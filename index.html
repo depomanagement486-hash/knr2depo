@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chakra E-Trans | Karimnagar Depot Portal</title>
+<style>
+  :root{
+    --bg:#eef2f7; --card:#ffffff; --line:#dfe6ee; --text:#1c2b3a; --muted:#64748b;
+    --blue:#1a3fa0; --blue-dark:#12297a; --blue-tab:#eaf0fb;
+    --green:#1f9254; --green-dark:#177a45; --red:#c0392b; --lime:#8fae1f;
+    --yellow:#fff3b0; --shadow:0 1px 2px rgba(16,32,64,.06), 0 6px 20px rgba(16,32,64,.05);
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{font-family:"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);}
+
+  /* ---------------- LOGIN SCREEN ---------------- */
+  #loginScreen{
+    position:fixed; inset:0; z-index:100;
+    background:#0a1830 url('login-bg.png') center/cover no-repeat;
+    display:flex; align-items:center; justify-content:flex-start;
+  }
+  #loginScreen::before{
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(270deg, rgba(6,14,32,.15) 0%, rgba(6,14,32,.55) 55%, rgba(6,14,32,.75) 100%);
+  }
+  .login-card{
+    position:relative; z-index:2; width:100%; max-width:380px; margin-left:6vw; margin-right:auto;
+    background:rgba(14,24,46,.72); backdrop-filter:blur(6px);
+    border:1px solid rgba(255,255,255,.15); border-radius:14px;
+    padding:32px 30px 26px; color:#fff; box-shadow:0 20px 60px rgba(0,0,0,.45);
+  }
+  .login-card h2{margin:0 0 4px; font-size:20px;}
+  .login-card .tag{font-size:12.5px; color:#b9c8ea; margin-bottom:22px;}
+  .login-card label{display:block; font-size:12px; color:#cfd9f5; margin-bottom:6px; font-weight:600;}
+  .login-card input{
+    width:100%; padding:11px 13px; margin-bottom:16px; border-radius:8px; border:1px solid rgba(255,255,255,.25);
+    background:rgba(255,255,255,.08); color:#fff; font-size:14px; outline:none;
+  }
+  .login-card input::placeholder{color:#9fb0d6;}
+  .login-card input:focus{border-color:var(--lime);}
+  .login-card button{
+    width:100%; padding:12px; border:none; border-radius:8px; font-size:14.5px; font-weight:700;
+    background:linear-gradient(135deg,#c9d84c,#8fae1f); color:#12297a; cursor:pointer;
+  }
+  .login-card button:hover{filter:brightness(1.06);}
+  .login-err{color:#ffb4ac; font-size:12.5px; margin-top:10px; min-height:16px;}
+  .login-hint{font-size:11px; color:#9fb0d6; margin-top:14px; line-height:1.5;}
+
+  /* ---------------- APP SHELL ---------------- */
+  #app{display:none; min-height:100vh; flex-direction:column;}
+
+  #topBanner{
+    position:relative; width:100%; overflow:hidden;
+    background:#0a1830; box-shadow:var(--shadow);
+    display:flex; align-items:center; justify-content:center;
+  }
+  #topBanner .banner-logo{
+    display:block; width:100%; height:auto; max-height:150px; object-fit:contain; object-position:center;
+  }
+  @media(max-width:640px){
+    #topBanner .banner-logo{max-height:90px;}
+  }
+
+  .brand{display:flex; align-items:center; gap:12px;}
+  .brand .mark{
+    width:36px;height:36px;border-radius:9px; background:linear-gradient(135deg,#c9d84c,#8fae1f);
+    display:flex;align-items:center;justify-content:center;font-weight:800;color:#12297a;font-size:15px;
+  }
+  .brand h1{font-size:17px;margin:0;font-weight:700;}
+  .brand span{display:block;font-size:11.5px;color:#c7d4f0;font-weight:400;}
+  .logout-btn{background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.3); color:#fff;
+    padding:8px 16px; border-radius:8px; font-size:12.5px; font-weight:600; cursor:pointer;}
+  .logout-btn:hover{background:rgba(255,255,255,.22);}
+
+  #birthdayBar{
+    display:none; align-items:center; gap:12px; flex-wrap:wrap;
+    background:linear-gradient(90deg,#fff3b0,#ffe27a); color:#5a4a1a;
+    padding:10px 26px; font-size:13px; font-weight:600; border-bottom:1px solid #e0c068;
+  }
+  #birthdayBar .bell{font-size:16px;}
+  #birthdayBar .msg{flex:1; min-width:200px;}
+  #birthdayBar .dismiss{
+    background:rgba(0,0,0,.08); border:none; color:#5a4a1a; font-weight:700;
+    border-radius:6px; padding:4px 10px; font-size:12px; cursor:pointer;
+  }
+  #birthdayBar .dismiss:hover{background:rgba(0,0,0,.16);}
+
+  .navtabs{display:flex; align-items:center; gap:6px; background:#0f2a72; padding:0 22px; flex-wrap:wrap;}
+  .navtab{
+    padding:12px 18px; font-size:13.5px; font-weight:600; color:#c7d4f0; cursor:pointer;
+    border-bottom:3px solid transparent;
+  }
+  .navtab.active{color:#fff; border-bottom-color:var(--lime); background:rgba(255,255,255,.05);}
+  .navtab:hover{color:#fff;}
+  .navtabs-right{display:flex; align-items:center; gap:14px; margin-left:auto; padding:8px 0;}
+
+  .page{display:none; flex:1; padding:22px 26px 60px;}
+  .page.active{display:block;}
+  .page.frame-page{padding:0;}
+  .page.frame-page iframe{width:100%; height:calc(100vh - 106px); border:none; display:block;}
+
+  h2.section-title{font-size:17px; margin:0 0 4px;}
+  .section-sub{color:var(--muted); font-size:12.5px; margin-bottom:16px;}
+
+  .card{background:var(--card); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); margin-bottom:20px; overflow:hidden;}
+  .card .card-head{padding:14px 18px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+  .card .card-head h3{margin:0; font-size:14.5px;}
+  .card .card-body{padding:14px 18px;}
+
+  table{width:100%; border-collapse:collapse; font-size:12.5px;}
+  thead th{background:#e3ecdb; border:1px solid #b9c6a8; padding:7px 6px; text-align:center; font-weight:700;}
+  tbody td{border:1px solid #d3d3d3; padding:6px 6px; text-align:center;}
+  tbody td.name{text-align:left; font-weight:600;}
+  tr.total-row td{background:#dbe6ff; font-weight:800;}
+  tr.group-row td{background:#f7f1d4; font-weight:700; text-align:left;}
+  .auto-val{color:var(--blue); font-weight:700;}
+  .reported-val{color:var(--green-dark); font-weight:700;}
+  .loss-pos{color:var(--red); font-weight:700;}
+  .loss-zero{color:var(--green-dark); font-weight:700;}
+  input.cell-input{
+    width:64px; padding:4px 5px; border:1px solid #c9c9c9; border-radius:4px; font-size:12px; text-align:center;
+  }
+  input.cell-input.small{width:50px;}
+  input.cell-input.wide{width:90px;}
+
+  .btn{border:none;border-radius:7px;padding:8px 15px;font-size:12.5px;font-weight:600;cursor:pointer;}
+  .btn-primary{background:var(--blue); color:#fff;}
+  .btn-primary:hover{background:var(--blue-dark);}
+  .btn-green{background:var(--green); color:#fff;}
+  .btn-green:hover{background:var(--green-dark);}
+  .btn-outline{background:#fff; color:var(--blue); border:1px solid var(--line);}
+  .btn-outline:hover{background:var(--blue-tab);}
+  .btn-danger{background:#fff; color:var(--red); border:1px solid #f1c9c3;}
+  .btn-danger:hover{background:#fdecea;}
+  .btn-sm{padding:5px 10px; font-size:11.5px;}
+
+  .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:20px;}
+  .kpi{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px; box-shadow:var(--shadow);}
+  .kpi .val{font-size:22px; font-weight:800; color:var(--blue);}
+  .kpi .lbl{font-size:11.5px; color:var(--muted); margin-top:2px;}
+  .kpi.manual .val-input{
+    width:100%; border:1px solid var(--line); border-radius:7px; padding:4px 6px;
+    font-size:20px; font-weight:800; color:var(--blue-dark); background:#f7f9fc;
+  }
+  .kpi.manual .lbl{display:flex; align-items:center; gap:5px;}
+  .kpi.manual .lbl .tag-manual{
+    font-size:9px; font-weight:700; color:#a06a00; background:#fff3b0; border-radius:4px; padding:1px 5px;
+  }
+
+  .route-block{margin-bottom:22px;}
+  .route-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; gap:8px;}
+  .route-head h4{margin:0; font-size:13.5px; color:var(--blue-dark);}
+  .route-head .meta{font-size:11.5px; color:var(--muted);}
+
+  .sync-status{font-size:11.5px; color:var(--muted);}
+  .sync-status.ok{color:var(--green-dark); font-weight:600;}
+  .sync-status.err{color:var(--red); font-weight:600;}
+  .sync-status.busy{color:#a06a00; font-weight:600;}
+
+  /* ---------------- STAFF STRENGTH CARDS ---------------- */
+  .subhead{font-size:12px; font-weight:700; color:var(--blue-dark); text-transform:uppercase; letter-spacing:.04em; margin:2px 0 8px;}
+  .kpi.manual.staff .val-input{color:var(--green-dark); background:#f4faf6;}
+  .kpi.manual.staff .lbl .tag-manual{color:#146c43; background:#d9f2e3;}
+
+  /* ---------------- SPOTLIGHT (BIRTHDAY / LEAVE) FLIP CARD ---------------- */
+  .spotlight-row{display:grid; grid-template-columns:minmax(260px,1fr); gap:12px; margin-bottom:20px;}
+  @media(min-width:560px){ .spotlight-row{grid-template-columns:repeat(auto-fit,minmax(300px,1fr));} }
+  .flip-card{perspective:1400px; height:150px;}
+  .flip-card-inner{
+    position:relative; width:100%; height:100%; text-align:left;
+    transition:transform .7s cubic-bezier(.4,.2,.2,1); transform-style:preserve-3d;
+    border-radius:12px; box-shadow:var(--shadow);
+  }
+  .flip-card.is-flipped .flip-card-inner{transform:rotateY(180deg);}
+  .flip-face{
+    position:absolute; inset:0; backface-visibility:hidden; border-radius:12px;
+    padding:14px 16px; overflow:hidden; display:flex; flex-direction:column;
+    border:1px solid var(--line);
+  }
+  .flip-face.flip-front{background:linear-gradient(135deg,#fff8de,#fff3b0);}
+  .flip-face.flip-back{background:linear-gradient(135deg,#e7edfb,#d9e4fb); transform:rotateY(180deg);}
+  .flip-face .flip-title{font-size:12.5px; font-weight:800; color:var(--blue-dark); display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:6px;}
+  .flip-face .flip-title .edit-btn{
+    background:rgba(255,255,255,.6); border:1px solid rgba(18,41,122,.15); color:var(--blue-dark);
+    border-radius:6px; padding:2px 8px; font-size:10.5px; font-weight:700; cursor:pointer;
+  }
+  .flip-face .flip-title .edit-btn:hover{background:#fff;}
+  .flip-face .flip-list{list-style:none; margin:0; padding:0; overflow-y:auto; flex:1; font-size:12.5px;}
+  .flip-face .flip-list li{padding:2px 0; font-weight:600; color:var(--text);}
+  .flip-face .flip-empty{color:var(--muted); font-size:12px; font-style:italic;}
+  .flip-dots{display:flex; gap:5px; margin-top:6px;}
+  .flip-dots span{width:6px; height:6px; border-radius:50%; background:rgba(18,41,122,.2);}
+  .flip-card.is-flipped .flip-dots span:first-child{background:rgba(18,41,122,.2);}
+  .flip-card.is-flipped .flip-dots span:last-child{background:var(--blue-dark);}
+  .flip-card:not(.is-flipped) .flip-dots span:first-child{background:var(--blue-dark);}
+
+  /* ---------------- MODEL COLOR CODING (Shift-wise Summary) ---------------- */
+  #depotTable td.name{vertical-align:middle;}
+  tr.model-superluxury td{background:#fff3b0;}
+  tr.model-delux td{background:#e7d6f7;}
+  tr.model-express td{background:#cfe0fb;}
+  tr.model-other td{background:#f1f1f1;}
+  tr.model-a td{background:#d7f2df;}
+  tr.model-b td{background:#ffe0cf;}
+  tr.model-c td{background:#f9d7e6;}
+  tr.model-d td{background:#dff2f2;}
+  tr.model-superluxury td.name{color:#7a5b00;}
+  tr.model-delux td.name{color:#5a2a8c;}
+  tr.model-express td.name{color:#12297a;}
+
+  @media(max-width:720px){
+    .login-card{margin:0 16px;}
+    #loginScreen{justify-content:center;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= LOGIN SCREEN ================= -->
+<div id="loginScreen">
+  <div class="login-card">
+    <h2>Chakra E-Trans</h2>
+    <div class="tag">Karimnagar Depot &middot; Boundless Journeys, Embracing All</div>
+    <form id="loginForm">
+      <label>Username</label>
+      <input type="text" id="loginUser" placeholder="Enter username" autocomplete="username">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="Enter password" autocomplete="current-password">
+      <button type="submit">Sign In</button>
+      <div class="login-err" id="loginErr"></div>
+    </form>
+    <div class="login-hint">Default login: <b>admin</b> / <b>chakra123</b> — change this in index.html (search for CREDENTIALS).</div>
+  </div>
+</div>
+
+<!-- ================= APP SHELL ================= -->
+<div id="app">
+
+  <div id="topBanner">
+    <img src="logo.png" alt="Chakra E-Trans logo" class="banner-logo">
+  </div>
+
+  <div id="birthdayBar">
+    <span class="bell">🎂</span>
+    <span class="msg" id="birthdayMsg"></span>
+    <button class="dismiss" id="birthdayDismiss">Dismiss</button>
+  </div>
+
+  <div class="navtabs" id="navtabs">
+    <div class="navtab active" data-page="dashboard">Depot Summary</div>
+    <div class="navtab" data-page="routes">Route Summary</div>
+    <div class="navtab" data-page="duty">Duty Chart</div>
+    <div class="navtab" data-page="drivers">Depot Management</div>
+    <div class="navtab" data-page="log">Driver Reporting Log</div>
+    <div class="navtab" data-page="report">Reports</div>
+    <div class="navtabs-right">
+      <span id="whoami" style="font-size:12.5px;color:#dbe6ff;"></span>
+      <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
+  </div>
+
+  <!-- ---------- DASHBOARD (Depot Summary) ---------- -->
+  <div class="page active" id="page-dashboard">
+    <h2 class="section-title">TGSRTC Karimnagar Depot-2 — Depot Summary</h2>
+    <div class="section-sub">Most figures below are computed automatically from the <b>Route Summary</b> tab (which itself is pulled from the DOR sheet) for the selected date — as soon as a DOR entry is logged, it rolls up here by Model, Shift, and Route. Total Fleet is a fixed value; Breakdown/Accident report counts, staff strength, and the leave list are typed in manually for now.</div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Fleet Composition — Bus Model vs Services</h3>
+        <span style="font-size:11.5px;color:var(--muted);">Fixed reference table</span>
+      </div>
+      <div class="card-body" style="overflow-x:auto;">
+        <table>
+          <thead>
+            <tr><th style="text-align:left;">Bus Model</th><th>Buses</th><th>Services</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="name">Super Luxury</td><td>40</td><td>80</td></tr>
+            <tr><td class="name">Deluxe</td><td>10</td><td>10</td></tr>
+            <tr><td class="name">Express JBS</td><td>14</td><td>28</td></tr>
+            <tr><td class="name">Express GDK</td><td>18</td><td>18</td></tr>
+            <tr><td class="name">Express KMR</td><td>6</td><td>6</td></tr>
+            <tr><td class="name">Express MNTY</td><td>4</td><td>4</td></tr>
+            <tr><td class="name">Express JGTL</td><td>4</td><td>4</td></tr>
+            <tr><td class="name">Express MNCL &amp; LXPT</td><td>4</td><td>4</td></tr>
+            <tr class="total-row"><td>Total Operated Buses / Services</td><td>100</td><td>154</td></tr>
+          </tbody>
+        </table>
+        <div style="margin-top:10px; font-size:12px; color:var(--muted);">
+          <b>Total Buses: 104</b> &nbsp;(Operated: 100&nbsp;•&nbsp;Spare: 4)
+        </div>
+      </div>
+    </div>
+
+    <div class="subhead">Depot Staff Strength</div>
+    <div class="kpis" id="staffKpiRow"></div>
+
+    <div class="subhead">Today at the Depot</div>
+    <div class="spotlight-row" id="spotlightRow"></div>
+
+    <div class="kpis" id="kpiRow"></div>
+
+    <div class="card">
+      <div class="card-head">
+        <h3>Shift-wise Summary</h3>
+        <span style="font-size:11.5px;color:var(--muted);">Date: <input type="date" id="summaryDate" class="cell-input wide"></span>
+      </div>
+      <div class="card-body" style="overflow-x:auto;">
+        <table id="depotTable"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------- ROUTE SUMMARY ---------- -->
+  <div class="page" id="page-routes">
+    <h2 class="section-title">Route Summary — Buses &amp; Trip KMs</h2>
+    <div class="section-sub">This page is pulled live from the <b>DOR (Driver Operation Report)</b> sheet for the selected date — every row logged on the DOR form appears here automatically, grouped by route ("En-Route"), with no manual entry needed. Pick a date and this page syncs automatically; use <b>Sync from DOR Sheet</b> to refresh on demand. Totals recalculate instantly and flow through to the Depot Summary tab.</div>
+    <div style="margin-bottom:16px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+      <span style="font-size:11.5px;color:var(--muted);">Date:
+        <input type="date" id="routesDate" class="cell-input wide">
+      </span>
+      <button class="btn btn-green btn-sm" id="syncLogBtn">⟲ Sync from DOR Sheet</button>
+      <span class="sync-status" id="syncStatus"></span>
+    </div>
+    <div id="routesArea"></div>
+  </div>
+
+  <!-- ---------- IFRAME PAGES ---------- -->
+  <div class="page frame-page" id="page-duty">
+    <iframe src="dutychart.html" title="Driver Duty Chart"></iframe>
+  </div>
+  <div class="page frame-page" id="page-drivers">
+    <iframe src="driver_management.html" title="Depot Management"></iframe>
+  </div>
+  <div class="page frame-page" id="page-log">
+    <iframe src="chakra-etrans-driver-log.html" title="Driver Reporting Log"></iframe>
+  </div>
+  <div class="page frame-page" id="page-accident">
+    <iframe src="Accident report.HTML" title="Accident Report"></iframe>
+  </div>
+  <div class="page frame-page" id="page-report">
+    <iframe src="reports.html" title="Reports"></iframe>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   Google Apps Script Web App URL — the JBM Driver Operation Report
+   (DOR) backend. Its "DOR" sheet is the single source of truth for
+   Route Summary and Depot Summary below: every row (SL.NO) written
+   to it by the Driver Operation Report form is pulled in live via
+   ?action=getSheetData and grouped by "En-Route" / "Model" to build
+   both tables — nothing here is typed in or stored locally anymore.
+   ============================================================ */
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzW-QA4J_brWe0hPIeSroirFy2a9fr1GRiPuZSqrnbYQ3UbjK-1cp45n6knWoalf9J2/exec";
+const DRIVERS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxR-gfM22idcXBTbqJxWcqQ2DqWg_WFLBQ2NHESB8krGZqsZbnYJB7YSndyKEze9Kip/exec"; // Drivers sheet — used only for the birthday check
+function sheetConfigured(){ return SCRIPT_URL && SCRIPT_URL.indexOf('PASTE_') !== 0; }
+
+/* ==========================================================================
+   LOGIN
+   ========================================================================== */
+const CREDENTIALS = { admin: 'chakra123' }; // add more username: 'password' pairs here
+
+const loginForm = document.getElementById('loginForm');
+const loginScreen = document.getElementById('loginScreen');
+const appEl = document.getElementById('app');
+const loginErr = document.getElementById('loginErr');
+
+function showApp(username){
+  loginScreen.style.display = 'none';
+  appEl.style.display = 'flex';
+  document.getElementById('whoami').textContent = 'Signed in as ' + username;
+  checkBirthdaysToday();
+  // Pull the latest reporting-log data the moment anyone signs in, so
+  // Route Summary / Depot Summary are already showing today's real figures
+  // instead of yesterday's cached numbers.
+  syncLogIntoRoutes(true);
+}
+
+loginForm.addEventListener('submit', function(e){
+  e.preventDefault();
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  if(CREDENTIALS[u] && CREDENTIALS[u] === p){
+    sessionStorage.setItem('chakra_session', u);
+    loginErr.textContent = '';
+    showApp(u);
+  } else {
+    loginErr.textContent = 'Invalid username or password.';
+  }
+});
+
+document.getElementById('logoutBtn').addEventListener('click', function(){
+  sessionStorage.removeItem('chakra_session');
+  location.reload();
+});
+
+(function checkSession(){
+  const existing = sessionStorage.getItem('chakra_session');
+  if(existing && CREDENTIALS[existing]) showApp(existing);
+})();
+
+/* ==========================================================================
+   BIRTHDAY NOTIFICATION
+   ========================================================================== */
+function parseDobToMonthDay(raw){
+  if(!raw) return null;
+  const s = String(raw).trim();
+  let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if(m) return { month: Number(m[2]), day: Number(m[3]) };
+  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if(m) return { month: Number(m[2]), day: Number(m[1]) };
+  return null;
+}
+
+async function checkBirthdaysToday(){
+  const bar = document.getElementById('birthdayBar');
+  const msgEl = document.getElementById('birthdayMsg');
+
+  const drivers = await ensureDriversLoaded();
+  // Refresh the Depot Summary spotlight card now that the driver list (and
+  // its birthdays) is available, in case it rendered before this resolved.
+  renderSpotlight(getActiveDate());
+  if(!drivers.length) return;
+
+  const today = new Date();
+  const todayKey = today.getFullYear() + '-' + (today.getMonth()+1) + '-' + today.getDate();
+  if(sessionStorage.getItem('chakra_bday_dismissed') === todayKey) return;
+
+  try{
+    const matches = drivers.filter(d=>{
+      const dob = parseDobToMonthDay(d.dob);
+      return dob && dob.month === (today.getMonth()+1) && dob.day === today.getDate();
+    }).map(d=> d.name || d.employee_id || 'Driver');
+
+    if(matches.length){
+      msgEl.textContent = matches.length === 1
+        ? `Today is ${matches[0]}'s birthday! 🎉`
+        : `Today is the birthday of: ${matches.join(', ')} 🎉`;
+      bar.style.display = 'flex';
+    }
+  }catch(err){
+    // Silent — birthday check is a nice-to-have, never blocks the app.
+  }
+}
+document.getElementById('birthdayDismiss').addEventListener('click', function(){
+  const today = new Date();
+  const todayKey = today.getFullYear() + '-' + (today.getMonth()+1) + '-' + today.getDate();
+  sessionStorage.setItem('chakra_bday_dismissed', todayKey);
+  document.getElementById('birthdayBar').style.display = 'none';
+});
+
+/* ==========================================================================
+   NAV TABS
+   Every time the user opens Route Summary or Depot Summary, re-pull the
+   reporting log for the currently selected date first, then render — so
+   the tables always reflect the latest driver log submissions.
+   ========================================================================== */
+document.querySelectorAll('.navtab').forEach(tab=>{
+  tab.addEventListener('click', function(){
+    document.querySelectorAll('.navtab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+    this.classList.add('active');
+    document.getElementById('page-'+this.dataset.page).classList.add('active');
+    if(this.dataset.page === 'dashboard') syncLogIntoRoutes(true);
+    if(this.dataset.page === 'routes') syncLogIntoRoutes(true);
+  });
+});
+
+/* ==========================================================================
+   DATA MODEL
+   Route Summary and Depot Summary are now built ENTIRELY from the DOR
+   (Driver Operation Report) sheet — nothing is hand-typed or stored
+   locally any more. Every time a row is submitted on the DOR form it
+   shows up here automatically, grouped by "En-Route" for Route Summary
+   and by "Model" + "Shift" + "En-Route" for Depot Summary.
+   ========================================================================== */
+
+let dorRows = [];    // every row ever pulled from the DOR sheet
+let todaysRows = []; // dorRows filtered down to the selected date
+
+function dmyToIso(s){
+  if(!s) return '';
+  const parts = String(s).trim().split('-');
+  if(parts.length !== 3) return '';
+  const pad = n => String(n).padStart(2,'0');
+  return parts[2] + '-' + pad(parts[1]) + '-' + pad(parts[0]);
+}
+function num(v){ const n = Number(v); return isNaN(n) ? 0 : n; }
+function lossClass(loss){ return loss > 0 ? 'loss-pos' : 'loss-zero'; }
+
+/* ---------- colour-code each Model group in the Shift-wise Summary table ---------- */
+function modelColorClass(model){
+  const m = String(model || '').toLowerCase();
+  if(m.includes('super')) return 'model-superluxury';
+  if(m.includes('delux')) return 'model-delux';
+  if(m.includes('express')) return 'model-express';
+  if(m.includes('unclass') || !m.trim()) return 'model-other';
+  const palette = ['model-a','model-b','model-c','model-d'];
+  let hash = 0;
+  for(let i=0;i<m.length;i++) hash = (hash * 31 + m.charCodeAt(i)) >>> 0;
+  return palette[hash % palette.length];
+}
+
+/* ---------- Total Fleet: fixed value (not pulled from the sheet) ---------- */
+const FIXED_TOTAL_FLEET = 104;
+
+/* ---------- Manually-typed KPIs (Breakdown / Accident report counts) ----------
+   These aren't in the DOR sheet yet, so for now they're typed in directly on
+   the dashboard and kept per-date in this browser via localStorage. */
+function getManualKpi(key, dateKey){
+  try{
+    const raw = localStorage.getItem('chakra_kpi_' + key + '_' + dateKey);
+    return raw !== null ? raw : '';
+  }catch(e){ return ''; }
+}
+function setManualKpi(key, dateKey, value){
+  try{ localStorage.setItem('chakra_kpi_' + key + '_' + dateKey, value); }catch(e){}
+}
+
+/* ---------- Depot staff strength (manual, per-date, same pattern as above) ---------- */
+const STAFF_ROLES = [
+  { key:'drivers',     label:'Drivers' },
+  { key:'technicians', label:'Technicians' },
+  { key:'washing',     label:'Washing Team' },
+  { key:'mis',         label:'MIS' },
+  { key:'supervisors', label:'Supervisors' }
+];
+
+function renderStaffKpis(dateKey){
+  const row = document.getElementById('staffKpiRow');
+  if(!row) return;
+  row.innerHTML = STAFF_ROLES.map(role=>{
+    const val = getManualKpi('staff_' + role.key, dateKey);
+    return `<div class="kpi manual staff">
+        <input type="number" min="0" class="val-input" data-staff-role="${role.key}" value="${val}" placeholder="0">
+        <div class="lbl">${role.label} <span class="tag-manual">manual</span></div>
+      </div>`;
+  }).join('');
+  row.querySelectorAll('[data-staff-role]').forEach(inp=>{
+    inp.addEventListener('input', function(){
+      setManualKpi('staff_' + this.dataset.staffRole, dateKey, this.value);
+    });
+  });
+}
+
+/* ---------- Drivers cache (used for the birthday bar AND the spotlight flip card) ---------- */
+let allDrivers = [];
+let driversLoaded = false;
+async function ensureDriversLoaded(){
+  if(driversLoaded) return allDrivers;
+  if(!DRIVERS_SCRIPT_URL || DRIVERS_SCRIPT_URL.indexOf('PASTE_') === 0) return allDrivers;
+  try{
+    const res = await fetch(DRIVERS_SCRIPT_URL + '?action=list');
+    if(res.ok){
+      const data = await res.json();
+      if(Array.isArray(data)){ allDrivers = data; driversLoaded = true; }
+    }
+  }catch(e){ /* silent — spotlight birthdays are a nice-to-have */ }
+  return allDrivers;
+}
+
+/* ---------- On-leave list (manual, per-date, kept in this browser for now) ---------- */
+function getLeaveList(dateKey){
+  try{
+    const raw = localStorage.getItem('chakra_leave_' + dateKey);
+    return raw ? JSON.parse(raw) : [];
+  }catch(e){ return []; }
+}
+function setLeaveList(dateKey, arr){
+  try{ localStorage.setItem('chakra_leave_' + dateKey, JSON.stringify(arr)); }catch(e){}
+}
+function editLeaveList(dateKey){
+  const current = getLeaveList(dateKey);
+  const input = prompt('Names on leave today (comma separated):', current.join(', '));
+  if(input === null) return;
+  const arr = input.split(',').map(s=>s.trim()).filter(Boolean);
+  setLeaveList(dateKey, arr);
+  renderSpotlight(dateKey);
+}
+
+/* ---------- Spotlight flip card: flips between Birthdays and On Leave every 8s ---------- */
+let spotlightInterval = null;
+function monthDayFromIso(dateKey){
+  const parts = String(dateKey).split('-');
+  if(parts.length !== 3) return null;
+  return { month: Number(parts[1]), day: Number(parts[2]) };
+}
+function renderSpotlight(dateKey){
+  const wrap = document.getElementById('spotlightRow');
+  if(!wrap) return;
+
+  const md = monthDayFromIso(dateKey);
+  const bdayMatches = (md ? allDrivers.filter(d=>{
+    const dob = parseDobToMonthDay(d.dob);
+    return dob && dob.month === md.month && dob.day === md.day;
+  }) : []).map(d=> d.name || d.employee_id || 'Driver');
+
+  const leaveList = getLeaveList(dateKey);
+
+  const frontList = bdayMatches.length
+    ? bdayMatches.map(n=>`<li>🎂 ${n}</li>`).join('')
+    : `<li class="flip-empty">No birthdays today.</li>`;
+  const backList = leaveList.length
+    ? leaveList.map(n=>`<li>🌴 ${n}</li>`).join('')
+    : `<li class="flip-empty">No one on leave today.</li>`;
+
+  wrap.innerHTML = `
+    <div class="flip-card" id="spotlightCard">
+      <div class="flip-card-inner">
+        <div class="flip-face flip-front">
+          <div class="flip-title"><span>🎂 Birthdays Today (${bdayMatches.length})</span></div>
+          <ul class="flip-list">${frontList}</ul>
+          <div class="flip-dots"><span></span><span></span></div>
+        </div>
+        <div class="flip-face flip-back">
+          <div class="flip-title"><span>🌴 On Leave Today (${leaveList.length})</span>
+            <button class="edit-btn" id="editLeaveBtn" type="button">Edit</button>
+          </div>
+          <ul class="flip-list">${backList}</ul>
+          <div class="flip-dots"><span></span><span></span></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  const editBtn = document.getElementById('editLeaveBtn');
+  if(editBtn) editBtn.addEventListener('click', function(e){ e.stopPropagation(); editLeaveList(dateKey); });
+
+  if(spotlightInterval) clearInterval(spotlightInterval);
+  const card = document.getElementById('spotlightCard');
+  spotlightInterval = setInterval(function(){
+    if(card) card.classList.toggle('is-flipped');
+  }, 8000);
+}
+
+/* ---------- shared "which date are we looking at" state ---------- */
+function getActiveDate(){
+  const routesDate = document.getElementById('routesDate');
+  const summaryDate = document.getElementById('summaryDate');
+  return (routesDate && routesDate.value) || (summaryDate && summaryDate.value) || new Date().toISOString().slice(0,10);
+}
+function syncDateInputs(value){
+  const routesDate = document.getElementById('routesDate');
+  const summaryDate = document.getElementById('summaryDate');
+  if(routesDate) routesDate.value = value;
+  if(summaryDate) summaryDate.value = value;
+}
+function applyDateFilter(){
+  const dateKey = getActiveDate();
+  todaysRows = dorRows.filter(r => dmyToIso(r['Date (dd-mm-yyyy)']) === dateKey);
+  renderRoutes(); renderDepot();
+}
+document.getElementById('routesDate').addEventListener('change', function(){
+  syncDateInputs(this.value); applyDateFilter();
+});
+document.getElementById('summaryDate').addEventListener('change', function(){
+  syncDateInputs(this.value); applyDateFilter();
+});
+
+/* ==========================================================================
+   RENDER: ROUTE SUMMARY — one card per "En-Route", every row inside it is
+   one DOR entry (SL.NO) logged for the selected date. Fully auto — there
+   is nothing left to type in, it just reflects what's in the DOR sheet.
+   ========================================================================== */
+function renderRoutes(){
+  const area = document.getElementById('routesArea');
+  area.innerHTML = '';
+
+  if(!todaysRows.length){
+    area.innerHTML = `<div class="card"><div class="card-body" style="color:var(--muted);">
+      No DOR entries found for this date yet. Submit entries on the DOR form, or click <b>Sync from DOR Sheet</b> to refresh.
+    </div></div>`;
+    return;
+  }
+
+  const groups = {};
+  todaysRows.forEach(r=>{
+    const routeName = String(r['En-Route'] || '').trim() || 'Unassigned';
+    (groups[routeName] = groups[routeName] || []).push(r);
+  });
+
+  Object.keys(groups).sort().forEach(routeName=>{
+    const rows = groups[routeName];
+    const buses = new Set(rows.map(r=>r['Bus No. (With full registration)']).filter(Boolean));
+    const totalSch = rows.reduce((s,r)=> s + num(r['Schedule Km']), 0);
+    const totalAct = rows.reduce((s,r)=> s + num(r['Act. Route Km ']), 0);
+    const totalLoss = totalSch - totalAct;
+    const model = rows[0]['Model'] || '';
+
+    const block = document.createElement('div');
+    block.className = 'route-block card';
+    let head = `<div class="card-head">
+        <div><h4>${routeName} <span class="meta">(${model})</span></h4></div>
+        <div class="meta">
+          Buses: <b>${buses.size}</b> &nbsp;|&nbsp; Trips: <b>${rows.length}</b> &nbsp;|&nbsp;
+          Sch Kms: <b>${totalSch.toLocaleString()}</b> &nbsp;|&nbsp;
+          Act Kms: <b class="auto-val">${totalAct.toLocaleString()}</b> &nbsp;|&nbsp;
+          Loss: <b class="${lossClass(totalLoss)}">${totalLoss.toLocaleString()}</b>
+        </div>
+      </div>`;
+    let body = `<div class="card-body" style="overflow-x:auto;"><table><thead><tr>
+        <th>SL.NO</th><th>Bus No</th><th>Route No</th><th>Duty</th><th>Driver ID</th>
+        <th>Sch Km</th><th>Act Km</th><th>Loss Km</th><th>Remarks</th>
+      </tr></thead><tbody>`;
+    rows.forEach(r=>{
+      const loss = num(r['Schedule Km']) - num(r['Act. Route Km ']);
+      body += `<tr>
+          <td>${r['SL.NO']||''}</td>
+          <td>${r['Bus No. (With full registration)']||''}</td>
+          <td>${r['Route No']||''}</td>
+          <td>${r['Duty']||''}</td>
+          <td>${r['Driver ID/Badge No.']||''}</td>
+          <td>${num(r['Schedule Km']).toLocaleString()}</td>
+          <td class="auto-val">${num(r['Act. Route Km ']).toLocaleString()}</td>
+          <td class="${lossClass(loss)}">${loss.toLocaleString()}</td>
+          <td style="text-align:left;">${r['Remarks']||''}</td>
+        </tr>`;
+    });
+    body += '</tbody></table></div>';
+    block.innerHTML = head + body;
+    area.appendChild(block);
+  });
+}
+
+/* ==========================================================================
+   RENDER: DEPOT SUMMARY — grouped by Model + Shift (Trip-based duties fall
+   under "General") + Route, computed straight off the same DOR rows that
+   just built Route Summary above. Purely derived — edit the DOR sheet /
+   form to change any of these figures, not this page.
+   ========================================================================== */
+function renderDepot(){
+  const rows = todaysRows;
+  const groups = {}; // "Model|Shift|Route" -> {model,shift,route,rows:[]}
+
+  rows.forEach(r=>{
+    const model = String(r['Model'] || 'Unclassified').trim() || 'Unclassified';
+    const shift = String(r['Shift'] || '').trim() || 'General';
+    const route = String(r['En-Route'] || '').trim() || 'Unassigned';
+    const key = model + '|' + shift + '|' + route;
+    (groups[key] = groups[key] || { model, shift, route, rows: [] }).rows.push(r);
+  });
+
+  const groupList = Object.values(groups).sort((a,b)=>
+    a.model.localeCompare(b.model) || a.route.localeCompare(b.route) || a.shift.localeCompare(b.shift));
+
+  // Bucket the already-sorted groups by Model so each vehicle type can get
+  // one merged (rowspan) Model cell and a shared colour, like the paper chart.
+  const modelOrder = [];
+  const modelBuckets = {};
+  groupList.forEach(g=>{
+    if(!modelBuckets[g.model]){ modelBuckets[g.model] = []; modelOrder.push(g.model); }
+    modelBuckets[g.model].push(g);
+  });
+
+  let totalFleet=0, totalSch=0, totalOps=0, totalSchKms=0, totalOprKms=0;
+  let totalTripsSch=0, totalTripsOps=0, totalTripsLoss=0, totalOdoKm=0, totalOdoDiff=0;
+  const totalDrivers = new Set();
+
+  let html = `<thead><tr>
+      <th>Model</th><th>Shift</th><th>Route</th><th>Fleet</th><th>Sch Services</th><th>Ops Services</th>
+      <th>Sch Kms</th><th>Opr Kms</th><th>Loss Kms</th><th>Drivers</th>
+    </tr></thead><tbody>`;
+
+  modelOrder.forEach(model=>{
+    const bucket = modelBuckets[model];
+    const colorClass = modelColorClass(model);
+
+    bucket.forEach((g, idx)=>{
+      const buses = new Set(g.rows.map(r=>r['Bus No. (With full registration)']).filter(Boolean));
+      const drivers = new Set(g.rows.map(r=>r['Driver ID/Badge No.']).filter(Boolean));
+      const schKms = g.rows.reduce((s,r)=> s + num(r['Schedule Km']), 0);
+      const oprKms = g.rows.reduce((s,r)=> s + num(r['Act. Route Km ']), 0);
+      const ops = g.rows.filter(r=> num(r['Actual Trip']) > 0).length;
+      const sch = g.rows.length;
+      const loss = schKms - oprKms;
+
+      totalFleet += buses.size; totalSch += sch; totalOps += ops;
+      totalSchKms += schKms; totalOprKms += oprKms;
+      drivers.forEach(d=>totalDrivers.add(d));
+
+      g.rows.forEach(r=>{
+        totalTripsSch += num(r['Schedule Trip']);
+        totalTripsOps += num(r['Actual Trip']);
+        totalTripsLoss += num(r['Miss Trip']);
+        totalOdoKm += num(r['Odometer  Diff. Km (B-A)']);
+        totalOdoDiff += num(r['Diffrence']);
+      });
+
+      html += `<tr class="${colorClass}">`;
+      if(idx === 0){
+        html += `<td class="name" rowspan="${bucket.length}">${model}</td>`;
+      }
+      html += `<td>${g.shift}</td><td>${g.route}</td>
+        <td>${buses.size}</td><td>${sch}</td><td>${ops}</td>
+        <td>${schKms.toLocaleString()}</td><td class="auto-val">${oprKms.toLocaleString()}</td>
+        <td class="${lossClass(loss)}">${loss.toLocaleString()}</td><td>${drivers.size}</td>
+      </tr>`;
+    });
+  });
+
+  const totalLoss = totalSchKms - totalOprKms;
+  html += `<tr class="total-row">
+      <td colspan="3">TOTAL</td>
+      <td>${totalFleet}</td><td>${totalSch}</td><td>${totalOps}</td>
+      <td>${totalSchKms.toLocaleString()}</td><td>${totalOprKms.toLocaleString()}</td>
+      <td class="${lossClass(totalLoss)}">${totalLoss.toLocaleString()}</td>
+      <td>${totalDrivers.size}</td>
+    </tr>`;
+  html += '</tbody>';
+
+  document.getElementById('depotTable').innerHTML = rows.length ? html : '';
+
+  const dateKey = getActiveDate();
+  const breakdownVal = getManualKpi('breakdown', dateKey);
+  const accidentVal = getManualKpi('accident', dateKey);
+  const odoDiffColor = totalOdoDiff > 0 ? '#c0392b' : '#177a45';
+
+  document.getElementById('kpiRow').innerHTML = `
+    <div class="kpi"><div class="val">${FIXED_TOTAL_FLEET}</div><div class="lbl">Total Fleet</div></div>
+    <div class="kpi"><div class="val">${totalSch}</div><div class="lbl">Scheduled Services</div></div>
+    <div class="kpi"><div class="val">${totalOps}</div><div class="lbl">Operated Services</div></div>
+    <div class="kpi"><div class="val">${totalTripsOps.toLocaleString()}</div><div class="lbl">Operated Trips</div></div>
+    <div class="kpi"><div class="val" style="color:${totalTripsLoss>0?'#c0392b':'#177a45'}">${totalTripsLoss.toLocaleString()}</div><div class="lbl">Loss Trips</div></div>
+    <div class="kpi"><div class="val">${totalSchKms.toLocaleString()}</div><div class="lbl">Scheduled KMs</div></div>
+    <div class="kpi"><div class="val">${totalOprKms.toLocaleString()}</div><div class="lbl">Operated KMs</div></div>
+    <div class="kpi"><div class="val" style="color:${totalLoss>0?'#c0392b':'#177a45'}">${totalLoss.toLocaleString()}</div><div class="lbl">Loss KMs</div></div>
+    <div class="kpi"><div class="val">${totalOdoKm.toLocaleString()}</div><div class="lbl">Odo KMs</div></div>
+    <div class="kpi"><div class="val" style="color:${odoDiffColor}">${totalOdoDiff.toLocaleString()}</div><div class="lbl">Actual vs Odo Diff.</div></div>
+    <div class="kpi manual">
+      <input type="number" min="0" class="val-input" id="kpiBreakdown" value="${breakdownVal}" placeholder="0">
+      <div class="lbl">Breakdown Reports <span class="tag-manual">manual</span></div>
+    </div>
+    <div class="kpi manual">
+      <input type="number" min="0" class="val-input" id="kpiAccident" value="${accidentVal}" placeholder="0">
+      <div class="lbl">Accident Reports <span class="tag-manual">manual</span></div>
+    </div>
+  `;
+
+  const breakdownInput = document.getElementById('kpiBreakdown');
+  const accidentInput = document.getElementById('kpiAccident');
+  if(breakdownInput) breakdownInput.addEventListener('input', function(){ setManualKpi('breakdown', dateKey, this.value); });
+  if(accidentInput) accidentInput.addEventListener('input', function(){ setManualKpi('accident', dateKey, this.value); });
+
+  renderStaffKpis(dateKey);
+  renderSpotlight(dateKey);
+}
+
+/* ==========================================================================
+   SYNC FROM DOR SHEET
+   Pulls every row of the "DOR" sheet via ?action=getSheetData (returns the
+   50 real headers + every row), keys each row back up by header name,
+   filters to the selected date, and rebuilds Route Summary + Depot
+   Summary from that filtered set. This is the single source of truth —
+   nothing is stored locally any more.
+   ========================================================================== */
+function setSyncStatus(state, text){
+  const el = document.getElementById('syncStatus');
+  if(!el) return;
+  el.textContent = text;
+  el.className = 'sync-status' + (state ? ' ' + state : '');
+}
+
+let syncInFlight = false;
+async function syncLogIntoRoutes(silent){
+  if(!sheetConfigured()){
+    setSyncStatus('err', 'Google Sheet not connected — set SCRIPT_URL first.');
+    renderRoutes(); renderDepot();
+    return;
+  }
+  if(syncInFlight) return;
+  syncInFlight = true;
+  if(!silent) setSyncStatus('busy', 'Pulling the DOR sheet…');
+  try{
+    const res = await fetch(SCRIPT_URL + '?action=getSheetData');
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    if(!json.ok) throw new Error(json.error || 'Unexpected response');
+    const { headers, rows } = json.result;
+
+    dorRows = rows.map(rowArr=>{
+      const obj = {};
+      headers.forEach((h,i)=> obj[h] = rowArr[i]);
+      return obj;
+    });
+
+    applyDateFilter();
+
+    const dateKey = getActiveDate();
+    if(todaysRows.length){
+      setSyncStatus('ok', `Synced ${todaysRows.length} DOR entr${todaysRows.length===1?'y':'ies'} for ${dateKey}.`);
+    } else {
+      setSyncStatus('err', `No DOR entries found yet for ${dateKey}.`);
+    }
+  }catch(err){
+    console.error(err);
+    setSyncStatus('err', 'Could not pull the DOR sheet — check the Web App URL / that "action=getSheetData" is supported.');
+    renderRoutes(); renderDepot();
+  }finally{
+    syncInFlight = false;
+  }
+}
+document.getElementById('syncLogBtn').addEventListener('click', function(){ syncLogIntoRoutes(false); });
+
+/* ---------- boot ---------- */
+todaysRows = [];
+const todayStr = new Date().toISOString().slice(0,10);
+document.getElementById('summaryDate').value = todayStr;
+document.getElementById('routesDate').value = todayStr;
+renderRoutes();
+renderDepot();
+// If already signed in (session restored above via checkSession), showApp()
+// already triggered a sync — but this covers the render-before-session-check
+// timing so the first paint isn't empty while that fetch is in flight.
+if(sessionStorage.getItem('chakra_session')) syncLogIntoRoutes(true);
+</script>
+</body>
+</html>

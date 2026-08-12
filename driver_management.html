@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chakra E-Trans | Depot Staff Management</title>
+<style>
+  :root{
+    --bg:#eef2f7;
+    --card:#ffffff;
+    --line:#dfe6ee;
+    --text:#1c2b3a;
+    --muted:#64748b;
+    --blue:#1a3fa0;
+    --blue-dark:#12297a;
+    --blue-tab:#eaf0fb;
+    --green:#1f9254;
+    --green-dark:#177a45;
+    --red:#c0392b;
+    --shadow: 0 1px 2px rgba(16,32,64,.06), 0 6px 20px rgba(16,32,64,.05);
+  }
+  *{box-sizing:border-box;}
+  body{ margin:0; font-family:"Segoe UI",Roboto,Arial,sans-serif; background:var(--bg); color:var(--text); }
+
+  .topbar{
+    background:var(--blue); color:#fff; padding:16px 28px;
+    display:flex; align-items:center; justify-content:space-between;
+    box-shadow:var(--shadow); flex-wrap:wrap; gap:14px;
+  }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand .mark{
+    width:34px;height:34px;border-radius:8px;
+    background:linear-gradient(135deg,#c9d84c,#8fae1f);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;color:#12297a;font-size:15px;
+  }
+  .brand h1{font-size:17px;margin:0;font-weight:700;letter-spacing:.2px;}
+  .brand span{display:block;font-size:11.5px;color:#c7d4f0;font-weight:400;}
+
+  .cat-tabs{display:flex;gap:6px;flex-wrap:wrap;}
+  .cat-tab{
+    background:rgba(255,255,255,.12);color:#dbe6ff;border:none;
+    padding:9px 18px;border-radius:8px;font-size:13.5px;font-weight:600;cursor:pointer;
+  }
+  .cat-tab:hover{background:rgba(255,255,255,.2);}
+  .cat-tab.active{background:#fff;color:var(--blue);}
+
+  .syncbar{
+    display:flex;align-items:center;gap:10px;font-size:12.5px;color:#dbe6ff;
+    background:rgba(255,255,255,.08);padding:6px 12px;border-radius:8px;
+  }
+  .syncbar .dot{width:8px;height:8px;border-radius:50%;background:#8fae1f;}
+  .syncbar .dot.err{background:#e05c4c;}
+  .syncbar .dot.busy{background:#f0c419;}
+
+  .wrap{max-width:1200px;margin:24px auto;padding:0 20px 60px;}
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .toolbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px;flex-wrap:wrap;}
+  .search{flex:1;min-width:220px;background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 14px;box-shadow:var(--shadow);}
+  .search input{border:none;outline:none;width:100%;font-size:14px;color:var(--text);background:transparent;}
+  .actions{display:flex;gap:10px;flex-wrap:wrap;}
+
+  .btn{border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;transition:transform .05s ease, background .15s ease;}
+  .btn:active{transform:translateY(1px);}
+  .btn-primary{background:var(--blue);color:#fff;}
+  .btn-primary:hover{background:var(--blue-dark);}
+  .btn-green{background:var(--green);color:#fff;}
+  .btn-green:hover{background:var(--green-dark);}
+  .btn-outline{background:#fff;color:var(--blue);border:1px solid var(--line);}
+  .btn-outline:hover{background:var(--blue-tab);}
+  .btn-ghost{background:transparent;color:var(--muted);}
+  .btn-danger{background:#fff;color:var(--red);border:1px solid #f1c9c3;}
+  .btn-danger:hover{background:#fdecea;}
+  .btn-sm{padding:6px 12px;font-size:12.5px;}
+
+  .card{background:var(--card);border-radius:12px;box-shadow:var(--shadow);border:1px solid var(--line);}
+
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  thead th{text-align:left;padding:14px 16px;color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--line);background:#f7f9fc;}
+  tbody td{padding:13px 16px;border-bottom:1px solid var(--line);vertical-align:middle;}
+  tbody tr:last-child td{border-bottom:none;}
+  tbody tr:hover{background:#f7faff;}
+  .pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:11.5px;font-weight:700;}
+  .pill-active{background:#e4f7ec;color:var(--green-dark);}
+  .pill-leave{background:#fdf3e0;color:#a06a00;}
+  .pill-inactive{background:#fdeaea;color:var(--red);}
+  .empty-state{padding:50px 20px;text-align:center;color:var(--muted);}
+  .empty-state b{color:var(--text);}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(15,25,45,.45);display:none;align-items:center;justify-content:center;z-index:50;padding:24px;}
+  .modal-overlay.open{display:flex;}
+  .modal{background:var(--bg);width:100%;max-width:1000px;max-height:92vh;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 20px 60px rgba(10,20,40,.35);}
+  .modal-titlebar{background:#0d1b2a;color:#fff;padding:12px 18px;font-size:13.5px;display:flex;align-items:center;justify-content:space-between;}
+  .modal-titlebar .close{cursor:pointer;color:#cbd5e1;font-size:16px;background:none;border:none;}
+  .modal-titlebar .close:hover{color:#fff;}
+
+  .tabs{display:flex;gap:8px;padding:14px 20px 0;flex-wrap:wrap;background:var(--bg);}
+  .tab-btn{background:var(--blue-tab);color:var(--blue);border:none;padding:10px 18px;border-radius:8px 8px 0 0;font-size:13.5px;font-weight:600;cursor:pointer;}
+  .tab-btn.active{background:var(--blue);color:#fff;}
+
+  .tab-panels{flex:1;overflow-y:auto;background:var(--bg);padding:22px 20px 6px;}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+
+  .field{margin-bottom:15px;display:flex;align-items:center;gap:18px;}
+  .field label{width:210px;min-width:210px;font-size:13.5px;color:var(--text);}
+  .field label .req{color:var(--red);margin-left:2px;}
+  .field input, .field select{flex:1;padding:11px 14px;border:1px solid var(--line);border-radius:8px;font-size:13.5px;background:#fff;color:var(--text);outline:none;}
+  .field input:focus, .field select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(26,63,160,.12);}
+  .field input::placeholder{color:#a9b4c2;}
+  .field-error input{border-color:var(--red);}
+
+  .doc-note{color:var(--muted);font-size:13px;margin-bottom:16px;}
+  .doc-row{display:flex;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid var(--line);}
+  .doc-row:last-child{border-bottom:none;}
+  .doc-name{width:210px;min-width:210px;font-size:13.5px;color:var(--blue);font-weight:600;}
+  .doc-status{flex:1;font-size:13px;color:var(--muted);}
+  .doc-status.uploaded{color:var(--green-dark);font-weight:600;}
+  .doc-actions{display:flex;gap:8px;}
+  .file-input{display:none;}
+
+  .modal-footer{padding:14px 20px;background:var(--bg);border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:10px;}
+
+  /* ===== Attendance-specific styles ===== */
+  .att-toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px;}
+  .att-datefield{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:9px 14px;box-shadow:var(--shadow);display:flex;align-items:center;gap:8px;font-size:13.5px;color:var(--text);}
+  .att-datefield input{border:none;outline:none;font-size:13.5px;color:var(--text);background:transparent;}
+  .att-summary{font-size:13px;color:var(--muted);white-space:nowrap;padding:0 4px;}
+  .att-radios{display:flex;gap:10px;flex-wrap:wrap;}
+  .att-radio{display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12.5px;font-weight:700;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:#fff;user-select:none;}
+  .att-radio input{margin:0;accent-color:var(--green);cursor:pointer;}
+  .att-radio.present-label{color:var(--green-dark);}
+  .att-radio.absent-label{color:var(--red);}
+  tr.att-row-present td:first-child{box-shadow:inset 3px 0 0 var(--green);}
+  tr.att-row-absent td:first-child{box-shadow:inset 3px 0 0 var(--red);}
+  .cat-badge{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;font-weight:700;background:var(--blue-tab);color:var(--blue);}
+
+  .att-subtabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px;}
+  .att-subtab{background:var(--card);color:var(--blue);border:1px solid var(--line);box-shadow:var(--shadow);padding:9px 18px;border-radius:8px;font-size:13.5px;font-weight:600;cursor:pointer;}
+  .att-subtab:hover{background:var(--blue-tab);}
+  .att-subtab.active{background:var(--blue);color:#fff;border-color:var(--blue);}
+  .att-subtab .cnt{opacity:.75;font-weight:600;margin-left:4px;}
+
+  @media (max-width:640px){
+    .field{flex-direction:column;align-items:flex-start;gap:6px;}
+    .field label{width:auto;}
+    .doc-row{flex-wrap:wrap;}
+    .doc-name{width:auto;}
+  }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+
+
+  </div>
+  <div class="cat-tabs">
+    <button class="cat-tab active" data-cat="drivers" onclick="switchCategory('drivers')">Drivers</button>
+    <button class="cat-tab" data-cat="washing" onclick="switchCategory('washing')">Washing Team</button>
+    <button class="cat-tab" data-cat="technician" onclick="switchCategory('technician')">Technician Team</button>
+    <button class="cat-tab" data-cat="supervisor" onclick="switchCategory('supervisor')">Supervisor</button>
+    <button class="cat-tab" data-cat="attendance" onclick="switchCategory('attendance')">Attendance</button>
+  </div>
+  <div class="syncbar" id="syncbar">
+    <span class="dot" id="syncDot"></span>
+    <span id="syncLabel">Not connected to Google Sheet</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <!-- =================== DRIVERS VIEW =================== -->
+  <div class="view active" id="view-drivers">
+    <div class="toolbar">
+      <div class="search"><input id="searchBox_drivers" placeholder="Search by name, Driver ID, mobile or licence no..." oninput="renderTable('drivers')"></div>
+      <div style="font-size:13px;color:var(--muted);white-space:nowrap;" id="countLabel_drivers"></div>
+    </div>
+    <div class="actions" style="margin-bottom:16px;">
+      <input type="file" id="excelInput_drivers" accept=".xlsx,.xls" class="file-input" onchange="genericLoadExcel(event,'drivers')">
+      <button class="btn btn-outline" onclick="document.getElementById('excelInput_drivers').click()">&#128193; Load Excel</button>
+      <button class="btn btn-outline" onclick="genericExportExcel('drivers')">&#8681; Export Excel</button>
+      <button class="btn btn-outline" onclick="genericSyncFromSheet('drivers',true)">&#8635; Sync from Sheet</button>
+      <button class="btn btn-green" onclick="openModal()">+ Add New Driver</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr>
+          <th>Driver ID</th><th>Full Name</th><th>Mobile</th><th>Licence No</th>
+          <th>Depot</th><th>Designation</th><th>Status</th><th style="text-align:right;">Actions</th>
+        </tr></thead>
+        <tbody id="tableBody_drivers"></tbody>
+      </table>
+      <div id="emptyState_drivers" class="empty-state" style="display:none;">
+        <b>No drivers yet.</b><br>Click "Add New Driver" above to create the first record.
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== WASHING TEAM VIEW =================== -->
+  <div class="view" id="view-washing">
+    <div class="toolbar">
+      <div class="search"><input id="searchBox_washing" placeholder="Search by name, Employee ID or mobile..." oninput="renderTable('washing')"></div>
+      <div style="font-size:13px;color:var(--muted);white-space:nowrap;" id="countLabel_washing"></div>
+    </div>
+    <div class="actions" style="margin-bottom:16px;">
+      <input type="file" id="excelInput_washing" accept=".xlsx,.xls" class="file-input" onchange="genericLoadExcel(event,'washing')">
+      <button class="btn btn-outline" onclick="document.getElementById('excelInput_washing').click()">&#128193; Load Excel</button>
+      <button class="btn btn-outline" onclick="genericExportExcel('washing')">&#8681; Export Excel</button>
+      <button class="btn btn-outline" onclick="genericSyncFromSheet('washing',true)">&#8635; Sync from Sheet</button>
+      <button class="btn btn-green" onclick="openWashingModal()">+ Add New Washing Staff</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr>
+          <th>Employee ID</th><th>Name</th><th>Mobile</th><th>Designation</th>
+          <th>Staff Type</th><th>Status</th><th style="text-align:right;">Actions</th>
+        </tr></thead>
+        <tbody id="tableBody_washing"></tbody>
+      </table>
+      <div id="emptyState_washing" class="empty-state" style="display:none;">
+        <b>No washing team members yet.</b><br>Click "Add New Washing Staff" above to create the first record.
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== TECHNICIAN TEAM VIEW =================== -->
+  <div class="view" id="view-technician">
+    <div class="toolbar">
+      <div class="search"><input id="searchBox_technician" placeholder="Search by name, Employee ID or mobile..." oninput="renderTable('technician')"></div>
+      <div style="font-size:13px;color:var(--muted);white-space:nowrap;" id="countLabel_technician"></div>
+    </div>
+    <div class="actions" style="margin-bottom:16px;">
+      <input type="file" id="excelInput_technician" accept=".xlsx,.xls" class="file-input" onchange="genericLoadExcel(event,'technician')">
+      <button class="btn btn-outline" onclick="document.getElementById('excelInput_technician').click()">&#128193; Load Excel</button>
+      <button class="btn btn-outline" onclick="genericExportExcel('technician')">&#8681; Export Excel</button>
+      <button class="btn btn-outline" onclick="genericSyncFromSheet('technician',true)">&#8635; Sync from Sheet</button>
+      <button class="btn btn-green" onclick="openTechnicianModal()">+ Add New Technician</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr>
+          <th>Employee ID</th><th>Name</th><th>Mobile</th><th>Designation</th>
+          <th>Staff Type</th><th>Status</th><th style="text-align:right;">Actions</th>
+        </tr></thead>
+        <tbody id="tableBody_technician"></tbody>
+      </table>
+      <div id="emptyState_technician" class="empty-state" style="display:none;">
+        <b>No technician team members yet.</b><br>Click "Add New Technician" above to create the first record.
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== SUPERVISOR VIEW =================== -->
+  <div class="view" id="view-supervisor">
+    <div class="toolbar">
+      <div class="search"><input id="searchBox_supervisor" placeholder="Search by name, Employee ID or mobile..." oninput="renderTable('supervisor')"></div>
+      <div style="font-size:13px;color:var(--muted);white-space:nowrap;" id="countLabel_supervisor"></div>
+    </div>
+    <div class="actions" style="margin-bottom:16px;">
+      <input type="file" id="excelInput_supervisor" accept=".xlsx,.xls" class="file-input" onchange="genericLoadExcel(event,'supervisor')">
+      <button class="btn btn-outline" onclick="document.getElementById('excelInput_supervisor').click()">&#128193; Load Excel</button>
+      <button class="btn btn-outline" onclick="genericExportExcel('supervisor')">&#8681; Export Excel</button>
+      <button class="btn btn-outline" onclick="genericSyncFromSheet('supervisor',true)">&#8635; Sync from Sheet</button>
+      <button class="btn btn-green" onclick="openSupervisorModal()">+ Add New Supervisor</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr>
+          <th>Employee ID</th><th>Name</th><th>Mobile</th><th>Designation</th>
+          <th>Staff Type</th><th>Status</th><th style="text-align:right;">Actions</th>
+        </tr></thead>
+        <tbody id="tableBody_supervisor"></tbody>
+      </table>
+      <div id="emptyState_supervisor" class="empty-state" style="display:none;">
+        <b>No supervisors yet.</b><br>Click "Add New Supervisor" above to create the first record.
+      </div>
+    </div>
+  </div>
+
+  <!-- =================== ATTENDANCE VIEW =================== -->
+  <div class="view" id="view-attendance">
+    <div class="att-subtabs" id="attSubtabs">
+      <button class="att-subtab active" data-attcat="all" onclick="switchAttendanceCategory('all')">All Staff <span class="cnt" id="attCnt_all"></span></button>
+      <button class="att-subtab" data-attcat="Driver" onclick="switchAttendanceCategory('Driver')">Drivers <span class="cnt" id="attCnt_Driver"></span></button>
+      <button class="att-subtab" data-attcat="Washing" onclick="switchAttendanceCategory('Washing')">Washing Team <span class="cnt" id="attCnt_Washing"></span></button>
+      <button class="att-subtab" data-attcat="Technician" onclick="switchAttendanceCategory('Technician')">Technician Team <span class="cnt" id="attCnt_Technician"></span></button>
+      <button class="att-subtab" data-attcat="Supervisor" onclick="switchAttendanceCategory('Supervisor')">Supervisor <span class="cnt" id="attCnt_Supervisor"></span></button>
+    </div>
+    <div class="att-toolbar">
+      <div class="att-datefield">
+        <span>&#128197;</span>
+        <input type="date" id="attendanceDate" onchange="loadAttendanceForDate()">
+      </div>
+      <div class="search" style="flex:1;min-width:240px;">
+        <input id="searchBox_attendance" placeholder="Search by name, phone number or Employee ID..." oninput="renderAttendanceTable()">
+      </div>
+      <div class="att-summary" id="attSummary">0 total</div>
+    </div>
+    <div class="actions" style="margin-bottom:16px;">
+      <button class="btn btn-green" onclick="markAllPresent()">&#10003; Mark All Present</button>
+      <button class="btn btn-danger" onclick="markAllAbsent()">&#10005; Mark All Absent</button>
+      <button class="btn btn-outline" onclick="clearAllAttendance()">&#8635; Clear All</button>
+      <button class="btn btn-outline" onclick="genericSyncFromSheet('attendance',false); loadAttendanceForDate();">&#8635; Refresh</button>
+      <button class="btn btn-primary" onclick="saveAttendanceToSheet()">&#128190; Save to Google Sheet</button>
+    </div>
+    <div class="card">
+      <table>
+        <thead><tr>
+          <th>Employee ID</th><th>Name</th><th>Mobile</th><th>Category</th><th>Designation</th><th>Attendance</th>
+        </tr></thead>
+        <tbody id="tableBody_attendance"></tbody>
+      </table>
+      <div id="emptyState_attendance" class="empty-state" style="display:none;">
+        <b>No matching staff.</b><br>Add drivers, washing team, technician or supervisor members first, or adjust your search.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ================= DRIVER MODAL ================= -->
+<div class="modal-overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-titlebar">
+      <span id="modalTitle">Add New Driver</span>
+      <button class="close" onclick="closeModal()">&#10005;</button>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="personal" onclick="showTab('personal')">Personal</button>
+      <button class="tab-btn" data-tab="government" onclick="showTab('government')">Government</button>
+      <button class="tab-btn" data-tab="medical" onclick="showTab('medical')">Medical</button>
+      <button class="tab-btn" data-tab="employment" onclick="showTab('employment')">Employment</button>
+      <button class="tab-btn" data-tab="documents" onclick="showTab('documents')">Documents</button>
+    </div>
+    <div class="tab-panels">
+      <div class="tab-panel active" data-panel="personal">
+        <div class="field" id="f_driverId"><label>Driver ID<span class="req">*</span></label><input id="driverId" placeholder="e.g. ECD-00301"></div>
+        <div class="field" id="f_fullName"><label>Full Name<span class="req">*</span></label><input id="fullName" placeholder="Full name"></div>
+        <div class="field"><label>Father's Name</label><input id="fatherName"></div>
+        <div class="field"><label>Date of Birth</label><input id="dob" type="date"></div>
+        <div class="field"><label>Gender</label><select id="gender"><option value="">Select</option><option>Male</option><option>Female</option><option>Other</option></select></div>
+        <div class="field"><label>Blood Group</label><select id="bloodGroup"><option value="">Select</option><option>A+</option><option>A-</option><option>B+</option><option>B-</option><option>AB+</option><option>AB-</option><option>O+</option><option>O-</option></select></div>
+        <div class="field"><label>Mobile Number</label><input id="mobile" maxlength="10" placeholder="10-digit mobile"></div>
+        <div class="field"><label>Alternate Mobile</label><input id="altMobile" maxlength="10"></div>
+        <div class="field"><label>Email</label><input id="email" type="email"></div>
+        <div class="field"><label>Current Address</label><input id="currentAddress"></div>
+        <div class="field"><label>Permanent Address</label><input id="permanentAddress"></div>
+        <div class="field"><label>City</label><input id="city"></div>
+        <div class="field"><label>District</label><input id="district" value="Karimnagar"></div>
+        <div class="field"><label>State</label><input id="state" value="Telangana"></div>
+        <div class="field"><label>Pincode</label><input id="pincode" maxlength="6"></div>
+      </div>
+      <div class="tab-panel" data-panel="government">
+        <div class="field"><label>Aadhaar Number (12 digits)</label><input id="aadhaar" maxlength="12"></div>
+        <div class="field"><label>PAN Number</label><input id="pan" maxlength="10" style="text-transform:uppercase;"></div>
+        <div class="field"><label>Licence No</label><input id="licenceNo"></div>
+        <div class="field"><label>Licence Issue Date</label><input id="licenceIssue" type="date"></div>
+        <div class="field"><label>Licence Expiry Date</label><input id="licenceExpiry" type="date"></div>
+        <div class="field"><label>Licence Class</label><input id="licenceClass" placeholder="e.g. LMV / HMV / Transport"></div>
+        <div class="field"><label>Badge No</label><input id="badgeNo"></div>
+        <div class="field"><label>Badge Issue Date</label><input id="badgeIssue" type="date"></div>
+        <div class="field"><label>Badge Expiry Date</label><input id="badgeExpiry" type="date"></div>
+        <div class="field"><label>IO Memo No</label><input id="memoNo"></div>
+        <div class="field"><label>Memo Issue Date</label><input id="memoIssue" type="date"></div>
+        <div class="field"><label>Police Verification No</label><input id="policeVerNo"></div>
+        <div class="field"><label>Police Verification Date</label><input id="policeVerDate" type="date"></div>
+      </div>
+      <div class="tab-panel" data-panel="medical">
+        <div class="field"><label>Medical Certificate No</label><input id="medCertNo"></div>
+        <div class="field"><label>Medical Issue Date</label><input id="medIssue" type="date"></div>
+        <div class="field"><label>Medical Expiry Date</label><input id="medExpiry" type="date"></div>
+        <div class="field"><label>Fitness Status</label><select id="fitnessStatus"><option value="">Select</option><option>Fit</option><option>Fit with restriction</option><option>Unfit</option></select></div>
+        <div class="field"><label>Blood Pressure</label><input id="bp" placeholder="e.g. 120/80"></div>
+        <div class="field"><label>Eye Test</label><select id="eyeTest"><option value="">Select</option><option>Normal</option><option>Corrected with glasses</option><option>Abnormal</option></select></div>
+        <div class="field"><label>Colour Blindness Test</label><select id="colorBlind"><option value="">Select</option><option>Normal</option><option>Deficient</option></select></div>
+        <div class="field"><label>Hearing Test</label><select id="hearingTest"><option value="">Select</option><option>Normal</option><option>Impaired</option></select></div>
+        <div class="field"><label>Doctor Name</label><input id="doctorName"></div>
+        <div class="field"><label>Hospital Name</label><input id="hospitalName"></div>
+        <div class="field"><label>Remarks</label><input id="medRemarks"></div>
+      </div>
+      <div class="tab-panel" data-panel="employment">
+        <div class="field"><label>Joining Date</label><input id="joiningDate" type="date"></div>
+        <div class="field"><label>Depot</label><input id="depot" placeholder="e.g. Karimnagar Depot"></div>
+        <div class="field"><label>Department</label><input id="department" placeholder="e.g. Operations"></div>
+        <div class="field"><label>Designation</label><input id="designation" value="Driver"></div>
+        <div class="field"><label>Shift</label><select id="shift"><option value="">Select</option><option>Morning</option><option>Afternoon</option><option>Night</option><option>Rotational</option></select></div>
+        <div class="field"><label>Employment Type</label><select id="employmentType"><option value="">Select</option><option>Permanent</option><option>Contract</option><option>Trainee</option></select></div>
+        <div class="field"><label>Salary</label><input id="salary" type="number" placeholder="Monthly gross (INR)"></div>
+        <div class="field"><label>Experience (years)</label><input id="experience" type="number" step="0.1"></div>
+        <div class="field"><label>Previous Employer</label><input id="prevEmployer"></div>
+        <div class="field"><label>Status</label><select id="empStatus"><option>Active</option><option>On Leave</option><option>Inactive</option></select></div>
+      </div>
+      <div class="tab-panel" data-panel="documents">
+        <div class="doc-note">Upload supporting documents (PDF/JPG/PNG, max 10 MB each).</div>
+        <div id="docList"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-green" onclick="saveDriver()">Save Driver</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= WASHING TEAM MODAL ================= -->
+<div class="modal-overlay" id="overlay_washing">
+  <div class="modal">
+    <div class="modal-titlebar">
+      <span id="modalTitle_washing">Add New Washing Staff</span>
+      <button class="close" onclick="closeWashingModal()">&#10005;</button>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="w_personal" onclick="showWashingTab('w_personal')">Personal</button>
+      <button class="tab-btn" data-tab="w_bank" onclick="showWashingTab('w_bank')">Bank Details</button>
+      <button class="tab-btn" data-tab="w_documents" onclick="showWashingTab('w_documents')">Documents</button>
+    </div>
+    <div class="tab-panels">
+      <div class="tab-panel active" data-panel="w_personal">
+        <div class="field" id="f_w_employeeId"><label>Employee Id<span class="req">*</span></label><input id="w_employeeId" placeholder="e.g. WSH-0007"></div>
+        <div class="field" id="f_w_fullName"><label>Name (as per Aadhar)<span class="req">*</span></label><input id="w_fullName"></div>
+        <div class="field"><label>Father's Name</label><input id="w_fatherName"></div>
+        <div class="field"><label>Date of Birth</label><input id="w_dob" type="date"></div>
+        <div class="field"><label>Date of Joining</label><input id="w_doj" type="date"></div>
+        <div class="field"><label>Gender</label><select id="w_gender"><option value="">Select</option><option value="M">Male</option><option value="F">Female</option></select></div>
+        <div class="field"><label>Marital Status</label><select id="w_maritalStatus"><option value="">Select</option><option>Single</option><option>Married</option><option>Other</option></select></div>
+        <div class="field"><label>Mobile Number</label><input id="w_mobile" maxlength="10"></div>
+        <div class="field"><label>Permanent Address</label><input id="w_permanentAddress"></div>
+        <div class="field"><label>Designation</label><input id="w_designation"></div>
+        <div class="field"><label>Staff Type</label><input id="w_staffType" placeholder="e.g. Washing Staff"></div>
+        <div class="field"><label>Status</label><select id="w_status"><option>Active</option><option>On Leave</option><option>Inactive</option></select></div>
+      </div>
+      <div class="tab-panel" data-panel="w_bank">
+        <div class="field"><label>Aadhar No</label><input id="w_aadhaar" maxlength="12"></div>
+        <div class="field"><label>PAN No</label><input id="w_pan" maxlength="10" style="text-transform:uppercase;"></div>
+        <div class="field"><label>Bank Ac No</label><input id="w_bankAcNo"></div>
+        <div class="field"><label>IFSC Code</label><input id="w_ifscCode" style="text-transform:uppercase;"></div>
+        <div class="field"><label>Bank</label><input id="w_bankName"></div>
+        <div class="field"><label>Bank Branch</label><input id="w_bankBranch"></div>
+      </div>
+      <div class="tab-panel" data-panel="w_documents">
+        <div class="doc-note">Upload supporting documents (PDF/JPG/PNG, max 10 MB each).</div>
+        <div id="docList_washing"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeWashingModal()">Cancel</button>
+      <button class="btn btn-green" onclick="saveWashing()">Save Washing Staff</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= TECHNICIAN TEAM MODAL ================= -->
+<div class="modal-overlay" id="overlay_technician">
+  <div class="modal">
+    <div class="modal-titlebar">
+      <span id="modalTitle_technician">Add New Technician</span>
+      <button class="close" onclick="closeTechnicianModal()">&#10005;</button>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="t_personal" onclick="showTechnicianTab('t_personal')">Personal</button>
+      <button class="tab-btn" data-tab="t_bank" onclick="showTechnicianTab('t_bank')">Bank Details</button>
+      <button class="tab-btn" data-tab="t_documents" onclick="showTechnicianTab('t_documents')">Documents</button>
+    </div>
+    <div class="tab-panels">
+      <div class="tab-panel active" data-panel="t_personal">
+        <div class="field" id="f_t_employeeId"><label>Employee Id<span class="req">*</span></label><input id="t_employeeId" placeholder="e.g. TEC-0004"></div>
+        <div class="field" id="f_t_fullName"><label>Name (as per Aadhar)<span class="req">*</span></label><input id="t_fullName"></div>
+        <div class="field"><label>Father's Name</label><input id="t_fatherName"></div>
+        <div class="field"><label>Date of Birth</label><input id="t_dob" type="date"></div>
+        <div class="field"><label>Date of Joining</label><input id="t_doj" type="date"></div>
+        <div class="field"><label>Gender</label><select id="t_gender"><option value="">Select</option><option value="M">Male</option><option value="F">Female</option></select></div>
+        <div class="field"><label>Marital Status</label><select id="t_maritalStatus"><option value="">Select</option><option>Single</option><option>Married</option><option>Other</option></select></div>
+        <div class="field"><label>Mobile Number</label><input id="t_mobile" maxlength="10"></div>
+        <div class="field"><label>Permanent Address</label><input id="t_permanentAddress"></div>
+        <div class="field"><label>Designation</label><input id="t_designation" placeholder="e.g. Technician"></div>
+        <div class="field"><label>Staff Type</label><input id="t_staffType" placeholder="e.g. Electrical / Mechanical"></div>
+        <div class="field"><label>Status</label><select id="t_status"><option>Active</option><option>On Leave</option><option>Inactive</option></select></div>
+      </div>
+      <div class="tab-panel" data-panel="t_bank">
+        <div class="field"><label>Aadhar No</label><input id="t_aadhaar" maxlength="12"></div>
+        <div class="field"><label>PAN No</label><input id="t_pan" maxlength="10" style="text-transform:uppercase;"></div>
+        <div class="field"><label>Bank Ac No</label><input id="t_bankAcNo"></div>
+        <div class="field"><label>IFSC Code</label><input id="t_ifscCode" style="text-transform:uppercase;"></div>
+        <div class="field"><label>Bank</label><input id="t_bankName"></div>
+        <div class="field"><label>Bank Branch</label><input id="t_bankBranch"></div>
+      </div>
+      <div class="tab-panel" data-panel="t_documents">
+        <div class="doc-note">Upload supporting documents (PDF/JPG/PNG, max 10 MB each).</div>
+        <div id="docList_technician"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeTechnicianModal()">Cancel</button>
+      <button class="btn btn-green" onclick="saveTechnician()">Save Technician</button>
+    </div>
+  </div>
+</div>
+
+<!-- ================= SUPERVISOR MODAL ================= -->
+<div class="modal-overlay" id="overlay_supervisor">
+  <div class="modal">
+    <div class="modal-titlebar">
+      <span id="modalTitle_supervisor">Add New Supervisor</span>
+      <button class="close" onclick="closeSupervisorModal()">&#10005;</button>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="sv_personal" onclick="showSupervisorTab('sv_personal')">Personal</button>
+      <button class="tab-btn" data-tab="sv_bank" onclick="showSupervisorTab('sv_bank')">Bank Details</button>
+      <button class="tab-btn" data-tab="sv_documents" onclick="showSupervisorTab('sv_documents')">Documents</button>
+    </div>
+    <div class="tab-panels">
+      <div class="tab-panel active" data-panel="sv_personal">
+        <div class="field" id="f_sv_employeeId"><label>Employee Id<span class="req">*</span></label><input id="sv_employeeId" placeholder="e.g. SUP-0002"></div>
+        <div class="field" id="f_sv_fullName"><label>Name (as per Aadhar)<span class="req">*</span></label><input id="sv_fullName"></div>
+        <div class="field"><label>Father's Name</label><input id="sv_fatherName"></div>
+        <div class="field"><label>Date of Birth</label><input id="sv_dob" type="date"></div>
+        <div class="field"><label>Date of Joining</label><input id="sv_doj" type="date"></div>
+        <div class="field"><label>Gender</label><select id="sv_gender"><option value="">Select</option><option value="M">Male</option><option value="F">Female</option></select></div>
+        <div class="field"><label>Marital Status</label><select id="sv_maritalStatus"><option value="">Select</option><option>Single</option><option>Married</option><option>Other</option></select></div>
+        <div class="field"><label>Mobile Number</label><input id="sv_mobile" maxlength="10"></div>
+        <div class="field"><label>Permanent Address</label><input id="sv_permanentAddress"></div>
+        <div class="field"><label>Designation</label><input id="sv_designation" placeholder="e.g. Supervisor"></div>
+        <div class="field"><label>Staff Type</label><input id="sv_staffType" placeholder="e.g. Depot Supervisor"></div>
+        <div class="field"><label>Status</label><select id="sv_status"><option>Active</option><option>On Leave</option><option>Inactive</option></select></div>
+      </div>
+      <div class="tab-panel" data-panel="sv_bank">
+        <div class="field"><label>Aadhar No</label><input id="sv_aadhaar" maxlength="12"></div>
+        <div class="field"><label>PAN No</label><input id="sv_pan" maxlength="10" style="text-transform:uppercase;"></div>
+        <div class="field"><label>Bank Ac No</label><input id="sv_bankAcNo"></div>
+        <div class="field"><label>IFSC Code</label><input id="sv_ifscCode" style="text-transform:uppercase;"></div>
+        <div class="field"><label>Bank</label><input id="sv_bankName"></div>
+        <div class="field"><label>Bank Branch</label><input id="sv_bankBranch"></div>
+      </div>
+      <div class="tab-panel" data-panel="sv_documents">
+        <div class="doc-note">Upload supporting documents (PDF/JPG/PNG, max 10 MB each).</div>
+        <div id="docList_supervisor"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeSupervisorModal()">Cancel</button>
+      <button class="btn btn-green" onclick="saveSupervisor()">Save Supervisor</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* =====================================================================
+   GOOGLE SHEET CONNECTIONS — one Web App URL per category.
+   Point these at your sheets/tabs (or one Apps Script that routes by
+   the "type" field sent in every request body/query below).
+===================================================================== */
+const SHEET_URLS = {
+  drivers:    "https://script.google.com/macros/s/AKfycbyAE1POq5C-ousC5-48dsPM1alLxx_6XEeAj2e4uInz2-UDLDxypv8-Y5YevdgSknMG/exec",
+  washing:    "https://script.google.com/macros/s/AKfycbyAE1POq5C-ousC5-48dsPM1alLxx_6XEeAj2e4uInz2-UDLDxypv8-Y5YevdgSknMG/exec",
+  technician: "https://script.google.com/macros/s/AKfycbyAE1POq5C-ousC5-48dsPM1alLxx_6XEeAj2e4uInz2-UDLDxypv8-Y5YevdgSknMG/exec",
+  supervisor: "https://script.google.com/macros/s/AKfycbyAE1POq5C-ousC5-48dsPM1alLxx_6XEeAj2e4uInz2-UDLDxypv8-Y5YevdgSknMG/exec",
+  attendance: "https://script.google.com/macros/s/AKfycbyAE1POq5C-ousC5-48dsPM1alLxx_6XEeAj2e4uInz2-UDLDxypv8-Y5YevdgSknMG/exec"
+};
+const AUTO_SYNC_SECONDS = 30; // 0 disables background auto-refresh
+
+/* =====================================================================
+   DATA STORE
+===================================================================== */
+const store = { drivers: [], washing: [], technician: [], supervisor: [] };
+let editingId = { drivers: null, washing: null, technician: null, supervisor: null };
+let currentDocs = { drivers: {}, washing: {}, technician: {}, supervisor: {} };
+
+/* =====================================================================
+   CATEGORY SWITCHING
+===================================================================== */
+function switchCategory(cat){
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + cat).classList.add('active');
+  document.querySelectorAll('.cat-tab').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+  if(cat === 'attendance') renderAttendanceTable();
+}
+
+/* =====================================================================
+   SHARED HELPERS
+===================================================================== */
+function normalizeHeader(str){
+  return String(str).trim().toLowerCase().replace(/['".]/g, '').replace(/[\s_]+/g, '_');
+}
+
+function excelDateToISO(value){
+  if(value === undefined || value === null || value === '') return '';
+  if(typeof value === 'number'){
+    const d = XLSX.SSF.parse_date_code(value);
+    if(!d) return '';
+    const mm = String(d.m).padStart(2,'0'), dd = String(d.d).padStart(2,'0');
+    return `${d.y}-${mm}-${dd}`;
+  }
+  return String(value).trim();
+}
+
+function setSyncStatus(state, text){
+  const dot = document.getElementById('syncDot');
+  const label = document.getElementById('syncLabel');
+  dot.classList.remove('err','busy');
+  if(state === 'busy') dot.classList.add('busy');
+  if(state === 'err') dot.classList.add('err');
+  label.textContent = text;
+}
+
+function sheetConfigured(catKey){
+  const url = SHEET_URLS[catKey];
+  return url && !url.startsWith('PASTE_');
+}
+
+function statusPillClass(status){
+  if(status === 'On Leave') return 'pill-leave';
+  if(status === 'Inactive') return 'pill-inactive';
+  return 'pill-active';
+}
+
+// Generic row -> record mapper used by Excel import AND Sheet sync for all categories.
+function rowObjectToRecord(row, idPrefix, headerMap, docFileMap, extraColumns, ignoreColumns, unrecognizedSet){
+  const rec = { id: idPrefix + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,7), docs: {}, extra: {} };
+  Object.keys(row).forEach(col => {
+    const norm = normalizeHeader(col);
+    const val = row[col];
+    if(ignoreColumns && ignoreColumns.has(norm)) return;
+    if(headerMap[norm]){
+      const key = headerMap[norm];
+      const isDateField = /Date$|^dob$|Dob$/.test(key);
+      rec[key] = isDateField ? excelDateToISO(val) : String(val === undefined || val === null ? '' : val).trim();
+    } else if(docFileMap[norm]){
+      const name = String(val === undefined || val === null ? '' : val).trim();
+      if(name) rec.docs[docFileMap[norm]] = name;
+    } else if(extraColumns.has(norm)){
+      if(val !== '' && val !== undefined && val !== null) rec.extra[norm] = val;
+    } else if(String(val === undefined || val === null ? '' : val).trim() !== '' && unrecognizedSet){
+      unrecognizedSet.add(col);
+    }
+  });
+  if(!rec.status && !rec.empStatus) rec.status = 'Active';
+  return rec;
+}
+
+// NOTE: previously this hard-coded "employeeId" as the match key for every
+// category, which silently broke once Drivers switched to a "driverId"
+// field (every sync would fail to find the existing row and create a
+// duplicate instead of updating it). It now looks up each category's real
+// ID field from CATS so Drivers (driverId) and the other three categories
+// (employeeId) both merge correctly.
+function mergeImportedRecords(catKey, imported){
+  const list = store[catKey];
+  const idField = CATS[catKey].idField;
+  imported.forEach(rec => {
+    const idx = list.findIndex(d => d[idField] && d[idField] === rec[idField]);
+    if(idx > -1) list[idx] = Object.assign({}, list[idx], rec, { id: list[idx].id });
+    else list.push(rec);
+  });
+}
+
+function recordToRow(catKey, d){
+  const cat = CATS[catKey];
+  const row = {};
+  cat.exportColumns.forEach(([header, key]) => { row[header] = d[key] || ''; });
+  cat.docExportColumns.forEach(([header, docKey]) => { row[header] = (d.docs && d.docs[docKey]) || ''; });
+  (cat.extraExportColumns || []).forEach(header => { row[header] = (d.extra && d.extra[header]) || ''; });
+  return row;
+}
+
+/* =====================================================================
+   CATEGORY CONFIG — header maps mirror your Excel sheets exactly
+===================================================================== */
+const CATS = {
+  drivers: {
+    filename: 'chakra_etrans_drivers.xlsx', sheetName: 'Drivers',
+    // Drivers use a single ID: "Driver ID" (record field driverId, sheet
+    // column "driver_id"). The old separate "Employee ID" field has been
+    // removed from the form. The "employee_id" column that already exists
+    // in your Google Sheet is left alone (ignored on import/sync so it
+    // doesn't trigger "unrecognized column" warnings) — nothing is deleted
+    // from the sheet, the app just no longer reads or writes it.
+    idField: 'driverId', nameField: 'fullName',
+    headerMap: {
+      'driver_id':'driverId','name':'fullName','full_name':'fullName','father_name':'fatherName',
+      'dob':'dob','date_of_birth':'dob','gender':'gender','blood_group':'bloodGroup',
+      'mobile':'mobile','mobile_number':'mobile','alt_mobile':'altMobile','alternate_mobile':'altMobile',
+      'email':'email','current_address':'currentAddress','permanent_address':'permanentAddress',
+      'city':'city','district':'district','state':'state','pincode':'pincode',
+      'aadhaar':'aadhaar','aadhaar_number':'aadhaar','aadhaar_number_(12_digits)':'aadhaar',
+      'pan':'pan','pan_number':'pan','licence_no':'licenceNo','license_no':'licenceNo',
+      'licence_issue':'licenceIssue','licence_issue_date':'licenceIssue',
+      'licence_expiry':'licenceExpiry','licence_expiry_date':'licenceExpiry','licence_class':'licenceClass',
+      'badge_no':'badgeNo','badge_issue':'badgeIssue','badge_issue_date':'badgeIssue',
+      'badge_expiry':'badgeExpiry','badge_expiry_date':'badgeExpiry',
+      'memo_no':'memoNo','io_memo_no':'memoNo','10_memo_no':'memoNo',
+      'memo_issue':'memoIssue','memo_issue_date':'memoIssue',
+      'police_verification_no':'policeVerNo','police_verification_date':'policeVerDate',
+      'medical_cert_no':'medCertNo','medical_certificate_no':'medCertNo',
+      'medical_issue':'medIssue','medical_issue_date':'medIssue',
+      'medical_expiry':'medExpiry','medical_expiry_date':'medExpiry',
+      'medical_fitness':'fitnessStatus','fitness_status':'fitnessStatus',
+      'blood_pressure':'bp','eye_test':'eyeTest','colour_blindness_test':'colorBlind',
+      'hearing_test':'hearingTest','doctor_name':'doctorName','hospital_name':'hospitalName',
+      'medical_remarks':'medRemarks','remarks':'medRemarks','joining_date':'joiningDate',
+      'depot':'depot','department':'department','designation':'designation','shift':'shift',
+      'employment_type':'employmentType','salary':'salary',
+      'experience':'experience','experience_(years)':'experience','experience_years':'experience',
+      'previous_employer':'prevEmployer','status':'empStatus'
+    },
+    docFileMap: {
+      'photo_file':'driverPhoto','aadhaar_file':'aadhaarCard','pan_file':'panCard',
+      'licence_front_file':'dlFront','licence_back_file':'dlBack','badge_file':'badgeCert',
+      'memo_file':'memoDoc','medical_file':'medCertDoc','police_file':'policeVerDoc',
+      'joining_file':'joiningLetter','experience_file':'expCert','address_file':'addressProof',
+      'other_file':'otherDocs'
+    },
+    extraColumns: new Set(['assigned_bus','assigned_bus_reg','assigned_route','assigned_shift','assignment_date','created_by','created_date','updated_date']),
+    ignoreColumns: new Set(['employee_id']),
+    exportColumns: [
+      ['driver_id','driverId'],['name','fullName'],['father_name','fatherName'],['dob','dob'],
+      ['gender','gender'],['blood_group','bloodGroup'],['mobile','mobile'],['alt_mobile','altMobile'],
+      ['email','email'],['current_address','currentAddress'],['permanent_address','permanentAddress'],
+      ['city','city'],['district','district'],['state','state'],['pincode','pincode'],
+      ['aadhaar','aadhaar'],['pan','pan'],['licence_no','licenceNo'],['licence_issue','licenceIssue'],
+      ['licence_expiry','licenceExpiry'],['licence_class','licenceClass'],['badge_no','badgeNo'],
+      ['badge_issue','badgeIssue'],['badge_expiry','badgeExpiry'],['memo_no','memoNo'],
+      ['memo_issue','memoIssue'],['police_verification_no','policeVerNo'],
+      ['police_verification_date','policeVerDate'],['medical_cert_no','medCertNo'],
+      ['medical_issue','medIssue'],['medical_expiry','medExpiry'],['medical_fitness','fitnessStatus'],
+      ['blood_pressure','bp'],['eye_test','eyeTest'],['colour_blindness_test','colorBlind'],
+      ['hearing_test','hearingTest'],['doctor_name','doctorName'],['hospital_name','hospitalName'],
+      ['medical_remarks','medRemarks'],['joining_date','joiningDate'],['depot','depot'],
+      ['department','department'],['designation','designation'],['shift','shift'],
+      ['employment_type','employmentType'],['salary','salary'],['experience','experience'],
+      ['previous_employer','prevEmployer'],['status','empStatus']
+    ],
+    docExportColumns: [
+      ['photo_file','driverPhoto'],['aadhaar_file','aadhaarCard'],['pan_file','panCard'],
+      ['licence_front_file','dlFront'],['licence_back_file','dlBack'],['badge_file','badgeCert'],
+      ['memo_file','memoDoc'],['medical_file','medCertDoc'],['police_file','policeVerDoc'],
+      ['joining_file','joiningLetter'],['experience_file','expCert'],['address_file','addressProof'],
+      ['other_file','otherDocs']
+    ],
+    extraExportColumns: ['assigned_bus','assigned_bus_reg','assigned_route','assigned_shift','assignment_date','created_by','created_date','updated_date']
+  },
+
+  washing: {
+    filename: 'chakra_etrans_washing_team.xlsx', sheetName: 'WashingTeam',
+    idField: 'employeeId', nameField: 'fullName',
+    headerMap: {
+      'employee_id':'employeeId','staff':'staffType','aadhar_no':'aadhaar','pan_no':'pan',
+      'name_as_per_aadhar_card':'fullName','designation':'designation','dob':'dob','doj':'doj',
+      'fathers_name':'fatherName','marital_status':'maritalStatus','gender_(m/f)':'gender',
+      'mobile_no':'mobile','parmanent_address':'permanentAddress','bank_ac_no':'bankAcNo',
+      'ifsc_code':'ifscCode','bank':'bankName','bank_brach':'bankBranch','status':'status'
+    },
+    docFileMap: { 'photo':'photo', 'aadhar_card_copy':'aadhaarCard', 'pan_card_copy':'panCard' },
+    extraColumns: new Set(),
+    ignoreColumns: new Set(['sr_no','sr']),
+    exportColumns: [
+      ['Employee Id','employeeId'],['Staff','staffType'],['AADHAR NO','aadhaar'],['PAN NO','pan'],
+      ['NAME AS PER AADHAR CARD','fullName'],['Designation','designation'],['DOB','dob'],['DOJ','doj'],
+      ["FATHER'S NAME",'fatherName'],['MARITAL STATUS','maritalStatus'],['GENDER (M/F)','gender'],
+      ['Mobile No.','mobile'],['PARMANENT ADDRESS','permanentAddress'],['Bank Ac No','bankAcNo'],
+      ['IFSC Code','ifscCode'],['Bank','bankName'],['Bank Brach','bankBranch'],['Status','status']
+    ],
+    docExportColumns: [ ['Photo','photo'], ['Aadhar Card Copy','aadhaarCard'], ['PAN Card Copy','panCard'] ],
+    extraExportColumns: []
+  },
+
+  technician: {
+    filename: 'chakra_etrans_technician_team.xlsx', sheetName: 'TechnicianTeam',
+    idField: 'employeeId', nameField: 'fullName',
+    headerMap: {
+      'employee_id':'employeeId','staff':'staffType','aadhar_no':'aadhaar','pan_no':'pan',
+      'name_as_per_aadhar_card':'fullName','designation':'designation','dob':'dob','doj':'doj',
+      'fathers_name':'fatherName','marital_status':'maritalStatus','gender_(m/f)':'gender',
+      'mobile_no':'mobile','parmanent_address':'permanentAddress','bank_ac_no':'bankAcNo',
+      'ifsc_code':'ifscCode','bank':'bankName','bank_brach':'bankBranch','status':'status'
+    },
+    docFileMap: { 'photo':'photo', 'aadhar_card_copy':'aadhaarCard', 'pan_card_copy':'panCard' },
+    extraColumns: new Set(),
+    ignoreColumns: new Set(['sr_no','sr']),
+    exportColumns: [
+      ['Employee Id','employeeId'],['Staff','staffType'],['AADHAR NO','aadhaar'],['PAN NO','pan'],
+      ['NAME AS PER AADHAR CARD','fullName'],['Designation','designation'],['DOB','dob'],['DOJ','doj'],
+      ["FATHER'S NAME",'fatherName'],['MARITAL STATUS','maritalStatus'],['GENDER (M/F)','gender'],
+      ['Mobile No.','mobile'],['PARMANENT ADDRESS','permanentAddress'],['Bank Ac No','bankAcNo'],
+      ['IFSC Code','ifscCode'],['Bank','bankName'],['Bank Brach','bankBranch'],['Status','status']
+    ],
+    docExportColumns: [ ['Photo','photo'], ['Aadhar Card Copy','aadhaarCard'], ['PAN Card Copy','panCard'] ],
+    extraExportColumns: []
+  },
+
+  supervisor: {
+    filename: 'chakra_etrans_supervisor.xlsx', sheetName: 'Supervisor',
+    idField: 'employeeId', nameField: 'fullName',
+    headerMap: {
+      'employee_id':'employeeId','staff':'staffType','aadhar_no':'aadhaar','pan_no':'pan',
+      'name_as_per_aadhar_card':'fullName','designation':'designation','dob':'dob','doj':'doj',
+      'fathers_name':'fatherName','marital_status':'maritalStatus','gender_(m/f)':'gender',
+      'mobile_no':'mobile','parmanent_address':'permanentAddress','bank_ac_no':'bankAcNo',
+      'ifsc_code':'ifscCode','bank':'bankName','bank_brach':'bankBranch','status':'status'
+    },
+    docFileMap: { 'photo':'photo', 'aadhar_card_copy':'aadhaarCard', 'pan_card_copy':'panCard' },
+    extraColumns: new Set(),
+    ignoreColumns: new Set(['sr_no','sr']),
+    exportColumns: [
+      ['Employee Id','employeeId'],['Staff','staffType'],['AADHAR NO','aadhaar'],['PAN NO','pan'],
+      ['NAME AS PER AADHAR CARD','fullName'],['Designation','designation'],['DOB','dob'],['DOJ','doj'],
+      ["FATHER'S NAME",'fatherName'],['MARITAL STATUS','maritalStatus'],['GENDER (M/F)','gender'],
+      ['Mobile No.','mobile'],['PARMANENT ADDRESS','permanentAddress'],['Bank Ac No','bankAcNo'],
+      ['IFSC Code','ifscCode'],['Bank','bankName'],['Bank Brach','bankBranch'],['Status','status']
+    ],
+    docExportColumns: [ ['Photo','photo'], ['Aadhar Card Copy','aadhaarCard'], ['PAN Card Copy','panCard'] ],
+    extraExportColumns: []
+  }
+};
+
+/* =====================================================================
+   GENERIC EXCEL / GOOGLE SHEET ENGINE (shared by all categories)
+===================================================================== */
+function genericLoadExcel(evt, catKey){
+  const cat = CATS[catKey];
+  const file = evt.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e){
+    try{
+      const wb = XLSX.read(new Uint8Array(e.target.result), {type:'array', cellDates:false});
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(sheet, {defval:''});
+      if(!rows.length){ alert('The selected sheet has no data rows.'); return; }
+
+      let unrecognized = new Set();
+      const imported = rows
+        .map((row, i) => rowObjectToRecord(row, catKey + '_import_' + i, cat.headerMap, cat.docFileMap, cat.extraColumns, cat.ignoreColumns, unrecognized))
+        .filter(rec => rec[cat.idField] || rec[cat.nameField]);
+
+      if(!imported.length){
+        alert('No recognizable columns were found for this sheet. Please check the column headers.');
+        return;
+      }
+
+      mergeImportedRecords(catKey, imported);
+      renderTable(catKey);
+      let msg = `Loaded ${imported.length} record(s) from "${file.name}".`;
+      if(unrecognized.size) msg += `\n\nNote: these column(s) weren't recognized and were skipped: ${Array.from(unrecognized).join(', ')}`;
+      alert(msg);
+    }catch(err){
+      console.error(err);
+      alert('Could not read that file. Please make sure it is a valid .xlsx or .xls file.');
+    }finally{
+      evt.target.value = '';
+    }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function genericExportExcel(catKey){
+  const cat = CATS[catKey];
+  const list = store[catKey];
+  if(!list.length){ alert('There are no records to export yet.'); return; }
+  const data = list.map((d,i) => Object.assign({ 'SR.NO.': i+1 }, recordToRow(catKey, d)));
+  const ws = XLSX.utils.json_to_sheet(data);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, cat.sheetName);
+  XLSX.writeFile(wb, cat.filename);
+}
+
+async function genericSyncFromSheet(catKey, manual){
+  const cat = CATS[catKey];
+  if(!cat){ return; } // e.g. 'attendance' has its own loader
+  if(!sheetConfigured(catKey)){
+    if(manual) alert('This sheet isn\'t connected yet. Paste its Apps Script Web App URL into SHEET_URLS.' + catKey + ' near the top of the script, then reload.');
+    return;
+  }
+  setSyncStatus('busy', 'Syncing ' + cat.sheetName + ' from Google Sheet…');
+  try{
+    const res = await fetch(SHEET_URLS[catKey] + '?action=list&type=' + catKey, {method:'GET'});
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const rows = await res.json();
+    const imported = rows
+      .map((row, i) => rowObjectToRecord(row, catKey + '_sheet_' + i, cat.headerMap, cat.docFileMap, cat.extraColumns, cat.ignoreColumns))
+      .filter(rec => rec[cat.idField] || rec[cat.nameField]);
+    mergeImportedRecords(catKey, imported);
+    renderTable(catKey);
+    setSyncStatus('ok', cat.sheetName + ' synced • ' + new Date().toLocaleTimeString());
+    if(manual) alert('Synced ' + imported.length + ' record(s) from the ' + cat.sheetName + ' Google Sheet.');
+  }catch(err){
+    console.error(err);
+    setSyncStatus('err', cat.sheetName + ' sync failed — check the Web App URL / deployment access');
+    if(manual) alert('Could not reach the ' + cat.sheetName + ' Google Sheet. Double-check the Web App URL and that the deployment is set to "Anyone" access.');
+  }
+}
+
+async function genericPushToSheet(catKey, record){
+  const cat = CATS[catKey];
+  if(!sheetConfigured(catKey)) return;
+  try{
+    await fetch(SHEET_URLS[catKey], {
+      method: 'POST',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify(Object.assign({ type: catKey }, recordToRow(catKey, record)))
+    });
+    setSyncStatus('ok', 'Saved to ' + cat.sheetName + ' sheet • ' + new Date().toLocaleTimeString());
+  }catch(err){
+    console.error(err);
+    setSyncStatus('err', 'Could not save this record to the ' + cat.sheetName + ' sheet');
+  }
+}
+
+/* =====================================================================
+   TABLE RENDERING (per-category columns)
+===================================================================== */
+function renderTable(catKey){
+  const cat = CATS[catKey];
+  const list = store[catKey];
+  const q = document.getElementById('searchBox_' + catKey).value.trim().toLowerCase();
+  const filtered = list.filter(d => {
+    if(!q) return true;
+    // Uses each category's own ID field (driverId for Drivers, employeeId
+    // for the rest) instead of a hard-coded field name, so the Driver ID
+    // search box actually matches Driver IDs again.
+    return [d[cat.idField], d.fullName, d.mobile, d.licenceNo].join(' ').toLowerCase().includes(q);
+  });
+
+  const body = document.getElementById('tableBody_' + catKey);
+  body.innerHTML = '';
+  document.getElementById('emptyState_' + catKey).style.display = filtered.length ? 'none' : 'block';
+  document.getElementById('countLabel_' + catKey).textContent = list.length + ' record' + (list.length === 1 ? '' : 's') + ' total';
+
+  filtered.forEach(d => {
+    const tr = document.createElement('tr');
+    if(catKey === 'drivers'){
+      tr.innerHTML = `
+        <td>${d.driverId || ''}</td><td>${d.fullName || ''}</td><td>${d.mobile || '—'}</td>
+        <td>${d.licenceNo || '—'}</td><td>${d.depot || '—'}</td><td>${d.designation || '—'}</td>
+        <td><span class="pill ${statusPillClass(d.empStatus)}">${d.empStatus || 'Active'}</span></td>
+        <td style="text-align:right;white-space:nowrap;">
+          <button class="btn btn-outline btn-sm" onclick="openModal('${d.id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteRecord('drivers','${d.id}')">Delete</button>
+        </td>`;
+    } else if(catKey === 'washing'){
+      tr.innerHTML = `
+        <td>${d.employeeId || ''}</td><td>${d.fullName || ''}</td><td>${d.mobile || '—'}</td>
+        <td>${d.designation || '—'}</td><td>${d.staffType || '—'}</td>
+        <td><span class="pill ${statusPillClass(d.status)}">${d.status || 'Active'}</span></td>
+        <td style="text-align:right;white-space:nowrap;">
+          <button class="btn btn-outline btn-sm" onclick="openWashingModal('${d.id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteRecord('washing','${d.id}')">Delete</button>
+        </td>`;
+    } else if(catKey === 'technician'){
+      tr.innerHTML = `
+        <td>${d.employeeId || ''}</td><td>${d.fullName || ''}</td><td>${d.mobile || '—'}</td>
+        <td>${d.designation || '—'}</td><td>${d.staffType || '—'}</td>
+        <td><span class="pill ${statusPillClass(d.status)}">${d.status || 'Active'}</span></td>
+        <td style="text-align:right;white-space:nowrap;">
+          <button class="btn btn-outline btn-sm" onclick="openTechnicianModal('${d.id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteRecord('technician','${d.id}')">Delete</button>
+        </td>`;
+    } else if(catKey === 'supervisor'){
+      tr.innerHTML = `
+        <td>${d.employeeId || ''}</td><td>${d.fullName || ''}</td><td>${d.mobile || '—'}</td>
+        <td>${d.designation || '—'}</td><td>${d.staffType || '—'}</td>
+        <td><span class="pill ${statusPillClass(d.status)}">${d.status || 'Active'}</span></td>
+        <td style="text-align:right;white-space:nowrap;">
+          <button class="btn btn-outline btn-sm" onclick="openSupervisorModal('${d.id}')">Edit</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteRecord('supervisor','${d.id}')">Delete</button>
+        </td>`;
+    }
+    body.appendChild(tr);
+  });
+
+  // Keep the Attendance roster in sync whenever any category's list changes.
+  if(typeof renderAttendanceTable === 'function') renderAttendanceTable();
+}
+
+function deleteRecord(catKey, id){
+  const cat = CATS[catKey];
+  const list = store[catKey];
+  const d = list.find(x => x.id === id);
+  if(!d) return;
+  if(confirm('Remove "' + (d.fullName || d[cat.idField]) + '" (' + d[cat.idField] + ') from the list?')){
+    store[catKey] = list.filter(x => x.id !== id);
+    renderTable(catKey);
+  }
+}
+
+/* =====================================================================
+   DRIVERS — modal (kept from original, unchanged behaviour)
+===================================================================== */
+const DRIVER_DOCS = [
+  ["driverPhoto","Driver Photo"],["aadhaarCard","Aadhaar Card"],["panCard","PAN Card"],
+  ["dlFront","Driving Licence Front"],["dlBack","Driving Licence Back"],["badgeCert","Badge Certificate"],
+  ["memoDoc","10 Memo"],["medCertDoc","Medical Certificate"],["policeVerDoc","Police Verification"],
+  ["joiningLetter","Joining Letter"],["expCert","Experience Certificate"],["addressProof","Address Proof"],
+  ["otherDocs","Other Documents"]
+];
+// "employeeId" replaced with "driverId" — this is the single ID field
+// shown on the Personal tab, labeled "Driver ID".
+const DRIVER_FIELD_IDS = [
+  'driverId','fullName','fatherName','dob','gender','bloodGroup','mobile','altMobile','email',
+  'currentAddress','permanentAddress','city','district','state','pincode',
+  'aadhaar','pan','licenceNo','licenceIssue','licenceExpiry','licenceClass','badgeNo','badgeIssue','badgeExpiry',
+  'memoNo','memoIssue','policeVerNo','policeVerDate',
+  'medCertNo','medIssue','medExpiry','fitnessStatus','bp','eyeTest','colorBlind','hearingTest','doctorName','hospitalName','medRemarks',
+  'joiningDate','depot','department','designation','shift','employmentType','salary','experience','prevEmployer','empStatus'
+];
+
+function buildDocRows(){
+  const list = document.getElementById('docList');
+  list.innerHTML = '';
+  DRIVER_DOCS.forEach(([key, label]) => {
+    const uploaded = currentDocs.drivers[key];
+    const row = document.createElement('div');
+    row.className = 'doc-row';
+    row.innerHTML = `
+      <div class="doc-name">${label}</div>
+      <div class="doc-status ${uploaded ? 'uploaded' : ''}" id="status_${key}">${uploaded ? uploaded : 'No file uploaded'}</div>
+      <div class="doc-actions">
+        <input type="file" class="file-input" id="file_${key}" accept=".pdf,.jpg,.jpeg,.png" onchange="handleFile('${key}')">
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('file_${key}').click()">Choose File</button>
+        <button class="btn btn-ghost btn-sm" ${uploaded ? '' : 'disabled'} onclick="alert('Open: ${label} preview would appear here once connected to storage.')">Open</button>
+      </div>`;
+    list.appendChild(row);
+  });
+}
+function handleFile(key){
+  const input = document.getElementById('file_' + key);
+  if(input.files && input.files[0]){
+    currentDocs.drivers[key] = input.files[0].name;
+    document.getElementById('status_' + key).textContent = currentDocs.drivers[key];
+    document.getElementById('status_' + key).classList.add('uploaded');
+    buildDocRows();
+  }
+}
+function showTab(name){
+  document.querySelectorAll('#overlay .tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('#overlay .tab-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === name));
+}
+function clearForm(){
+  DRIVER_FIELD_IDS.forEach(id => { const el = document.getElementById(id); if(el) el.value = (id==='district'?'Karimnagar':id==='state'?'Telangana':id==='designation'?'Driver':''); });
+  currentDocs.drivers = {};
+  document.getElementById('driverId').closest('.field').classList.remove('field-error');
+  document.getElementById('fullName').closest('.field').classList.remove('field-error');
+}
+function openModal(id){
+  editingId.drivers = id || null;
+  clearForm();
+  buildDocRows();
+  if(id){
+    const d = store.drivers.find(x => x.id === id);
+    document.getElementById('modalTitle').textContent = 'Edit Driver — ' + d.fullName;
+    DRIVER_FIELD_IDS.forEach(fid => { if(fid in d && document.getElementById(fid)) document.getElementById(fid).value = d[fid] || ''; });
+    currentDocs.drivers = Object.assign({}, d.docs || {});
+    buildDocRows();
+  } else {
+    document.getElementById('modalTitle').textContent = 'Add New Driver';
+  }
+  showTab('personal');
+  document.getElementById('overlay').classList.add('open');
+}
+function closeModal(){ document.getElementById('overlay').classList.remove('open'); }
+
+function saveDriver(){
+  const driverId = document.getElementById('driverId').value.trim();
+  const fullName = document.getElementById('fullName').value.trim();
+  let ok = true;
+  document.getElementById('driverId').closest('.field').classList.toggle('field-error', !driverId);
+  document.getElementById('fullName').closest('.field').classList.toggle('field-error', !fullName);
+  if(!driverId || !fullName) ok = false;
+  if(!ok){ showTab('personal'); alert('Driver ID and Full Name are required before saving.'); return; }
+
+  const dupe = store.drivers.find(d => d.driverId === driverId && d.id !== editingId.drivers);
+  if(dupe){ showTab('personal'); alert('Another driver already uses Driver ID "' + driverId + '". Please use a unique ID.'); return; }
+
+  const existing = editingId.drivers ? store.drivers.find(d => d.id === editingId.drivers) : null;
+  const record = { id: editingId.drivers || ('drv_' + Date.now()), docs: Object.assign({}, currentDocs.drivers), extra: (existing && existing.extra) || {} };
+  DRIVER_FIELD_IDS.forEach(fid => { const el = document.getElementById(fid); if(el) record[fid] = el.value; });
+
+  if(editingId.drivers){
+    const idx = store.drivers.findIndex(d => d.id === editingId.drivers);
+    store.drivers[idx] = record;
+  } else {
+    store.drivers.push(record);
+  }
+  closeModal();
+  renderTable('drivers');
+  genericPushToSheet('drivers', record);
+}
+
+/* =====================================================================
+   WASHING TEAM — modal
+===================================================================== */
+const WASHING_DOCS = [ ["photo","Photo"], ["aadhaarCard","Aadhar Card Copy"], ["panCard","PAN Card Copy"] ];
+const WASHING_FIELD_IDS = [
+  'w_employeeId','w_fullName','w_fatherName','w_dob','w_doj','w_gender','w_maritalStatus','w_mobile',
+  'w_permanentAddress','w_designation','w_staffType','w_status',
+  'w_aadhaar','w_pan','w_bankAcNo','w_ifscCode','w_bankName','w_bankBranch'
+];
+function buildWashingDocRows(){
+  const list = document.getElementById('docList_washing');
+  list.innerHTML = '';
+  WASHING_DOCS.forEach(([key, label]) => {
+    const uploaded = currentDocs.washing[key];
+    const row = document.createElement('div');
+    row.className = 'doc-row';
+    row.innerHTML = `
+      <div class="doc-name">${label}</div>
+      <div class="doc-status ${uploaded ? 'uploaded' : ''}" id="w_status_${key}">${uploaded ? uploaded : 'No file uploaded'}</div>
+      <div class="doc-actions">
+        <input type="file" class="file-input" id="w_file_${key}" accept=".pdf,.jpg,.jpeg,.png" onchange="handleWashingFile('${key}')">
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('w_file_${key}').click()">Choose File</button>
+        <button class="btn btn-ghost btn-sm" ${uploaded ? '' : 'disabled'} onclick="alert('Open: ${label} preview would appear here once connected to storage.')">Open</button>
+      </div>`;
+    list.appendChild(row);
+  });
+}
+function handleWashingFile(key){
+  const input = document.getElementById('w_file_' + key);
+  if(input.files && input.files[0]){
+    currentDocs.washing[key] = input.files[0].name;
+    document.getElementById('w_status_' + key).textContent = currentDocs.washing[key];
+    document.getElementById('w_status_' + key).classList.add('uploaded');
+    buildWashingDocRows();
+  }
+}
+function showWashingTab(name){
+  document.querySelectorAll('#overlay_washing .tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('#overlay_washing .tab-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === name));
+}
+function clearWashingForm(){
+  WASHING_FIELD_IDS.forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  document.getElementById('w_status').value = 'Active';
+  currentDocs.washing = {};
+  document.getElementById('w_employeeId').closest('.field').classList.remove('field-error');
+  document.getElementById('w_fullName').closest('.field').classList.remove('field-error');
+}
+function openWashingModal(id){
+  editingId.washing = id || null;
+  clearWashingForm();
+  buildWashingDocRows();
+  if(id){
+    const d = store.washing.find(x => x.id === id);
+    document.getElementById('modalTitle_washing').textContent = 'Edit Washing Staff — ' + d.fullName;
+    WASHING_FIELD_IDS.forEach(fid => {
+      const key = fid.replace(/^w_/, '');
+      if(key in d && document.getElementById(fid)) document.getElementById(fid).value = d[key] || '';
+    });
+    if(document.getElementById('w_status')) document.getElementById('w_status').value = d.status || 'Active';
+    currentDocs.washing = Object.assign({}, d.docs || {});
+    buildWashingDocRows();
+  } else {
+    document.getElementById('modalTitle_washing').textContent = 'Add New Washing Staff';
+  }
+  showWashingTab('w_personal');
+  document.getElementById('overlay_washing').classList.add('open');
+}
+function closeWashingModal(){ document.getElementById('overlay_washing').classList.remove('open'); }
+
+function saveWashing(){
+  const employeeId = document.getElementById('w_employeeId').value.trim();
+  const fullName = document.getElementById('w_fullName').value.trim();
+  let ok = true;
+  document.getElementById('w_employeeId').closest('.field').classList.toggle('field-error', !employeeId);
+  document.getElementById('w_fullName').closest('.field').classList.toggle('field-error', !fullName);
+  if(!employeeId || !fullName) ok = false;
+  if(!ok){ showWashingTab('w_personal'); alert('Employee Id and Name are required before saving.'); return; }
+
+  const dupe = store.washing.find(d => d.employeeId === employeeId && d.id !== editingId.washing);
+  if(dupe){ showWashingTab('w_personal'); alert('Another washing team member already uses Employee Id "' + employeeId + '". Please use a unique ID.'); return; }
+
+  const existing = editingId.washing ? store.washing.find(d => d.id === editingId.washing) : null;
+  const record = { id: editingId.washing || ('wsh_' + Date.now()), docs: Object.assign({}, currentDocs.washing), extra: (existing && existing.extra) || {} };
+  WASHING_FIELD_IDS.forEach(fid => {
+    const key = fid.replace(/^w_/, '');
+    const el = document.getElementById(fid);
+    if(el) record[key] = el.value;
+  });
+
+  if(editingId.washing){
+    const idx = store.washing.findIndex(d => d.id === editingId.washing);
+    store.washing[idx] = record;
+  } else {
+    store.washing.push(record);
+  }
+  closeWashingModal();
+  renderTable('washing');
+  genericPushToSheet('washing', record);
+}
+
+/* =====================================================================
+   TECHNICIAN TEAM — modal
+===================================================================== */
+const TECH_DOCS = [ ["photo","Photo"], ["aadhaarCard","Aadhar Card Copy"], ["panCard","PAN Card Copy"] ];
+const TECH_FIELD_IDS = [
+  't_employeeId','t_fullName','t_fatherName','t_dob','t_doj','t_gender','t_maritalStatus','t_mobile',
+  't_permanentAddress','t_designation','t_staffType','t_status',
+  't_aadhaar','t_pan','t_bankAcNo','t_ifscCode','t_bankName','t_bankBranch'
+];
+function buildTechnicianDocRows(){
+  const list = document.getElementById('docList_technician');
+  list.innerHTML = '';
+  TECH_DOCS.forEach(([key, label]) => {
+    const uploaded = currentDocs.technician[key];
+    const row = document.createElement('div');
+    row.className = 'doc-row';
+    row.innerHTML = `
+      <div class="doc-name">${label}</div>
+      <div class="doc-status ${uploaded ? 'uploaded' : ''}" id="t_status_${key}">${uploaded ? uploaded : 'No file uploaded'}</div>
+      <div class="doc-actions">
+        <input type="file" class="file-input" id="t_file_${key}" accept=".pdf,.jpg,.jpeg,.png" onchange="handleTechnicianFile('${key}')">
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('t_file_${key}').click()">Choose File</button>
+        <button class="btn btn-ghost btn-sm" ${uploaded ? '' : 'disabled'} onclick="alert('Open: ${label} preview would appear here once connected to storage.')">Open</button>
+      </div>`;
+    list.appendChild(row);
+  });
+}
+function handleTechnicianFile(key){
+  const input = document.getElementById('t_file_' + key);
+  if(input.files && input.files[0]){
+    currentDocs.technician[key] = input.files[0].name;
+    document.getElementById('t_status_' + key).textContent = currentDocs.technician[key];
+    document.getElementById('t_status_' + key).classList.add('uploaded');
+    buildTechnicianDocRows();
+  }
+}
+function showTechnicianTab(name){
+  document.querySelectorAll('#overlay_technician .tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('#overlay_technician .tab-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === name));
+}
+function clearTechnicianForm(){
+  TECH_FIELD_IDS.forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  document.getElementById('t_status').value = 'Active';
+  currentDocs.technician = {};
+  document.getElementById('t_employeeId').closest('.field').classList.remove('field-error');
+  document.getElementById('t_fullName').closest('.field').classList.remove('field-error');
+}
+function openTechnicianModal(id){
+  editingId.technician = id || null;
+  clearTechnicianForm();
+  buildTechnicianDocRows();
+  if(id){
+    const d = store.technician.find(x => x.id === id);
+    document.getElementById('modalTitle_technician').textContent = 'Edit Technician — ' + d.fullName;
+    TECH_FIELD_IDS.forEach(fid => {
+      const key = fid.replace(/^t_/, '');
+      if(key in d && document.getElementById(fid)) document.getElementById(fid).value = d[key] || '';
+    });
+    if(document.getElementById('t_status')) document.getElementById('t_status').value = d.status || 'Active';
+    currentDocs.technician = Object.assign({}, d.docs || {});
+    buildTechnicianDocRows();
+  } else {
+    document.getElementById('modalTitle_technician').textContent = 'Add New Technician';
+  }
+  showTechnicianTab('t_personal');
+  document.getElementById('overlay_technician').classList.add('open');
+}
+function closeTechnicianModal(){ document.getElementById('overlay_technician').classList.remove('open'); }
+
+function saveTechnician(){
+  const employeeId = document.getElementById('t_employeeId').value.trim();
+  const fullName = document.getElementById('t_fullName').value.trim();
+  let ok = true;
+  document.getElementById('t_employeeId').closest('.field').classList.toggle('field-error', !employeeId);
+  document.getElementById('t_fullName').closest('.field').classList.toggle('field-error', !fullName);
+  if(!employeeId || !fullName) ok = false;
+  if(!ok){ showTechnicianTab('t_personal'); alert('Employee Id and Name are required before saving.'); return; }
+
+  const dupe = store.technician.find(d => d.employeeId === employeeId && d.id !== editingId.technician);
+  if(dupe){ showTechnicianTab('t_personal'); alert('Another technician already uses Employee Id "' + employeeId + '". Please use a unique ID.'); return; }
+
+  const existing = editingId.technician ? store.technician.find(d => d.id === editingId.technician) : null;
+  const record = { id: editingId.technician || ('tec_' + Date.now()), docs: Object.assign({}, currentDocs.technician), extra: (existing && existing.extra) || {} };
+  TECH_FIELD_IDS.forEach(fid => {
+    const key = fid.replace(/^t_/, '');
+    const el = document.getElementById(fid);
+    if(el) record[key] = el.value;
+  });
+
+  if(editingId.technician){
+    const idx = store.technician.findIndex(d => d.id === editingId.technician);
+    store.technician[idx] = record;
+  } else {
+    store.technician.push(record);
+  }
+  closeTechnicianModal();
+  renderTable('technician');
+  genericPushToSheet('technician', record);
+}
+
+/* =====================================================================
+   SUPERVISOR — modal
+===================================================================== */
+const SUP_DOCS = [ ["photo","Photo"], ["aadhaarCard","Aadhar Card Copy"], ["panCard","PAN Card Copy"] ];
+const SUP_FIELD_IDS = [
+  'sv_employeeId','sv_fullName','sv_fatherName','sv_dob','sv_doj','sv_gender','sv_maritalStatus','sv_mobile',
+  'sv_permanentAddress','sv_designation','sv_staffType','sv_status',
+  'sv_aadhaar','sv_pan','sv_bankAcNo','sv_ifscCode','sv_bankName','sv_bankBranch'
+];
+function buildSupervisorDocRows(){
+  const list = document.getElementById('docList_supervisor');
+  list.innerHTML = '';
+  SUP_DOCS.forEach(([key, label]) => {
+    const uploaded = currentDocs.supervisor[key];
+    const row = document.createElement('div');
+    row.className = 'doc-row';
+    row.innerHTML = `
+      <div class="doc-name">${label}</div>
+      <div class="doc-status ${uploaded ? 'uploaded' : ''}" id="sv_status_${key}">${uploaded ? uploaded : 'No file uploaded'}</div>
+      <div class="doc-actions">
+        <input type="file" class="file-input" id="sv_file_${key}" accept=".pdf,.jpg,.jpeg,.png" onchange="handleSupervisorFile('${key}')">
+        <button class="btn btn-outline btn-sm" onclick="document.getElementById('sv_file_${key}').click()">Choose File</button>
+        <button class="btn btn-ghost btn-sm" ${uploaded ? '' : 'disabled'} onclick="alert('Open: ${label} preview would appear here once connected to storage.')">Open</button>
+      </div>`;
+    list.appendChild(row);
+  });
+}
+function handleSupervisorFile(key){
+  const input = document.getElementById('sv_file_' + key);
+  if(input.files && input.files[0]){
+    currentDocs.supervisor[key] = input.files[0].name;
+    document.getElementById('sv_status_' + key).textContent = currentDocs.supervisor[key];
+    document.getElementById('sv_status_' + key).classList.add('uploaded');
+    buildSupervisorDocRows();
+  }
+}
+function showSupervisorTab(name){
+  document.querySelectorAll('#overlay_supervisor .tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+  document.querySelectorAll('#overlay_supervisor .tab-panel').forEach(p => p.classList.toggle('active', p.dataset.panel === name));
+}
+function clearSupervisorForm(){
+  SUP_FIELD_IDS.forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
+  document.getElementById('sv_status').value = 'Active';
+  currentDocs.supervisor = {};
+  document.getElementById('sv_employeeId').closest('.field').classList.remove('field-error');
+  document.getElementById('sv_fullName').closest('.field').classList.remove('field-error');
+}
+function openSupervisorModal(id){
+  editingId.supervisor = id || null;
+  clearSupervisorForm();
+  buildSupervisorDocRows();
+  if(id){
+    const d = store.supervisor.find(x => x.id === id);
+    document.getElementById('modalTitle_supervisor').textContent = 'Edit Supervisor — ' + d.fullName;
+    SUP_FIELD_IDS.forEach(fid => {
+      const key = fid.replace(/^sv_/, '');
+      if(key in d && document.getElementById(fid)) document.getElementById(fid).value = d[key] || '';
+    });
+    if(document.getElementById('sv_status')) document.getElementById('sv_status').value = d.status || 'Active';
+    currentDocs.supervisor = Object.assign({}, d.docs || {});
+    buildSupervisorDocRows();
+  } else {
+    document.getElementById('modalTitle_supervisor').textContent = 'Add New Supervisor';
+  }
+  showSupervisorTab('sv_personal');
+  document.getElementById('overlay_supervisor').classList.add('open');
+}
+function closeSupervisorModal(){ document.getElementById('overlay_supervisor').classList.remove('open'); }
+
+function saveSupervisor(){
+  const employeeId = document.getElementById('sv_employeeId').value.trim();
+  const fullName = document.getElementById('sv_fullName').value.trim();
+  let ok = true;
+  document.getElementById('sv_employeeId').closest('.field').classList.toggle('field-error', !employeeId);
+  document.getElementById('sv_fullName').closest('.field').classList.toggle('field-error', !fullName);
+  if(!employeeId || !fullName) ok = false;
+  if(!ok){ showSupervisorTab('sv_personal'); alert('Employee Id and Name are required before saving.'); return; }
+
+  const dupe = store.supervisor.find(d => d.employeeId === employeeId && d.id !== editingId.supervisor);
+  if(dupe){ showSupervisorTab('sv_personal'); alert('Another supervisor already uses Employee Id "' + employeeId + '". Please use a unique ID.'); return; }
+
+  const existing = editingId.supervisor ? store.supervisor.find(d => d.id === editingId.supervisor) : null;
+  const record = { id: editingId.supervisor || ('sup_' + Date.now()), docs: Object.assign({}, currentDocs.supervisor), extra: (existing && existing.extra) || {} };
+  SUP_FIELD_IDS.forEach(fid => {
+    const key = fid.replace(/^sv_/, '');
+    const el = document.getElementById(fid);
+    if(el) record[key] = el.value;
+  });
+
+  if(editingId.supervisor){
+    const idx = store.supervisor.findIndex(d => d.id === editingId.supervisor);
+    store.supervisor[idx] = record;
+  } else {
+    store.supervisor.push(record);
+  }
+  closeSupervisorModal();
+  renderTable('supervisor');
+  genericPushToSheet('supervisor', record);
+}
+
+/* =====================================================================
+   ATTENDANCE — combined roster from Drivers + Washing Team +
+   Technician Team + Supervisor, with a Present/Absent radio per person,
+   search, bulk actions, category sub-tabs, and Save/Load against a
+   Google Sheet ("Attendance" tab).
+===================================================================== */
+let attendanceData = {}; // uid -> 'Present' | 'Absent'
+let currentAttendanceCategory = 'all'; // 'all' | 'Driver' | 'Washing' | 'Technician' | 'Supervisor'
+
+function getAllPeople(){
+  const people = [];
+  // Drivers now source their ID from driverId (the single "Driver ID"
+  // field) instead of the removed employeeId field. The generic
+  // "employeeId" property below is just this list's shared display key —
+  // it's populated from driverId for drivers and from employeeId for the
+  // other three categories.
+  store.drivers.forEach(d => people.push({
+    uid: 'drivers_' + d.driverId, employeeId: d.driverId, fullName: d.fullName,
+    mobile: d.mobile, category: 'Driver', designation: d.designation || 'Driver'
+  }));
+  store.washing.forEach(d => people.push({
+    uid: 'washing_' + d.employeeId, employeeId: d.employeeId, fullName: d.fullName,
+    mobile: d.mobile, category: 'Washing', designation: d.designation || ''
+  }));
+  store.technician.forEach(d => people.push({
+    uid: 'technician_' + d.employeeId, employeeId: d.employeeId, fullName: d.fullName,
+    mobile: d.mobile, category: 'Technician', designation: d.designation || ''
+  }));
+  store.supervisor.forEach(d => people.push({
+    uid: 'supervisor_' + d.employeeId, employeeId: d.employeeId, fullName: d.fullName,
+    mobile: d.mobile, category: 'Supervisor', designation: d.designation || ''
+  }));
+  return people.filter(p => p.employeeId);
+}
+
+function switchAttendanceCategory(cat){
+  currentAttendanceCategory = cat;
+  document.querySelectorAll('.att-subtab').forEach(b => b.classList.toggle('active', b.dataset.attcat === cat));
+  renderAttendanceTable();
+}
+
+function currentAttendanceDate(){
+  const el = document.getElementById('attendanceDate');
+  if(el && !el.value) el.value = new Date().toISOString().slice(0,10);
+  return el ? el.value : new Date().toISOString().slice(0,10);
+}
+
+function filteredPeople(){
+  const box = document.getElementById('searchBox_attendance');
+  const q = box ? box.value.trim().toLowerCase() : '';
+  let all = getAllPeople();
+  if(currentAttendanceCategory !== 'all') all = all.filter(p => p.category === currentAttendanceCategory);
+  if(!q) return all;
+  return all.filter(p => [p.employeeId, p.fullName, p.mobile].join(' ').toLowerCase().includes(q));
+}
+
+function updateAttendanceSubtabCounts(){
+  const all = getAllPeople();
+  const counts = { all: all.length, Driver: 0, Washing: 0, Technician: 0, Supervisor: 0 };
+  all.forEach(p => { if(counts[p.category] !== undefined) counts[p.category]++; });
+  Object.keys(counts).forEach(key => {
+    const el = document.getElementById('attCnt_' + key);
+    if(el) el.textContent = '(' + counts[key] + ')';
+  });
+}
+
+function setAttendance(uid, status){
+  attendanceData[uid] = status;
+  const rows = document.querySelectorAll('#tableBody_attendance tr');
+  updateAttendanceSummary();
+  // Re-stripe just the row colours without a full re-render (keeps focus in place)
+  rows.forEach(tr => {
+    if(tr.dataset.uid === uid){
+      tr.classList.remove('att-row-present','att-row-absent');
+      if(status === 'Present') tr.classList.add('att-row-present');
+      if(status === 'Absent') tr.classList.add('att-row-absent');
+    }
+  });
+}
+
+function renderAttendanceTable(){
+  const body = document.getElementById('tableBody_attendance');
+  if(!body) return;
+  currentAttendanceDate();
+  updateAttendanceSubtabCounts();
+  const list = filteredPeople();
+  body.innerHTML = '';
+  const emptyEl = document.getElementById('emptyState_attendance');
+  if(emptyEl) emptyEl.style.display = list.length ? 'none' : 'block';
+
+  list.forEach(p => {
+    const status = attendanceData[p.uid];
+    const tr = document.createElement('tr');
+    tr.dataset.uid = p.uid;
+    if(status === 'Present') tr.classList.add('att-row-present');
+    if(status === 'Absent') tr.classList.add('att-row-absent');
+    tr.innerHTML = `
+      <td>${p.employeeId}</td>
+      <td>${p.fullName || ''}</td>
+      <td>${p.mobile || '—'}</td>
+      <td><span class="cat-badge">${p.category}</span></td>
+      <td>${p.designation || '—'}</td>
+      <td>
+        <div class="att-radios">
+          <label class="att-radio present-label">
+            <input type="radio" name="att_${p.uid}" value="Present" ${status === 'Present' ? 'checked' : ''} onchange="setAttendance('${p.uid}','Present')"><span>Present</span>
+          </label>
+          <label class="att-radio absent-label">
+            <input type="radio" name="att_${p.uid}" value="Absent" ${status === 'Absent' ? 'checked' : ''} onchange="setAttendance('${p.uid}','Absent')"><span>Absent</span>
+          </label>
+        </div>
+      </td>`;
+    body.appendChild(tr);
+  });
+  updateAttendanceSummary();
+}
+
+function updateAttendanceSummary(){
+  const all = getAllPeople();
+  const scoped = currentAttendanceCategory === 'all' ? all : all.filter(p => p.category === currentAttendanceCategory);
+  let present = 0, absent = 0;
+  scoped.forEach(p => {
+    if(attendanceData[p.uid] === 'Present') present++;
+    else if(attendanceData[p.uid] === 'Absent') absent++;
+  });
+  const unmarked = scoped.length - present - absent;
+  const label = document.getElementById('attSummary');
+  if(label) label.textContent = `${scoped.length} total • ${present} Present • ${absent} Absent • ${unmarked} Unmarked`;
+}
+
+function markAllPresent(){
+  filteredPeople().forEach(p => attendanceData[p.uid] = 'Present');
+  renderAttendanceTable();
+}
+function markAllAbsent(){
+  filteredPeople().forEach(p => attendanceData[p.uid] = 'Absent');
+  renderAttendanceTable();
+}
+function clearAllAttendance(){
+  const list = filteredPeople();
+  if(!list.length) return;
+  if(!confirm('Clear attendance marks for the ' + list.length + ' currently listed staff?')) return;
+  list.forEach(p => delete attendanceData[p.uid]);
+  renderAttendanceTable();
+}
+
+async function loadAttendanceForDate(){
+  const date = currentAttendanceDate();
+  attendanceData = {};
+  if(!sheetConfigured('attendance')){ renderAttendanceTable(); return; }
+  setSyncStatus('busy', 'Loading attendance for ' + date + '…');
+  try{
+    const res = await fetch(SHEET_URLS.attendance + '?action=list&type=attendance&date=' + encodeURIComponent(date), {method:'GET'});
+    if(!res.ok) throw new Error('HTTP ' + res.status);
+    const rows = await res.json();
+    rows.forEach(r => {
+      const empId = r.employee_id || r.employeeId || r['Employee ID'] || '';
+      const cat = String(r.category || r.Category || '').toLowerCase();
+      const status = r.status || r.Status || '';
+      if(!empId || !status) return;
+      let prefix = null;
+      if(cat.indexOf('driv') === 0) prefix = 'drivers_';
+      else if(cat.indexOf('wash') === 0) prefix = 'washing_';
+      else if(cat.indexOf('tech') === 0) prefix = 'technician_';
+      else if(cat.indexOf('super') === 0) prefix = 'supervisor_';
+      if(!prefix) return;
+      attendanceData[prefix + empId] = status;
+    });
+    setSyncStatus('ok', 'Attendance loaded for ' + date + ' • ' + new Date().toLocaleTimeString());
+  }catch(err){
+    console.error(err);
+    setSyncStatus('err', 'Could not load attendance for ' + date + ' — check the Web App URL / deployment access');
+  }
+  renderAttendanceTable();
+}
+
+async function saveAttendanceToSheet(){
+  if(!sheetConfigured('attendance')){
+    alert('The Attendance sheet isn\'t connected yet. Paste its Apps Script Web App URL into SHEET_URLS.attendance near the top of the script, then reload.');
+    return;
+  }
+  const date = currentAttendanceDate();
+  const all = getAllPeople();
+  const rows = all.filter(p => attendanceData[p.uid]).map(p => ({
+    date: date,
+    employee_id: p.employeeId,
+    name: p.fullName || '',
+    mobile: p.mobile || '',
+    category: p.category,
+    designation: p.designation || '',
+    status: attendanceData[p.uid]
+  }));
+  if(!rows.length){ alert('Mark at least one person as Present or Absent before saving.'); return; }
+
+  setSyncStatus('busy', 'Saving attendance for ' + date + '…');
+  try{
+    await fetch(SHEET_URLS.attendance, {
+      method: 'POST',
+      headers: {'Content-Type': 'text/plain;charset=utf-8'},
+      body: JSON.stringify({ type: 'attendance', action: 'save_batch', date: date, rows: rows })
+    });
+    setSyncStatus('ok', 'Attendance saved for ' + date + ' • ' + new Date().toLocaleTimeString());
+    alert('Saved attendance for ' + rows.length + ' record(s) on ' + date + '.');
+  }catch(err){
+    console.error(err);
+    setSyncStatus('err', 'Could not save attendance to the sheet');
+    alert('Could not save attendance to the Google Sheet. Check the Web App URL and deployment access.');
+  }
+}
+
+/* =====================================================================
+   INIT
+===================================================================== */
+document.getElementById('attendanceDate').value = new Date().toISOString().slice(0,10);
+
+['drivers','washing','technician','supervisor'].forEach(catKey => renderTable(catKey));
+renderAttendanceTable();
+
+let anyConfigured = false;
+['drivers','washing','technician','supervisor'].forEach(catKey => {
+  if(sheetConfigured(catKey)){
+    anyConfigured = true;
+    genericSyncFromSheet(catKey, false);
+    if(AUTO_SYNC_SECONDS > 0){
+      setInterval(() => genericSyncFromSheet(catKey, false), AUTO_SYNC_SECONDS * 1000);
+    }
+  }
+});
+if(sheetConfigured('attendance')){
+  anyConfigured = true;
+  loadAttendanceForDate();
+}
+if(!anyConfigured) setSyncStatus('err', 'No Google Sheet connected — see setup instructions');
+</script>
+</body>
+</html>

@@ -1,0 +1,2145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+<title>Depot Reports</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#141414;
+    --line:#000000;
+    --paper:#ffffff;
+    --paper-shade:#f4f4f2;
+    --gold:#b8860b;
+    --lime:#5a8f1f;
+    --red:#b23b3b;
+    --muted:#555;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:#dcdcd6;
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    padding:24px 12px 60px;
+  }
+
+  /* ===================== TOOLBAR ===================== */
+  .toolbar{
+    max-width:980px;margin:0 auto 16px auto;
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;
+  }
+  .tabs{display:flex;gap:6px;flex:1;min-width:0;flex-wrap:wrap;}
+  .tab-btn{
+    background:#e9e9e6;border:1px solid #b5b5b0;border-bottom:none;
+    padding:10px 16px;font-size:14px;font-weight:600;cursor:pointer;
+    border-radius:6px 6px 0 0;color:#444;flex:1;white-space:nowrap;
+    overflow:hidden;text-overflow:ellipsis;min-width:110px;
+  }
+  .tab-btn.active{background:var(--paper);color:var(--ink);border-color:var(--ink);}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;}
+  .actions button{
+    background:#1a1a1a;color:#fff;border:none;padding:10px 14px;font-size:13px;
+    font-weight:600;border-radius:6px;cursor:pointer;
+  }
+  .actions button:hover{background:#333;}
+  .actions .secondary{background:#666;}
+  .actions .secondary:hover{background:#7d7d7d;}
+  .actions .clear-btn{background:#8a1f1f;}
+  .actions .clear-btn:hover{background:#a52929;}
+  .actions .print-btn{background:#0d5c2e;}
+  .actions .print-btn:hover{background:#127a3d;}
+
+  .config-note{
+    max-width:980px;margin:0 auto 14px;background:#fff8e1;border:1px solid #e0c068;
+    border-radius:6px;padding:10px 14px;font-size:12px;color:#5a4a1a;line-height:1.6;
+  }
+  .config-note code{background:#eee0b0;padding:1px 5px;border-radius:3px;}
+
+  /* ===================== SHEET / FORM ===================== */
+  .sheet-wrap{max-width:980px;margin:0 auto;}
+  .sheet{
+    display:none;background:var(--paper);border:2px solid var(--line);
+    box-shadow:0 6px 24px rgba(0,0,0,0.18);
+  }
+  .sheet.active{display:block;}
+
+  .title-row{
+    text-align:center;padding:14px 8px;border-bottom:2px solid var(--line);
+    font-weight:700;font-size:17px;letter-spacing:0.5px;
+    display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;
+  }
+  .severity-badge{
+    font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;
+    letter-spacing:0.5px;text-transform:uppercase;background:#999;color:#fff;
+  }
+  .severity-badge.fatal{background:var(--red);}
+  .severity-badge.nonfatal{background:var(--lime);}
+  .severity-badge.fail{background:var(--red);}
+  .severity-badge.pass{background:var(--lime);}
+  .severity-badge.pending{background:var(--gold);}
+  .severity-badge.approved{background:var(--lime);}
+  .severity-badge.rejected{background:var(--red);}
+
+  .section-tab{
+    background:#222;color:#fff;font-weight:700;font-size:12.5px;letter-spacing:1px;
+    text-transform:uppercase;padding:8px 16px;
+  }
+
+  .data-rows{display:grid;grid-template-columns:minmax(220px,1.5fr) 1fr;}
+  .r-label,.r-cell{
+    padding:9px 14px;border-bottom:1px solid #999;border-right:1px solid #999;
+    display:flex;align-items:center;min-height:40px;gap:8px;
+  }
+  .r-label{font-size:13px;font-weight:600;background:var(--paper-shade);}
+  .r-cell{border-right:none;}
+  .r-cell input,.r-cell select,.r-cell textarea{
+    border:none;background:transparent;width:100%;font-size:14px;
+    font-family:'Inter',sans-serif;padding:3px 2px;color:var(--red);
+  }
+  .r-cell textarea{resize:vertical;min-height:44px;}
+  .r-cell input:focus,.r-cell select:focus,.r-cell textarea:focus{outline:none;background:#fffbe8;}
+
+  .chip-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .chip{
+    border:1.5px solid #999;border-radius:20px;padding:5px 14px;font-size:12.5px;
+    font-weight:600;cursor:pointer;background:#fff;user-select:none;
+  }
+  .chip.active{background:var(--lime);border-color:var(--lime);color:#fff;}
+
+  select.severity-select,select.status-select,select.radio-select{
+    border:1px solid #bbb !important;border-radius:4px;padding:6px 10px;background:#fff !important;
+    font-weight:600;cursor:pointer;
+  }
+  select.severity-select{color:var(--red);}
+  select.status-select{color:var(--gold);}
+
+  .fetch-btn{
+    background:var(--gold);color:#141414;border:none;font-weight:700;font-size:12px;
+    padding:6px 14px;border-radius:4px;cursor:pointer;white-space:nowrap;
+  }
+  .fetch-btn:hover{background:#a4770a;}
+  .fetch-btn:disabled{opacity:0.5;cursor:not-allowed;}
+  .lookup-status{font-size:12px;color:var(--muted);}
+  .lookup-status.ok{color:var(--lime);font-weight:600;}
+  .lookup-status.err{color:var(--red);font-weight:600;}
+
+  /* ===================== PHOTO UPLOAD ===================== */
+  .photo-block{padding:14px;}
+  .photo-block .drop-zone{
+    border:2px dashed #aaa;border-radius:8px;padding:22px;text-align:center;
+    cursor:pointer;color:var(--muted);font-size:13px;background:var(--paper-shade);display:block;
+  }
+  .photo-block .drop-zone:hover{border-color:var(--gold);color:var(--ink);}
+  .photo-block input[type=file]{display:none;}
+  .thumb-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;}
+  .thumb{position:relative;width:88px;height:88px;border-radius:6px;overflow:hidden;border:1px solid #ccc;}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .thumb .remove-thumb{
+    position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.65);color:#fff;
+    border:none;border-radius:50%;width:20px;height:20px;font-size:12px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;line-height:1;
+  }
+  .photo-count{font-size:12px;color:var(--muted);margin-top:8px;display:block;}
+
+  /* ===================== SEARCH ===================== */
+  .search-block{padding:14px 16px;background:#fbf8ef;}
+  .search-row{display:flex;gap:8px;flex-wrap:wrap;}
+  .search-row input{
+    flex:1;min-width:220px;border:1px solid #bbb;border-radius:4px;
+    padding:9px 12px;font-size:14px;font-family:'Inter',sans-serif;
+  }
+  .search-row input:focus{outline:none;border-color:var(--gold);}
+  .search-btn{
+    background:var(--gold);color:#141414;border:none;font-weight:700;
+    font-size:13px;padding:9px 18px;border-radius:4px;cursor:pointer;
+  }
+  .search-btn:hover{background:#a4770a;}
+  .search-btn:disabled{opacity:0.5;cursor:not-allowed;}
+  .clear-search-btn{
+    background:transparent;color:var(--muted);border:1px solid #bbb;font-weight:600;
+    font-size:13px;padding:9px 14px;border-radius:4px;cursor:pointer;
+  }
+  .clear-search-btn:hover{border-color:var(--red);color:var(--red);}
+  .search-status{display:block;font-size:12px;color:var(--muted);margin-top:8px;}
+  .search-status.ok{color:var(--lime);font-weight:600;}
+  .search-status.err{color:var(--red);font-weight:600;}
+
+  .result-card{background:#fff;border:1px solid #ddd;border-radius:8px;padding:14px;margin-top:14px;}
+  .result-card-header{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    font-weight:700;font-size:14px;padding-bottom:8px;margin-bottom:8px;border-bottom:2px solid var(--ink);
+  }
+  .result-card .preview-photos-grid img{
+    width:88px;height:88px;object-fit:cover;border-radius:6px;border:1px solid #ccc;cursor:pointer;
+  }
+
+  /* ===================== LIVE PREVIEW ===================== */
+  .preview-block{padding:14px 16px;background:#fbfaf6;}
+  .preview-empty{font-size:13px;color:var(--muted);font-style:italic;padding:6px 2px;}
+  .preview-header{
+    display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:15px;font-weight:700;
+    margin-bottom:10px;padding-bottom:8px;border-bottom:2px solid var(--ink);
+  }
+  .preview-grid{display:grid;grid-template-columns:1fr 1fr;gap:2px 18px;}
+  .preview-item{padding:6px 0;border-bottom:1px dashed #ccc;font-size:13px;line-height:1.4;}
+  .preview-item .pi-label{font-weight:700;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:0.4px;display:block;}
+  .preview-item .pi-value{color:var(--ink);word-break:break-word;}
+  .preview-item.wide{grid-column:1/-1;}
+  .preview-item.highlight{
+    grid-column:1/-1;background:#fff3cd;border:1px solid #e0c068;border-radius:6px;
+    padding:10px 14px;margin-bottom:6px;
+  }
+  .preview-item.highlight .pi-label{color:#8a6100;font-size:12px;}
+  .preview-item.highlight .pi-value{font-weight:800;font-size:17px;color:#141414;}
+  .preview-photos{margin-top:14px;}
+  .preview-photos-label{font-weight:700;font-size:12px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+  .preview-photos-grid{display:flex;gap:10px;flex-wrap:wrap;}
+  .preview-photos-grid img{width:96px;height:96px;object-fit:cover;border-radius:6px;border:1px solid #ccc;}
+  @media (max-width:600px){.preview-grid{grid-template-columns:1fr;}}
+
+  /* ===================== VIEW REPORTS TAB ===================== */
+  .view-controls{padding:14px 16px;background:#fbf8ef;display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;}
+  .view-field{display:flex;flex-direction:column;gap:4px;font-size:11px;font-weight:700;text-transform:uppercase;color:var(--muted);letter-spacing:0.4px;}
+  .view-field input,.view-field select{
+    border:1px solid #bbb;border-radius:4px;padding:9px 10px;font-size:13px;
+    font-family:'Inter',sans-serif;min-width:150px;
+  }
+  .view-field input:focus,.view-field select:focus{outline:none;border-color:var(--gold);}
+  .view-table-wrap{padding:0 16px 16px;overflow-x:auto;}
+  table.view-table{width:100%;border-collapse:collapse;font-size:13px;}
+  table.view-table th,table.view-table td{
+    text-align:left;padding:9px 10px;border-bottom:1px solid #ddd;white-space:nowrap;
+  }
+  table.view-table th{
+    background:#222;color:#fff;font-weight:700;text-transform:uppercase;font-size:11px;
+    letter-spacing:0.4px;cursor:pointer;user-select:none;
+  }
+  table.view-table th.sorted{background:var(--gold);color:#141414;}
+  table.view-table th.check-col,table.view-table td.check-col{cursor:default;width:34px;}
+  table.view-table tbody tr:nth-child(even){background:#fafafa;}
+  table.view-table tbody tr:hover{background:#fff3cd;}
+  table.view-table tbody tr.row-selected{background:#fdeec2;}
+  .view-detail-btn{
+    background:var(--ink);color:#fff;border:none;padding:6px 12px;border-radius:4px;
+    font-size:12px;font-weight:600;cursor:pointer;
+  }
+  .view-detail-btn:hover{background:var(--gold);color:#141414;}
+  .view-edit-btn{
+    background:var(--gold);color:#141414;border:none;padding:6px 12px;border-radius:4px;
+    font-size:12px;font-weight:600;cursor:pointer;margin-left:6px;
+  }
+  .view-edit-btn:hover{background:#a4770a;color:#fff;}
+  .view-actions-col{white-space:nowrap;}
+  .view-detail-wrap{padding:0 16px 20px;}
+  .editing-banner{
+    display:none;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;
+    background:#fff3cd;border:1px solid #e0c068;border-radius:6px;
+    padding:10px 14px;margin:14px 16px 0;font-size:13px;font-weight:600;color:#5a4a1a;
+  }
+  .editing-banner.active{display:flex;}
+  .editing-banner button{
+    background:#8a1f1f;color:#fff;border:none;padding:6px 12px;border-radius:4px;
+    font-size:12px;font-weight:600;cursor:pointer;
+  }
+  .editing-banner button:hover{background:#a52929;}
+
+  /* Report selection / export toolbar for View Reports */
+  .view-export-bar{
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    padding:12px 16px;background:#f1efe6;border-top:1px solid #ddd;border-bottom:1px solid #ddd;
+  }
+  .view-export-bar .sel-count{font-size:12px;color:var(--muted);font-weight:600;margin-right:4px;}
+  .view-export-bar button{
+    background:#0d5c2e;color:#fff;border:none;padding:9px 14px;font-size:12.5px;
+    font-weight:700;border-radius:4px;cursor:pointer;
+  }
+  .view-export-bar button:hover{background:#127a3d;}
+  .view-export-bar button:disabled{opacity:0.45;cursor:not-allowed;}
+  .view-export-bar button.export-all{background:#1a1a1a;}
+  .view-export-bar button.export-all:hover{background:#333;}
+  .view-export-bar button.export-current{background:#665c1a;}
+  .view-export-bar button.export-current:hover{background:#847a24;}
+
+  /* ===================== SIGNATURES ===================== */
+  .sig-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;text-align:center;padding:22px 16px;}
+  .sig-grid.two-col{grid-template-columns:repeat(2,1fr);}
+  .sig-grid div{font-size:13px;font-weight:600;}
+  .sig-grid input{
+    width:100%;text-align:center;border:none;border-bottom:1px solid var(--ink);
+    background:transparent;font-family:inherit;font-size:13px;color:var(--red);
+    padding:4px 2px;margin-top:36px;outline:none;
+  }
+  .sig-grid input:focus{background:#fff7d6;}
+
+  /* ===================== SUBMIT BAR ===================== */
+  .submit-bar{
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    padding:16px 14px;background:var(--paper-shade);border-top:2px solid var(--line);
+  }
+  .status-msg{font-size:12.5px;color:var(--muted);}
+  .status-msg.ok{color:var(--lime);font-weight:600;}
+  .status-msg.err{color:var(--red);font-weight:600;}
+  button.save-btn{
+    background:var(--ink);color:#fff;border:none;font-weight:700;font-size:14px;
+    letter-spacing:0.5px;padding:12px 26px;border-radius:4px;cursor:pointer;
+  }
+  button.save-btn:hover{background:var(--gold);color:#141414;}
+  button.save-btn:disabled{opacity:0.5;cursor:not-allowed;}
+
+  @media (max-width:720px){
+    .data-rows{grid-template-columns:1fr;}
+    .r-label{border-right:none;border-bottom:none;padding-bottom:2px;}
+    .tab-btn{padding:12px 8px;font-size:13px;}
+    .actions button{flex:1;padding:12px 8px;font-size:13px;}
+    .sig-grid,.sig-grid.two-col{grid-template-columns:1fr;gap:28px;}
+  }
+
+  /* ===================== PRINT / PDF ===================== */
+  .print-report-area{display:none;}
+  .print-report-page{border:2px solid var(--line);margin-bottom:0;}
+  .print-report-page .title-row{display:flex;}
+  .print-report-page .print-page-grid{padding:14px 16px;}
+
+  @page{size:A4;margin:12mm 14mm;}
+  @media print{
+    body{background:#fff;padding:0;}
+    .no-print,.toolbar,.config-note,.entry-section{display:none !important;}
+    .preview-empty{display:none !important;}
+    .sheet-wrap{max-width:100%;}
+    .sheet{display:none;border:none;box-shadow:none;page-break-after:always;}
+    .sheet.print-active{display:block !important;}
+    .preview-grid{grid-template-columns:1fr 1fr !important;}
+    .sig-grid{grid-template-columns:repeat(3,1fr) !important;}
+    .sig-grid.two-col{grid-template-columns:repeat(2,1fr) !important;}
+    .preview-item.highlight,.severity-badge{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+
+    /* When exporting specific reports from View Reports, hide the table/detail/
+       controls entirely and show only the generated report page(s) below. */
+    #viewForm.printing-mode .view-controls,
+    #viewForm.printing-mode .view-export-bar,
+    #viewForm.printing-mode #view_tableWrap,
+    #viewForm.printing-mode #view_status,
+    #viewForm.printing-mode #view_detail,
+    #viewForm.printing-mode > .title-row{display:none !important;}
+    #viewForm.printing-mode .print-report-area{display:block !important;}
+    .print-report-page{page-break-after:always;border:none;}
+    .print-report-page:last-child{page-break-after:auto;}
+  }
+</style>
+</head>
+<body>
+
+<div class="config-note" id="configNote" style="display:none;">
+  ⚙ <strong>One-time setup:</strong> paste your Google Apps Script Web App URL into <code>SCRIPT_URL</code> near the bottom of this file, then reload.
+</div>
+
+<div class="toolbar no-print">
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="breakdown" onclick="showTab('breakdown')">Breakdown</button>
+    <button class="tab-btn" data-tab="accident" onclick="showTab('accident')">Accident</button>
+    <button class="tab-btn" data-tab="heldup" onclick="showTab('heldup')">Held Up</button>
+    <button class="tab-btn" data-tab="suspension" onclick="showTab('suspension')">Suspension / Alcohol</button>
+    <button class="tab-btn" data-tab="leave" onclick="showTab('leave')">Leave</button>
+    <button class="tab-btn" data-tab="view" onclick="showTab('view')">View Reports</button>
+  </div>
+  <div class="actions">
+    <button class="clear-btn" type="button" onclick="clearCurrent()">Clear Form</button>
+    <button class="print-btn" type="button" onclick="printCurrent()">Print (A4)</button>
+    <button class="secondary" type="button" onclick="printCurrent()">Save Current as PDF</button>
+    <button type="button" onclick="printBoth()">Save All as PDF</button>
+  </div>
+</div>
+
+<div class="sheet-wrap">
+
+  <!-- ===================== BREAKDOWN REPORT ===================== -->
+  <form class="sheet active" id="breakdownForm" data-type="breakdown">
+    <div class="title-row">BREAKDOWN REPORT</div>
+    <div class="editing-banner no-print" id="breakdown_editingBanner">
+      <span>✏️ Editing an existing report — Save will update it instead of creating a new one.</span>
+      <button type="button" id="breakdown_cancelEditBtn">Cancel Edit</button>
+    </div>
+
+    <div class="section-tab no-print">Search Existing Reports</div>
+    <div class="search-block no-print">
+      <div class="search-row">
+        <input type="text" id="breakdown_searchQuery" placeholder="Search by driver name, bus number, service no, ID...">
+        <button type="button" class="search-btn" id="breakdown_searchBtn">Search</button>
+        <button type="button" class="clear-search-btn" id="breakdown_clearSearchBtn">Clear</button>
+      </div>
+      <span class="search-status" id="breakdown_searchStatus"></span>
+      <div id="breakdown_searchResults"></div>
+    </div>
+
+    <div class="section-tab entry-section">Incident Overview</div>
+    <div class="data-rows entry-section">
+      <div class="r-label">Depot</div>
+      <div class="r-cell"><input type="text" id="bd_depot"></div>
+
+      <div class="r-label">Date of Breakdown</div>
+      <div class="r-cell"><input type="date" id="bd_date"></div>
+
+      <div class="r-label">Breakdown Time</div>
+      <div class="r-cell"><input type="time" id="bd_breakdownTime"></div>
+
+      <div class="r-label">Reached Time</div>
+      <div class="r-cell"><input type="time" id="bd_reachedTime"></div>
+
+      <div class="r-label">Breakdown Location</div>
+      <div class="r-cell"><input type="text" id="bd_location"></div>
+    </div>
+
+    <div class="section-tab entry-section">Bus &amp; Service Details</div>
+    <div class="data-rows entry-section">
+      <div class="r-label">Bus No.</div>
+      <div class="r-cell"><input type="text" id="bd_busNo"></div>
+
+      <div class="r-label">Bus Type / Model</div>
+      <div class="r-cell">
+        <div class="chip-row" id="bd_busTypeOptions">
+          <div class="chip" data-value="EV Express">EV Express</div>
+          <div class="chip" data-value="EV Deluxe">EV Deluxe</div>
+          <div class="chip" data-value="EV Super Luxury">EV Super Luxury</div>
+        </div>
+        <input type="hidden" id="bd_busType" value="">
+      </div>
+
+      <div class="r-label">Service No.</div>
+      <div class="r-cell"><input type="text" id="bd_serviceNo"></div>
+
+      <div class="r-label">Route</div>
+      <div class="r-cell"><input type="text" id="bd_route"></div>
+    </div>
+
+    <div class="section-tab entry-section">Driver &amp; Mechanic Details</div>
+    <div class="data-rows entry-section">
+      <div class="r-label">Driver ID</div>
+      <div class="r-cell">
+        <input type="text" id="bd_driverId" style="flex:1;">
+        <button type="button" class="fetch-btn no-print" id="bd_lookupDriverBtn">Fetch</button>
+      </div>
+
+      <div class="r-label"></div>
+      <div class="r-cell"><span class="lookup-status" id="bd_driverLookupStatus"></span></div>
+
+      <div class="r-label">Driver Name</div>
+      <div class="r-cell"><input type="text" id="bd_driverName"></div>
+
+      <div class="r-label">Mobile No. (Driver)</div>
+      <div class="r-cell"><input type="tel" id="bd_mobile"></div>
+
+      <div class="r-label">Mechanic Informed</div>
+      <div class="r-cell">
+        <select id="bd_mechInformed" class="radio-select">
+          <option value="">-- Select --</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+      </div>
+
+      <div class="r-label">Mechanic Name</div>
+      <div class="r-cell"><input type="text" id="bd_mechanicName"></div>
+
+      <div class="r-label">Staff ID</div>
+      <div class="r-cell"><input type="text" id="bd_staffId"></div>
+
+      <div class="r-label">Mobile No. (Staff)</div>
+      <div class="r-cell"><input type="tel" id="bd_staffMobile"></div>
+    </div>
+
+    <div class="section-tab entry-section">Breakdown Details</div>
+    <div class="data-rows entry-section">
+      <div class="r-label">Details of Breakdown</div>
+      <div class="r-cell"><textarea id="bd_details" rows="3" placeholder="Describe the breakdown..."></textarea></div>
+
+      <div class="r-label">Cause of Breakdown</div>
+      <div class="r-cell"><textarea id="bd_cause" rows="2"></textarea></div>
+
+      <div class="r-label">Action Taken / Repairs Done</div>
+      <div class="r-cell"><textarea id="bd_action" rows="2"></textarea></div>
+    </div>
+
+    <div class="section-tab entry-section">Bus Released</div>
+    <div class="data-rows entry-section">
+      <div class="r-label">Date</div>
+      <div class="r-cell"><input type="date" id="bd_relDate"></div>
+
+      <div class="r-label">Time</div>
+      <div class="r-cell"><input type="time" id="bd_relTime"></div>
+
+      <div class="r-label">Location</div>
+      <div class="r-cell"><input type="text" id="bd_relLocation"></div>
+    </div>
+
+    <div class="section-tab no-print">Photo Evidence — Breakdown / Repairs</div>
+    <div class="photo-block no-print">
+      <label class="drop-zone" for="bd_photoInput">📷 Tap to upload photos of the breakdown / bus / repairs</label>
+      <input type="file" id="bd_photoInput" accept="image/*" multiple>
+      <div class="thumb-row" id="bd_thumbRow"></div>
+      <span class="photo-count" id="bd_photoCount">No photos attached yet.</span>
+    </div>
+
+    <div class="section-tab">Report Preview</div>
+    <div class="preview-block" id="breakdown_previewBlock">
+      <div class="preview-empty" id="breakdown_previewEmpty">Start filling in the details above — the full report will build here automatically.</div>
+      <div class="preview-content" id="breakdown_previewContent" style="display:none;">
+        <div class="preview-header"><span>Breakdown Report</span></div>
+        <div class="preview-grid" id="breakdown_previewGrid"></div>
+        <div class="preview-photos" id="breakdown_previewPhotos" style="display:none;">
+          <div class="preview-photos-label">Photo Evidence</div>
+          <div class="preview-photos-grid" id="breakdown_previewPhotosGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sig-grid">
+      <div>Reported By (Driver)<input type="text" id="bd_reportedByName" placeholder="Name"></div>
+      <div>Verified By (Supervisor)<input type="text" id="bd_verifiedByName" placeholder="Name"></div>
+      <div>Depot Manager<input type="text" id="bd_managerName" placeholder="Name"></div>
+    </div>
+
+    <div class="submit-bar no-print">
+      <span class="status-msg" id="breakdown_statusMsg">Fill in the details above, then save.</span>
+      <button type="submit" class="save-btn" id="breakdown_saveBtn">Save to Google Sheet</button>
+    </div>
+  </form>
+
+  <!-- ===================== ACCIDENT REPORT ===================== -->
+  <form class="sheet" id="accidentForm" data-type="accident">
+    <div class="title-row">
+      ACCIDENT REPORT
+      <span class="severity-badge" id="accident_severityBadge" style="display:none;"></span>
+    </div>
+    <div class="editing-banner no-print" id="accident_editingBanner">
+      <span>✏️ Editing an existing report — Save will update it instead of creating a new one.</span>
+      <button type="button" id="accident_cancelEditBtn">Cancel Edit</button>
+    </div>
+
+    <div class="section-tab no-print">Search Existing Reports</div>
+    <div class="search-block no-print">
+      <div class="search-row">
+        <input type="text" id="accident_searchQuery" placeholder="Search by driver name, bus number, service no, ID...">
+        <button type="button" class="search-btn" id="accident_searchBtn">Search</button>
+        <button type="button" class="clear-search-btn" id="accident_clearSearchBtn">Clear</button>
+      </div>
+      <span class="search-status" id="accident_searchStatus"></span>
+      <div id="accident_searchResults"></div>
+    </div>
+
+    <div class="section-tab entry-section">Incident Overview</div>
+    <div class="data-rows entry-section">
+      <div class="r-label">Report Date</div>
+      <div class="r-cell"><input type="date" id="ac_reportDate" required></div>
+
+      <div class="r-label">Time of Accident</div>
+      <div class="r-cell"><input type="time" id="ac_accidentTime"></div>
+
+      <div class="r-label">Depot</div>
+      <div class="r-cell"><input type="text" id="ac_depot"></div>
+
+      <div class="r-label">Spot / Location of Accident</div>
+      <div class="r-cell"><input type="text" id="ac_accidentSpot"></div>
+    </div>
+
+    <div class="section-tab entry-section">Bus &amp; Service Details</div>
+    <div class="data-rows entry-section">
+      <div class="r-label">Bus No</div>
+      <div class="r-cell"><input type="text" id="ac_busNo"></div>
+
+      <div class="r-label">Bus Type</div>
+      <div class="r-cell">
+        <div class="chip-row" id="ac_busTypeOptions">
+          <div class="chip" data-value="EV Express">EV Express</div>
+          <div class="chip" data-value="EV Deluxe">EV Deluxe</div>
+          <div class="chip" data-value="EV Super Luxury">EV Super Luxury</div>
+        </div>
+        <input type="hidden" id="ac_busType" value="">
+      </div>
+
+      <div class="r-label">Bus Model</div>
+      <div class="r-cell"><input type="text" id="ac_busModel"></div>
+
+      <div class="r-label">Service No</div>
+      <div class="r-cell"><input type="text" id="ac_serviceNo"></div>
+
+      <div class="r-label">Route</div>
+      <div class="r-cell"><input type="text" id="ac_route"></div>
+    </div>
+
+    <div class="section-tab entry-section">Driver &amp; Conductor Details</div>
+    <div class="data-rows entry-section">
+      <div class="r-label">Driver ID No</div>
+      <div class="r-cell">
+        <input type="text" id="ac_driverId" style="flex:1;">
+        <button type="button" class="fetch-btn no-print" id="ac_lookupDriverBtn">Fetch</button>
+      </div>
+
+      <div class="r-label"></div>
+      <div class="r-cell"><span class="lookup-status" id="ac_driverLookupStatus"></span></div>
+
+      <div class="r-label">Driver Name</div>
+      <div class="r-cell"><input type="text" id="ac_driverName"></div>
+
+      <div class="r-label">Driver Cell</div>
+      <div class="r-cell"><input type="tel" id="ac_driverCell"></div>
+
+      <div class="r-label">Conductor Name</div>
+      <div class="r-cell"><input type="text" id="ac_conductorName"></div>
+
+      <div class="r-label">Conductor Staff No</div>
+      <div class="r-cell"><input type="text" id="ac_conductorStaffNo"></div>
+
+      <div class="r-label">Conductor Cell</div>
+      <div class="r-cell"><input type="tel" id="ac_conductorCell"></div>
+    </div>
+
+    <div class="section-tab entry-section">Accident Details</div>
+    <div class="data-rows entry-section">
+      <div class="r-label">1. Cause of Accident</div>
+      <div class="r-cell"><textarea id="ac_cause" placeholder="Describe how the accident happened..."></textarea></div>
+
+      <div class="r-label">2. Route of Accident</div>
+      <div class="r-cell"><input type="text" id="ac_accidentRoute" placeholder="Route on which accident occurred"></div>
+
+      <div class="r-label">3. Which Service</div>
+      <div class="r-cell"><input type="text" id="ac_accidentService" placeholder="Service number involved"></div>
+
+      <div class="r-label">4. Which Bus</div>
+      <div class="r-cell"><input type="text" id="ac_accidentBus" placeholder="Bus number involved"></div>
+
+      <div class="r-label">5. Driver Name &amp; ID</div>
+      <div class="r-cell"><input type="text" id="ac_accidentDriver" placeholder="Name and ID of driver at the time"></div>
+
+      <div class="r-label">6. Fatal or Non-Fatal</div>
+      <div class="r-cell">
+        <select id="ac_severity" class="severity-select">
+          <option value="">-- Select --</option>
+          <option value="Fatal">Fatal</option>
+          <option value="Non-Fatal">Non-Fatal</option>
+        </select>
+      </div>
+
+      <div class="r-label">7. Status</div>
+      <div class="r-cell">
+        <select id="ac_status" class="status-select">
+          <option value="">-- Select --</option>
+          <option value="UPC">UPC</option>
+          <option value="Depot">Depot</option>
+        </select>
+      </div>
+
+      <div class="r-label">8. Action Taken on Driver</div>
+      <div class="r-cell"><textarea id="ac_actionTaken" placeholder="Suspension, counselling, none, etc."></textarea></div>
+    </div>
+
+    <div class="section-tab no-print">Photo Evidence — Accident Spot / Position</div>
+    <div class="photo-block no-print">
+      <label class="drop-zone" for="ac_photoInput">📷 Tap to upload photos of the accident spot / bus position</label>
+      <input type="file" id="ac_photoInput" accept="image/*" multiple>
+      <div class="thumb-row" id="ac_thumbRow"></div>
+      <span class="photo-count" id="ac_photoCount">No photos attached yet.</span>
+    </div>
+
+    <div class="section-tab entry-section">Reported By</div>
+    <div class="data-rows entry-section">
+      <div class="r-label">Name &amp; Designation</div>
+      <div class="r-cell"><input type="text" id="ac_reportedBy"></div>
+    </div>
+
+    <div class="section-tab">Report Preview</div>
+    <div class="preview-block" id="accident_previewBlock">
+      <div class="preview-empty" id="accident_previewEmpty">Start filling in the details above — the full report will build here automatically.</div>
+      <div class="preview-content" id="accident_previewContent" style="display:none;">
+        <div class="preview-header">
+          <span>Accident Report</span>
+          <span class="severity-badge" id="accident_previewSeverityBadge" style="display:none;"></span>
+        </div>
+        <div class="preview-grid" id="accident_previewGrid"></div>
+        <div class="preview-photos" id="accident_previewPhotos" style="display:none;">
+          <div class="preview-photos-label">Photo Evidence</div>
+          <div class="preview-photos-grid" id="accident_previewPhotosGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sig-grid two-col">
+      <div>Depot Manager Signature<input type="text" id="ac_managerName" placeholder="Name"></div>
+      <div>Driver Signature<input type="text" id="ac_driverSigName" placeholder="Name"></div>
+    </div>
+
+    <div class="submit-bar no-print">
+      <span class="status-msg" id="accident_statusMsg">Fill in the details above, then save.</span>
+      <button type="submit" class="save-btn" id="accident_saveBtn">Save to Google Sheet</button>
+    </div>
+  </form>
+
+  <!-- ===================== HELD UP VEHICLE REPORT ===================== -->
+  <form class="sheet" id="heldupForm" data-type="heldup">
+    <div class="title-row">HELD UP VEHICLE REPORT</div>
+    <div class="editing-banner no-print" id="heldup_editingBanner">
+      <span>✏️ Editing an existing report — Save will update it instead of creating a new one.</span>
+      <button type="button" id="heldup_cancelEditBtn">Cancel Edit</button>
+    </div>
+
+    <div class="section-tab no-print">Search Existing Reports</div>
+    <div class="search-block no-print">
+      <div class="search-row">
+        <input type="text" id="heldup_searchQuery" placeholder="Search by driver name, bus number, service no, ID...">
+        <button type="button" class="search-btn" id="heldup_searchBtn">Search</button>
+        <button type="button" class="clear-search-btn" id="heldup_clearSearchBtn">Clear</button>
+      </div>
+      <span class="search-status" id="heldup_searchStatus"></span>
+      <div id="heldup_searchResults"></div>
+    </div>
+
+    <div class="section-tab entry-section">Incident Overview</div>
+    <div class="data-rows entry-section">
+      <div class="r-label">Depot</div>
+      <div class="r-cell"><input type="text" id="hu_depot"></div>
+
+      <div class="r-label">Date Held Up</div>
+      <div class="r-cell"><input type="date" id="hu_date"></div>
+
+      <div class="r-label">Time Held Up</div>
+      <div class="r-cell"><input type="time" id="hu_heldTime"></div>
+
+      <div class="r-label">Time Released</div>
+      <div class="r-cell"><input type="time" id="hu_releasedTime"></div>
+
+      <div class="r-label">Location Held Up</div>
+      <div class="r-cell"><input type="text" id="hu_location"></div>
+    </div>
+
+    <div class="section-tab entry-section">Bus &amp; Service Details</div>
+    <div class="data-rows entry-section">
+      <div class="r-label">Bus No.</div>
+      <div class="r-cell"><input type="text" id="hu_busNo"></div>
+
+      <div class="r-label">Bus Type / Model</div>
+      <div class="r-cell">
+        <div class="chip-row" id="hu_busTypeOptions">
+          <div class="chip" data-value="EV Express">EV Express</div>
+          <div class="chip" data-value="EV Deluxe">EV Deluxe</div>
+          <div class="chip" data-value="EV Super Luxury">EV Super Luxury</div>
+        </div>
+        <input type="hidden" id="hu_busType" value="">
+      </div>
+    </div>
+
+    <div class="section-tab entry-section">Hold Up Details</div>
+    <div class="data-rows entry-section">
+      <div class="r-label">Reason for Hold Up</div>
+      <div class="r-cell"><textarea id="hu_reason" rows="3" placeholder="Describe why the vehicle was held up..."></textarea></div>
+    </div>
+
+    <div class="section-tab entry-section">Vehicle Released</div>
+    <div class="data-rows entry-section">
+      <div class="r-label">Date</div>
+      <div class="r-cell"><input type="date" id="hu_relDate"></div>
+
+      <div class="r-label">Time</div>
+      <div class="r-cell"><input type="time" id="hu_relTime"></div>
+
+      <div class="r-label">Location</div>
+      <div class="r-cell"><input type="text" id="hu_relLocation"></div>
+    </div>
+
+    <div class="section-tab no-print">Photo Evidence — Held Up Vehicle</div>
+    <div class="photo-block no-print">
+      <label class="drop-zone" for="hu_photoInput">📷 Tap to upload photos of the held up vehicle / location</label>
+      <input type="file" id="hu_photoInput" accept="image/*" multiple>
+      <div class="thumb-row" id="hu_thumbRow"></div>
+      <span class="photo-count" id="hu_photoCount">No photos attached yet.</span>
+    </div>
+
+    <div class="section-tab">Report Preview</div>
+    <div class="preview-block" id="heldup_previewBlock">
+      <div class="preview-empty" id="heldup_previewEmpty">Start filling in the details above — the full report will build here automatically.</div>
+      <div class="preview-content" id="heldup_previewContent" style="display:none;">
+        <div class="preview-header"><span>Held Up Vehicle Report</span></div>
+        <div class="preview-grid" id="heldup_previewGrid"></div>
+        <div class="preview-photos" id="heldup_previewPhotos" style="display:none;">
+          <div class="preview-photos-label">Photo Evidence</div>
+          <div class="preview-photos-grid" id="heldup_previewPhotosGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sig-grid two-col">
+      <div>Verified By (Supervisor)<input type="text" id="hu_verifiedByName" placeholder="Name"></div>
+      <div>Depot Manager<input type="text" id="hu_managerName" placeholder="Name"></div>
+    </div>
+
+    <div class="submit-bar no-print">
+      <span class="status-msg" id="heldup_statusMsg">Fill in the details above, then save.</span>
+      <button type="submit" class="save-btn" id="heldup_saveBtn">Save to Google Sheet</button>
+    </div>
+  </form>
+
+  <!-- ===================== SUSPENSION / ALCOHOL TEST REPORT ===================== -->
+  <form class="sheet" id="suspensionForm" data-type="suspension">
+    <div class="title-row">
+      SUSPENSION / ALCOHOL TEST REPORT
+      <span class="severity-badge" id="suspension_severityBadge" style="display:none;"></span>
+    </div>
+    <div class="editing-banner no-print" id="suspension_editingBanner">
+      <span>✏️ Editing an existing report — Save will update it instead of creating a new one.</span>
+      <button type="button" id="suspension_cancelEditBtn">Cancel Edit</button>
+    </div>
+
+    <div class="section-tab no-print">Search Existing Reports</div>
+    <div class="search-block no-print">
+      <div class="search-row">
+        <input type="text" id="suspension_searchQuery" placeholder="Search by driver name, staff ID, bus number...">
+        <button type="button" class="search-btn" id="suspension_searchBtn">Search</button>
+        <button type="button" class="clear-search-btn" id="suspension_clearSearchBtn">Clear</button>
+      </div>
+      <span class="search-status" id="suspension_searchStatus"></span>
+      <div id="suspension_searchResults"></div>
+    </div>
+
+    <div class="section-tab entry-section">Incident Overview</div>
+    <div class="data-rows entry-section">
+      <div class="r-label">Depot</div>
+      <div class="r-cell"><input type="text" id="su_depot"></div>
+
+      <div class="r-label">Date of Incident</div>
+      <div class="r-cell"><input type="date" id="su_date" required></div>
+
+      <div class="r-label">Time of Incident</div>
+      <div class="r-cell"><input type="time" id="su_time"></div>
+
+      <div class="r-label">Location</div>
+      <div class="r-cell"><input type="text" id="su_location"></div>
+
+      <div class="r-label">Duty / Service No.</div>
+      <div class="r-cell"><input type="text" id="su_serviceNo"></div>
+
+      <div class="r-label">Bus No. (if applicable)</div>
+      <div class="r-cell"><input type="text" id="su_busNo"></div>
+    </div>
+
+    <div class="section-tab entry-section">Staff Details</div>
+    <div class="data-rows entry-section">
+      <div class="r-label">Driver / Staff ID</div>
+      <div class="r-cell">
+        <input type="text" id="su_driverId" style="flex:1;">
+        <button type="button" class="fetch-btn no-print" id="su_lookupDriverBtn">Fetch</button>
+      </div>
+
+      <div class="r-label"></div>
+      <div class="r-cell"><span class="lookup-status" id="su_driverLookupStatus"></span></div>
+
+      <div class="r-label">Name</div>
+      <div class="r-cell"><input type="text" id="su_driverName"></div>
+
+      <div class="r-label">Mobile No.</div>
+      <div class="r-cell"><input type="tel" id="su_mobile"></div>
+
+      <div class="r-label">Designation</div>
+      <div class="r-cell">
+        <select id="su_designation" class="radio-select">
+          <option value="">-- Select --</option>
+          <option value="Driver">Driver</option>
+          <option value="Conductor">Conductor</option>
+          <option value="Mechanic">Mechanic</option>
+          <option value="Other Staff">Other Staff</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="section-tab entry-section">Test Details</div>
+    <div class="data-rows entry-section">
+      <div class="r-label">Test Type</div>
+      <div class="r-cell">
+        <select id="su_testType" class="radio-select">
+          <option value="">-- Select --</option>
+          <option value="Alcohol / Breathalyzer Test">Alcohol / Breathalyzer Test</option>
+          <option value="Medical Fitness Test">Medical Fitness Test</option>
+          <option value="Random Check">Random Check</option>
+          <option value="Post-Incident Test">Post-Incident Test</option>
+        </select>
+      </div>
+
+      <div class="r-label">Test Result</div>
+      <div class="r-cell">
+        <select id="su_testResult" class="severity-select">
+          <option value="">-- Select --</option>
+          <option value="Pass">Pass</option>
+          <option value="Fail">Fail</option>
+        </select>
+      </div>
+
+      <div class="r-label">Reading (e.g. BAC mg/100ml)</div>
+      <div class="r-cell"><input type="text" id="su_reading" placeholder="e.g. 0.35 mg/100ml"></div>
+
+      <div class="r-label">Tested By (Name &amp; Designation)</div>
+      <div class="r-cell"><input type="text" id="su_testedBy"></div>
+    </div>
+
+    <div class="section-tab entry-section">Circumstances &amp; Action</div>
+    <div class="data-rows entry-section">
+      <div class="r-label">Reason / Circumstances</div>
+      <div class="r-cell"><textarea id="su_circumstances" rows="3" placeholder="Describe the circumstances leading to the test..."></textarea></div>
+
+      <div class="r-label">Action Taken</div>
+      <div class="r-cell">
+        <select id="su_actionTaken" class="radio-select">
+          <option value="">-- Select --</option>
+          <option value="Verbal Warning">Verbal Warning</option>
+          <option value="Written Warning">Written Warning</option>
+          <option value="Suspended">Suspended</option>
+          <option value="Terminated">Terminated</option>
+          <option value="Counselling">Counselling</option>
+          <option value="No Action">No Action</option>
+        </select>
+      </div>
+
+      <div class="r-label">Suspension Start Date</div>
+      <div class="r-cell"><input type="date" id="su_suspStartDate"></div>
+
+      <div class="r-label">Suspension End Date</div>
+      <div class="r-cell"><input type="date" id="su_suspEndDate"></div>
+
+      <div class="r-label">Current Status</div>
+      <div class="r-cell">
+        <select id="su_status" class="status-select">
+          <option value="">-- Select --</option>
+          <option value="Under Suspension">Under Suspension</option>
+          <option value="Reinstated">Reinstated</option>
+          <option value="Terminated">Terminated</option>
+          <option value="Case Pending">Case Pending</option>
+          <option value="Closed">Closed</option>
+        </select>
+      </div>
+
+      <div class="r-label">Remarks</div>
+      <div class="r-cell"><textarea id="su_remarks" rows="2"></textarea></div>
+    </div>
+
+    <div class="section-tab no-print">Photo Evidence — Test Reading / Incident</div>
+    <div class="photo-block no-print">
+      <label class="drop-zone" for="su_photoInput">📷 Tap to upload photos of the test reading / incident</label>
+      <input type="file" id="su_photoInput" accept="image/*" multiple>
+      <div class="thumb-row" id="su_thumbRow"></div>
+      <span class="photo-count" id="su_photoCount">No photos attached yet.</span>
+    </div>
+
+    <div class="section-tab entry-section">Reported By</div>
+    <div class="data-rows entry-section">
+      <div class="r-label">Name &amp; Designation</div>
+      <div class="r-cell"><input type="text" id="su_reportedBy"></div>
+    </div>
+
+    <div class="section-tab">Report Preview</div>
+    <div class="preview-block" id="suspension_previewBlock">
+      <div class="preview-empty" id="suspension_previewEmpty">Start filling in the details above — the full report will build here automatically.</div>
+      <div class="preview-content" id="suspension_previewContent" style="display:none;">
+        <div class="preview-header">
+          <span>Suspension / Alcohol Test Report</span>
+          <span class="severity-badge" id="suspension_previewSeverityBadge" style="display:none;"></span>
+        </div>
+        <div class="preview-grid" id="suspension_previewGrid"></div>
+        <div class="preview-photos" id="suspension_previewPhotos" style="display:none;">
+          <div class="preview-photos-label">Photo Evidence</div>
+          <div class="preview-photos-grid" id="suspension_previewPhotosGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sig-grid two-col">
+      <div>Depot Manager Signature<input type="text" id="su_managerName" placeholder="Name"></div>
+      <div>Staff Acknowledgement Signature<input type="text" id="su_driverSigName" placeholder="Name"></div>
+    </div>
+
+    <div class="submit-bar no-print">
+      <span class="status-msg" id="suspension_statusMsg">Fill in the details above, then save.</span>
+      <button type="submit" class="save-btn" id="suspension_saveBtn">Save to Google Sheet</button>
+    </div>
+  </form>
+
+  <!-- ===================== LEAVE REPORT ===================== -->
+  <form class="sheet" id="leaveForm" data-type="leave">
+    <div class="title-row">
+      LEAVE REPORT
+      <span class="severity-badge" id="leave_severityBadge" style="display:none;"></span>
+    </div>
+    <div class="editing-banner no-print" id="leave_editingBanner">
+      <span>✏️ Editing an existing report — Save will update it instead of creating a new one.</span>
+      <button type="button" id="leave_cancelEditBtn">Cancel Edit</button>
+    </div>
+
+    <div class="section-tab no-print">Search Existing Reports</div>
+    <div class="search-block no-print">
+      <div class="search-row">
+        <input type="text" id="leave_searchQuery" placeholder="Search by driver name, staff ID...">
+        <button type="button" class="search-btn" id="leave_searchBtn">Search</button>
+        <button type="button" class="clear-search-btn" id="leave_clearSearchBtn">Clear</button>
+      </div>
+      <span class="search-status" id="leave_searchStatus"></span>
+      <div id="leave_searchResults"></div>
+    </div>
+
+    <div class="section-tab entry-section">Staff Details</div>
+    <div class="data-rows entry-section">
+      <div class="r-label">Depot</div>
+      <div class="r-cell"><input type="text" id="lv_depot"></div>
+
+      <div class="r-label">Driver / Staff ID</div>
+      <div class="r-cell">
+        <input type="text" id="lv_driverId" style="flex:1;">
+        <button type="button" class="fetch-btn no-print" id="lv_lookupDriverBtn">Fetch</button>
+      </div>
+
+      <div class="r-label"></div>
+      <div class="r-cell"><span class="lookup-status" id="lv_driverLookupStatus"></span></div>
+
+      <div class="r-label">Name</div>
+      <div class="r-cell"><input type="text" id="lv_driverName"></div>
+
+      <div class="r-label">Mobile No.</div>
+      <div class="r-cell"><input type="tel" id="lv_mobile"></div>
+
+      <div class="r-label">Designation</div>
+      <div class="r-cell">
+        <select id="lv_designation" class="radio-select">
+          <option value="">-- Select --</option>
+          <option value="Driver">Driver</option>
+          <option value="Conductor">Conductor</option>
+          <option value="Mechanic">Mechanic</option>
+          <option value="Other Staff">Other Staff</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="section-tab entry-section">Leave Details</div>
+    <div class="data-rows entry-section">
+      <div class="r-label">Leave Type</div>
+      <div class="r-cell">
+        <select id="lv_leaveType" class="radio-select">
+          <option value="">-- Select --</option>
+          <option value="Casual Leave">Casual Leave</option>
+          <option value="Sick Leave">Sick Leave</option>
+          <option value="Earned Leave">Earned Leave</option>
+          <option value="Emergency Leave">Emergency Leave</option>
+          <option value="Leave Without Pay">Leave Without Pay</option>
+        </select>
+      </div>
+
+      <div class="r-label">Leave From Date</div>
+      <div class="r-cell"><input type="date" id="lv_fromDate" required></div>
+
+      <div class="r-label">Leave To Date</div>
+      <div class="r-cell"><input type="date" id="lv_toDate"></div>
+
+      <div class="r-label">No. of Days</div>
+      <div class="r-cell"><input type="number" id="lv_days" min="0" step="0.5"></div>
+
+      <div class="r-label">Date Applied</div>
+      <div class="r-cell"><input type="date" id="lv_appliedDate"></div>
+
+      <div class="r-label">Reason for Leave</div>
+      <div class="r-cell"><textarea id="lv_reason" rows="3" placeholder="Describe the reason for leave..."></textarea></div>
+    </div>
+
+    <div class="section-tab entry-section">Substitute &amp; Approval</div>
+    <div class="data-rows entry-section">
+      <div class="r-label">Substitute Arranged</div>
+      <div class="r-cell">
+        <select id="lv_substituteArranged" class="radio-select">
+          <option value="">-- Select --</option>
+          <option value="Yes">Yes</option>
+          <option value="No">No</option>
+        </select>
+      </div>
+
+      <div class="r-label">Substitute Staff Name</div>
+      <div class="r-cell"><input type="text" id="lv_substituteName"></div>
+
+      <div class="r-label">Status</div>
+      <div class="r-cell">
+        <select id="lv_status" class="status-select">
+          <option value="">-- Select --</option>
+          <option value="Pending">Pending</option>
+          <option value="Approved">Approved</option>
+          <option value="Rejected">Rejected</option>
+        </select>
+      </div>
+
+      <div class="r-label">Approved By (Name &amp; Designation)</div>
+      <div class="r-cell"><input type="text" id="lv_approvedBy"></div>
+
+      <div class="r-label">Remarks</div>
+      <div class="r-cell"><textarea id="lv_remarks" rows="2"></textarea></div>
+    </div>
+
+    <div class="section-tab no-print">Supporting Documents (Medical Certificate, etc.)</div>
+    <div class="photo-block no-print">
+      <label class="drop-zone" for="lv_photoInput">📷 Tap to upload supporting documents / photos</label>
+      <input type="file" id="lv_photoInput" accept="image/*" multiple>
+      <div class="thumb-row" id="lv_thumbRow"></div>
+      <span class="photo-count" id="lv_photoCount">No photos attached yet.</span>
+    </div>
+
+    <div class="section-tab">Report Preview</div>
+    <div class="preview-block" id="leave_previewBlock">
+      <div class="preview-empty" id="leave_previewEmpty">Start filling in the details above — the full report will build here automatically.</div>
+      <div class="preview-content" id="leave_previewContent" style="display:none;">
+        <div class="preview-header">
+          <span>Leave Report</span>
+          <span class="severity-badge" id="leave_previewSeverityBadge" style="display:none;"></span>
+        </div>
+        <div class="preview-grid" id="leave_previewGrid"></div>
+        <div class="preview-photos" id="leave_previewPhotos" style="display:none;">
+          <div class="preview-photos-label">Supporting Documents</div>
+          <div class="preview-photos-grid" id="leave_previewPhotosGrid"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sig-grid two-col">
+      <div>Applicant Signature<input type="text" id="lv_applicantSigName" placeholder="Name"></div>
+      <div>Depot Manager Signature<input type="text" id="lv_managerName" placeholder="Name"></div>
+    </div>
+
+    <div class="submit-bar no-print">
+      <span class="status-msg" id="leave_statusMsg">Fill in the details above, then save.</span>
+      <button type="submit" class="save-btn" id="leave_saveBtn">Save to Google Sheet</button>
+    </div>
+  </form>
+
+  <!-- ===================== VIEW REPORTS ===================== -->
+  <div class="sheet" id="viewForm" data-type="view">
+    <div class="title-row">VIEW REPORTS</div>
+
+    <div class="view-controls no-print">
+      <div class="view-field">
+        Report Type
+        <select id="view_type">
+          <option value="breakdown">Breakdown</option>
+          <option value="accident">Accident</option>
+          <option value="heldup">Held Up Vehicle</option>
+          <option value="suspension">Suspension / Alcohol Test</option>
+          <option value="leave">Leave</option>
+        </select>
+      </div>
+      <div class="view-field">
+        Search (name / ID / bus no.)
+        <input type="text" id="view_query" placeholder="e.g. driver name, ID, bus no...">
+      </div>
+      <div class="view-field">
+        Date From
+        <input type="date" id="view_dateFrom">
+      </div>
+      <div class="view-field">
+        Date To
+        <input type="date" id="view_dateTo">
+      </div>
+      <button type="button" class="search-btn" id="view_loadBtn">Load Reports</button>
+      <button type="button" class="clear-search-btn" id="view_clearBtn">Clear</button>
+    </div>
+    <span class="search-status no-print" id="view_status" style="margin:0 16px;display:block;"></span>
+
+    <div class="view-table-wrap" id="view_tableWrap"></div>
+
+    <!-- Export / print-selection toolbar -->
+    <div class="view-export-bar no-print" id="view_exportBar" style="display:none;">
+      <span class="sel-count" id="view_selCount">0 selected</span>
+      <button type="button" id="view_printSelectedBtn" disabled>Save Selected as PDF</button>
+      <button type="button" class="export-current" id="view_printCurrentBtn" disabled>Save Viewed Report as PDF</button>
+      <button type="button" class="export-all" id="view_printAllBtn">Save All Loaded as PDF</button>
+    </div>
+
+    <div class="view-detail-wrap" id="view_detail"></div>
+
+    <!-- Hidden container populated with the report(s) actually sent to print/PDF -->
+    <div class="print-report-area" id="view_printArea"></div>
+  </div>
+
+</div>
+
+<script>
+/* ================================================================
+   Same Google Apps Script Web App URL used by the driver duty chart
+   system — the Drivers sheet already used there powers the
+   "Fetch" driver lookup below, and the "View Reports" tab pulls
+   saved reports from the Breakdown / Accident / Held Up sheets it
+   manages.
+   ================================================================ */
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwf2B2SkkY96_6opqeBmfK3JDOl71WiMklv-Z5j8rWy38e6IjwZXO6onL5xXT1zve6lNA/exec";
+
+const configNote = document.getElementById('configNote');
+if (SCRIPT_URL.indexOf('PASTE_YOUR') !== -1) configNote.style.display = 'block';
+
+function val(id){ const el = document.getElementById(id); return el ? (el.value || "") : ""; }
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+}
+
+/* ---------------- Tab switching ---------------- */
+function showTab(id){
+  document.querySelectorAll('.sheet').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById(id + 'Form').classList.add('active');
+  document.querySelector('.tab-btn[data-tab="'+id+'"]').classList.add('active');
+}
+
+/* ---------------- Field configs per report type ---------------- */
+const REPORT_CONFIG = {
+  breakdown: {
+    reportType: 'Breakdown Report',
+    fields: [
+      {id:'bd_driverId', label:'Driver ID', highlight:true},
+      {id:'bd_driverName', label:'Driver Name', highlight:true},
+      {id:'bd_depot', label:'Depot'},
+      {id:'bd_date', label:'Date of Breakdown'},
+      {id:'bd_breakdownTime', label:'Breakdown Time'},
+      {id:'bd_reachedTime', label:'Reached Time'},
+      {id:'bd_location', label:'Breakdown Location'},
+      {id:'bd_busNo', label:'Bus No.'},
+      {id:'bd_busType', label:'Bus Type / Model'},
+      {id:'bd_serviceNo', label:'Service No.'},
+      {id:'bd_route', label:'Route'},
+      {id:'bd_mobile', label:'Mobile No. (Driver)'},
+      {id:'bd_mechInformed', label:'Mechanic Informed'},
+      {id:'bd_mechanicName', label:'Mechanic Name'},
+      {id:'bd_staffId', label:'Staff ID'},
+      {id:'bd_staffMobile', label:'Mobile No. (Staff)'},
+      {id:'bd_details', label:'Details of Breakdown', wide:true},
+      {id:'bd_cause', label:'Cause of Breakdown', wide:true},
+      {id:'bd_action', label:'Action Taken / Repairs Done', wide:true},
+      {id:'bd_relDate', label:'Bus Released - Date'},
+      {id:'bd_relTime', label:'Bus Released - Time'},
+      {id:'bd_relLocation', label:'Bus Released - Location'},
+      {id:'bd_reportedByName', label:'Reported By (Driver)'},
+      {id:'bd_verifiedByName', label:'Verified By (Supervisor)'},
+      {id:'bd_managerName', label:'Depot Manager'}
+    ],
+    driverIdField:'bd_driverId', driverNameField:'bd_driverName', driverMobileField:'bd_mobile'
+  },
+  accident: {
+    reportType: 'Accident Report',
+    fields: [
+      {id:'ac_driverId', label:'Driver ID No', highlight:true},
+      {id:'ac_driverName', label:'Driver Name', highlight:true},
+      {id:'ac_reportDate', label:'Report Date'},
+      {id:'ac_accidentTime', label:'Time of Accident'},
+      {id:'ac_depot', label:'Depot'},
+      {id:'ac_accidentSpot', label:'Spot / Location'},
+      {id:'ac_busNo', label:'Bus No'},
+      {id:'ac_busType', label:'Bus Type'},
+      {id:'ac_busModel', label:'Bus Model'},
+      {id:'ac_serviceNo', label:'Service No'},
+      {id:'ac_route', label:'Route'},
+      {id:'ac_driverCell', label:'Driver Cell'},
+      {id:'ac_conductorName', label:'Conductor Name'},
+      {id:'ac_conductorStaffNo', label:'Conductor Staff No'},
+      {id:'ac_conductorCell', label:'Conductor Cell'},
+      {id:'ac_cause', label:'Cause of Accident', wide:true},
+      {id:'ac_accidentRoute', label:'Route of Accident'},
+      {id:'ac_accidentService', label:'Which Service'},
+      {id:'ac_accidentBus', label:'Which Bus'},
+      {id:'ac_accidentDriver', label:'Driver Name & ID'},
+      {id:'ac_status', label:'Status'},
+      {id:'ac_actionTaken', label:'Action Taken on Driver', wide:true},
+      {id:'ac_reportedBy', label:'Reported By'},
+      {id:'ac_managerName', label:'Depot Manager'},
+      {id:'ac_driverSigName', label:'Driver Signature Name'}
+    ],
+    driverIdField:'ac_driverId', driverNameField:'ac_driverName', driverMobileField:'ac_driverCell'
+  },
+  heldup: {
+    reportType: 'Held Up Vehicle Report',
+    fields: [
+      {id:'hu_depot', label:'Depot'},
+      {id:'hu_date', label:'Date Held Up'},
+      {id:'hu_heldTime', label:'Time Held Up'},
+      {id:'hu_releasedTime', label:'Time Released'},
+      {id:'hu_location', label:'Location Held Up'},
+      {id:'hu_busNo', label:'Bus No.'},
+      {id:'hu_busType', label:'Bus Type / Model'},
+      {id:'hu_reason', label:'Reason for Hold Up', wide:true},
+      {id:'hu_relDate', label:'Vehicle Released - Date'},
+      {id:'hu_relTime', label:'Vehicle Released - Time'},
+      {id:'hu_relLocation', label:'Vehicle Released - Location'},
+      {id:'hu_verifiedByName', label:'Verified By (Supervisor)'},
+      {id:'hu_managerName', label:'Depot Manager'}
+    ]
+  },
+  suspension: {
+    reportType: 'Suspension / Alcohol Test Report',
+    fields: [
+      {id:'su_driverId', label:'Driver / Staff ID', highlight:true},
+      {id:'su_driverName', label:'Name', highlight:true},
+      {id:'su_depot', label:'Depot'},
+      {id:'su_date', label:'Date of Incident'},
+      {id:'su_time', label:'Time of Incident'},
+      {id:'su_location', label:'Location'},
+      {id:'su_serviceNo', label:'Duty / Service No.'},
+      {id:'su_busNo', label:'Bus No.'},
+      {id:'su_mobile', label:'Mobile No.'},
+      {id:'su_designation', label:'Designation'},
+      {id:'su_testType', label:'Test Type'},
+      {id:'su_testResult', label:'Test Result'},
+      {id:'su_reading', label:'Reading (BAC / mg per 100ml)'},
+      {id:'su_testedBy', label:'Tested By'},
+      {id:'su_circumstances', label:'Reason / Circumstances', wide:true},
+      {id:'su_actionTaken', label:'Action Taken'},
+      {id:'su_suspStartDate', label:'Suspension Start Date'},
+      {id:'su_suspEndDate', label:'Suspension End Date'},
+      {id:'su_status', label:'Current Status'},
+      {id:'su_remarks', label:'Remarks', wide:true},
+      {id:'su_reportedBy', label:'Reported By'},
+      {id:'su_managerName', label:'Depot Manager'},
+      {id:'su_driverSigName', label:'Staff Acknowledgement'}
+    ],
+    driverIdField:'su_driverId', driverNameField:'su_driverName', driverMobileField:'su_mobile'
+  },
+  leave: {
+    reportType: 'Leave Report',
+    fields: [
+      {id:'lv_driverId', label:'Driver / Staff ID', highlight:true},
+      {id:'lv_driverName', label:'Name', highlight:true},
+      {id:'lv_depot', label:'Depot'},
+      {id:'lv_mobile', label:'Mobile No.'},
+      {id:'lv_designation', label:'Designation'},
+      {id:'lv_leaveType', label:'Leave Type'},
+      {id:'lv_fromDate', label:'Leave From Date'},
+      {id:'lv_toDate', label:'Leave To Date'},
+      {id:'lv_days', label:'No. of Days'},
+      {id:'lv_appliedDate', label:'Date Applied'},
+      {id:'lv_reason', label:'Reason for Leave', wide:true},
+      {id:'lv_substituteArranged', label:'Substitute Arranged'},
+      {id:'lv_substituteName', label:'Substitute Staff Name'},
+      {id:'lv_status', label:'Status'},
+      {id:'lv_approvedBy', label:'Approved By'},
+      {id:'lv_remarks', label:'Remarks', wide:true},
+      {id:'lv_applicantSigName', label:'Applicant Signature'},
+      {id:'lv_managerName', label:'Depot Manager'}
+    ],
+    driverIdField:'lv_driverId', driverNameField:'lv_driverName', driverMobileField:'lv_mobile'
+  }
+};
+
+const photos = { breakdown: [], accident: [], heldup: [], suspension: [], leave: [] };
+
+/* ---------------- Chip groups (Bus Type) ---------------- */
+function initChips(containerId, hiddenId, onChange){
+  const container = document.getElementById(containerId);
+  const hidden = document.getElementById(hiddenId);
+  container.addEventListener('click', function(e){
+    const chip = e.target.closest('.chip');
+    if (!chip) return;
+    [...container.children].forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+    hidden.value = chip.dataset.value;
+    if (onChange) onChange();
+  });
+}
+initChips('bd_busTypeOptions', 'bd_busType', () => updatePreview('breakdown'));
+initChips('ac_busTypeOptions', 'ac_busType', () => updatePreview('accident'));
+initChips('hu_busTypeOptions', 'hu_busType', () => updatePreview('heldup'));
+
+/* ---------------- Severity badge (accident) ---------------- */
+const severitySelect = document.getElementById('ac_severity');
+const severityBadge = document.getElementById('accident_severityBadge');
+severitySelect.addEventListener('change', function(){
+  if (this.value){
+    severityBadge.textContent = this.value;
+    severityBadge.className = 'severity-badge' + (this.value === 'Fatal' ? ' fatal' : ' nonfatal');
+    severityBadge.style.display = 'inline-block';
+  } else {
+    severityBadge.style.display = 'none';
+  }
+});
+
+/* ---------------- Test Result badge (suspension) ---------------- */
+const su_testResultSelect = document.getElementById('su_testResult');
+const suspensionBadge = document.getElementById('suspension_severityBadge');
+su_testResultSelect.addEventListener('change', function(){
+  if (this.value){
+    suspensionBadge.textContent = this.value;
+    suspensionBadge.className = 'severity-badge' + (this.value === 'Fail' ? ' fail' : ' pass');
+    suspensionBadge.style.display = 'inline-block';
+  } else {
+    suspensionBadge.style.display = 'none';
+  }
+});
+
+/* ---------------- Status badge (leave) ---------------- */
+const lv_statusSelect = document.getElementById('lv_status');
+const leaveBadge = document.getElementById('leave_severityBadge');
+lv_statusSelect.addEventListener('change', function(){
+  if (this.value){
+    leaveBadge.textContent = this.value;
+    leaveBadge.className = 'severity-badge' + (this.value === 'Approved' ? ' approved' : (this.value === 'Rejected' ? ' rejected' : ' pending'));
+    leaveBadge.style.display = 'inline-block';
+  } else {
+    leaveBadge.style.display = 'none';
+  }
+});
+
+/* ---------------- Driver ID lookup ---------------- */
+const LOOKUP_BTN_IDS = { breakdown:'bd_lookupDriverBtn', accident:'ac_lookupDriverBtn', suspension:'su_lookupDriverBtn', leave:'lv_lookupDriverBtn' };
+const LOOKUP_STATUS_IDS = { breakdown:'bd_driverLookupStatus', accident:'ac_driverLookupStatus', suspension:'su_driverLookupStatus', leave:'lv_driverLookupStatus' };
+
+function initDriverLookup(type){
+  const cfg = REPORT_CONFIG[type];
+  if (!cfg.driverIdField) return;
+  const btn = document.getElementById(LOOKUP_BTN_IDS[type]);
+  const statusEl = document.getElementById(LOOKUP_STATUS_IDS[type]);
+  const idInput = document.getElementById(cfg.driverIdField);
+
+  async function lookup(){
+    const id = val(cfg.driverIdField).trim();
+    if (!id){ statusEl.textContent = 'Enter a Driver ID first.'; statusEl.className = 'lookup-status err'; return; }
+    if (SCRIPT_URL.indexOf('PASTE_YOUR') !== -1){ statusEl.textContent = 'Connect the Google Sheet first.'; statusEl.className = 'lookup-status err'; return; }
+    btn.disabled = true;
+    statusEl.textContent = 'Looking up...';
+    statusEl.className = 'lookup-status';
+    try{
+      const res = await fetch(SCRIPT_URL + '?id=' + encodeURIComponent(id));
+      const data = await res.json();
+      if (data && data.found){
+        document.getElementById(cfg.driverNameField).value = data.name || '';
+        document.getElementById(cfg.driverMobileField).value = data.mobile || '';
+        statusEl.textContent = 'Details loaded ✓';
+        statusEl.className = 'lookup-status ok';
+        updatePreview(type);
+      } else {
+        statusEl.textContent = 'No record found — enter manually.';
+        statusEl.className = 'lookup-status err';
+      }
+    }catch(err){
+      statusEl.textContent = 'Lookup failed — check connection or Script URL.';
+      statusEl.className = 'lookup-status err';
+    }finally{
+      btn.disabled = false;
+    }
+  }
+  btn.addEventListener('click', lookup);
+  idInput.addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); lookup(); } });
+}
+initDriverLookup('breakdown');
+initDriverLookup('accident');
+initDriverLookup('suspension');
+initDriverLookup('leave');
+
+/* ---------------- Photo upload ---------------- */
+const PHOTO_INPUT_IDS = { breakdown:'bd_photoInput', accident:'ac_photoInput', heldup:'hu_photoInput', suspension:'su_photoInput', leave:'lv_photoInput' };
+const PHOTO_THUMB_IDS = { breakdown:'bd_thumbRow', accident:'ac_thumbRow', heldup:'hu_thumbRow', suspension:'su_thumbRow', leave:'lv_thumbRow' };
+const PHOTO_COUNT_IDS = { breakdown:'bd_photoCount', accident:'ac_photoCount', heldup:'hu_photoCount', suspension:'su_photoCount', leave:'lv_photoCount' };
+
+function initPhotoUpload(type){
+  const input = document.getElementById(PHOTO_INPUT_IDS[type]);
+  const thumbRow = document.getElementById(PHOTO_THUMB_IDS[type]);
+  const countEl = document.getElementById(PHOTO_COUNT_IDS[type]);
+
+  function renderThumbs(){
+    thumbRow.innerHTML = '';
+    photos[type].forEach((p, i) => {
+      const div = document.createElement('div');
+      div.className = 'thumb';
+      div.innerHTML = `<img src="${p.dataUrl}" alt="${escapeHtml(p.name)}"><button type="button" class="remove-thumb" data-i="${i}">×</button>`;
+      thumbRow.appendChild(div);
+    });
+    countEl.textContent = photos[type].length ? `${photos[type].length} photo(s) attached.` : 'No photos attached yet.';
+    updatePreview(type);
+  }
+
+  input.addEventListener('change', function(){
+    const files = [...this.files];
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onload = function(e){
+        photos[type].push({ name: file.name, dataUrl: e.target.result });
+        renderThumbs();
+      };
+      reader.readAsDataURL(file);
+    });
+    input.value = '';
+  });
+
+  thumbRow.addEventListener('click', function(e){
+    const btn = e.target.closest('.remove-thumb');
+    if (!btn) return;
+    photos[type].splice(Number(btn.dataset.i), 1);
+    renderThumbs();
+  });
+
+  return renderThumbs;
+}
+const renderBreakdownThumbs = initPhotoUpload('breakdown');
+const renderAccidentThumbs = initPhotoUpload('accident');
+const renderHeldupThumbs = initPhotoUpload('heldup');
+const renderSuspensionThumbs = initPhotoUpload('suspension');
+const renderLeaveThumbs = initPhotoUpload('leave');
+const THUMB_RENDERERS = { breakdown: renderBreakdownThumbs, accident: renderAccidentThumbs, heldup: renderHeldupThumbs, suspension: renderSuspensionThumbs, leave: renderLeaveThumbs };
+
+/* ---------------- Live preview ---------------- */
+const BADGE_SOURCE_FIELD = { accident:'ac_severity', suspension:'su_testResult', leave:'lv_status' };
+
+function updatePreview(type){
+  const cfg = REPORT_CONFIG[type];
+  const filled = cfg.fields.filter(f => val(f.id).trim() !== '');
+  const badgeField = BADGE_SOURCE_FIELD[type];
+  const hasSeverity = !!badgeField && val(badgeField).trim() !== '';
+  const hasAnyData = filled.length > 0 || hasSeverity || photos[type].length > 0;
+
+  const emptyEl = document.getElementById(type + '_previewEmpty');
+  const contentEl = document.getElementById(type + '_previewContent');
+  const gridEl = document.getElementById(type + '_previewGrid');
+
+  if (!hasAnyData){ emptyEl.style.display = 'block'; contentEl.style.display = 'none'; return; }
+  emptyEl.style.display = 'none';
+  contentEl.style.display = 'block';
+
+  gridEl.innerHTML = filled.map(f => `
+    <div class="preview-item${f.wide ? ' wide' : ''}${f.highlight ? ' highlight' : ''}">
+      <span class="pi-label">${escapeHtml(f.label)}</span>
+      <span class="pi-value">${escapeHtml(val(f.id))}</span>
+    </div>`).join('');
+
+  if (badgeField){
+    const badge = document.getElementById(type + '_previewSeverityBadge');
+    if (badge){
+      if (hasSeverity){
+        const v = val(badgeField);
+        badge.textContent = v;
+        let cls = '';
+        if (type === 'accident') cls = v === 'Fatal' ? ' fatal' : ' nonfatal';
+        else if (type === 'suspension') cls = v === 'Fail' ? ' fail' : ' pass';
+        else if (type === 'leave') cls = v === 'Approved' ? ' approved' : (v === 'Rejected' ? ' rejected' : ' pending');
+        badge.className = 'severity-badge' + cls;
+        badge.style.display = 'inline-block';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+  }
+
+  const photosWrap = document.getElementById(type + '_previewPhotos');
+  const photosGrid = document.getElementById(type + '_previewPhotosGrid');
+  if (photos[type].length){
+    photosWrap.style.display = 'block';
+    photosGrid.innerHTML = photos[type].map(p => `<img src="${p.dataUrl}" alt="${escapeHtml(p.name)}">`).join('');
+  } else {
+    photosWrap.style.display = 'none';
+    photosGrid.innerHTML = '';
+  }
+}
+document.getElementById('breakdownForm').addEventListener('input', () => updatePreview('breakdown'));
+document.getElementById('breakdownForm').addEventListener('change', () => updatePreview('breakdown'));
+document.getElementById('accidentForm').addEventListener('input', () => updatePreview('accident'));
+document.getElementById('accidentForm').addEventListener('change', () => updatePreview('accident'));
+document.getElementById('heldupForm').addEventListener('input', () => updatePreview('heldup'));
+document.getElementById('heldupForm').addEventListener('change', () => updatePreview('heldup'));
+document.getElementById('suspensionForm').addEventListener('input', () => updatePreview('suspension'));
+document.getElementById('suspensionForm').addEventListener('change', () => updatePreview('suspension'));
+document.getElementById('leaveForm').addEventListener('input', () => updatePreview('leave'));
+document.getElementById('leaveForm').addEventListener('change', () => updatePreview('leave'));
+
+/* ---------------- Search existing reports ---------------- */
+function buildFieldGridHtml(type, record){
+  return REPORT_CONFIG[type].fields
+    .filter(f => (record[f.id.replace(/^(bd_|ac_|hu_|su_|lv_)/,'')] || record[f.id] || '').toString().trim() !== '')
+    .map(f => {
+      const key = f.id.replace(/^(bd_|ac_|hu_|su_|lv_)/,'');
+      const value = record[key] !== undefined ? record[key] : record[f.id];
+      return `<div class="preview-item${f.wide ? ' wide' : ''}${f.highlight ? ' highlight' : ''}">
+        <span class="pi-label">${escapeHtml(f.label)}</span>
+        <span class="pi-value">${escapeHtml(String(value))}</span>
+      </div>`;
+    }).join('');
+}
+
+function getPhotoUrls(record){
+  if (Array.isArray(record.photoLinks)) return record.photoLinks;
+  if (typeof record.photoLinks === 'string' && record.photoLinks.trim()) return record.photoLinks.split(',').map(s => s.trim()).filter(Boolean);
+  return [];
+}
+
+function getRecordBadgeHtml(type, record){
+  let text = '', cls = '';
+  if (type === 'accident'){ text = record.severity || ''; cls = text === 'Fatal' ? 'fatal' : 'nonfatal'; }
+  else if (type === 'suspension'){ text = record.testResult || ''; cls = text === 'Fail' ? 'fail' : 'pass'; }
+  else if (type === 'leave'){ text = record.status || ''; cls = text === 'Approved' ? 'approved' : (text === 'Rejected' ? 'rejected' : 'pending'); }
+  return text ? `<span class="severity-badge ${cls}">${escapeHtml(text)}</span>` : '';
+}
+
+function renderResultCard(type, record){
+  const badgeHtml = getRecordBadgeHtml(type, record);
+  const photoUrls = getPhotoUrls(record);
+  const photosHtml = photoUrls.length ? `
+    <div class="preview-photos-label" style="margin-top:10px;">Photo Evidence</div>
+    <div class="preview-photos-grid">${photoUrls.map(u => `<a href="${u}" target="_blank" rel="noopener"><img src="${u}" alt="photo"></a>`).join('')}</div>` : '';
+  const headerLabel = record.driverName || record.busNo || record.reportDate || record.date || 'Report';
+  const dateVal = record.reportDate || record.date || record.fromDate || '';
+  return `<div class="result-card">
+    <div class="result-card-header">
+      <span>${escapeHtml(String(headerLabel))}${dateVal ? ' — ' + escapeHtml(String(dateVal)) : ''}</span>
+      ${badgeHtml}
+    </div>
+    <div class="preview-grid">${buildFieldGridHtml(type, record)}</div>
+    ${photosHtml}
+  </div>`;
+}
+
+/* Full-page version used only for print/PDF export (one per selected report) */
+function buildPrintReportPage(type, record){
+  const cfg = VIEW_CONFIG[type];
+  const badgeHtml = getRecordBadgeHtml(type, record);
+  const photoUrls = getPhotoUrls(record);
+  const photosHtml = photoUrls.length ? `
+    <div class="preview-photos" style="padding:0 16px 16px;">
+      <div class="preview-photos-label">Photo Evidence</div>
+      <div class="preview-photos-grid">${photoUrls.map(u => `<img src="${u}" alt="photo">`).join('')}</div>
+    </div>` : '';
+  return `<div class="print-report-page">
+    <div class="title-row">${escapeHtml(cfg.reportType.toUpperCase())}${badgeHtml}</div>
+    <div class="preview-grid print-page-grid">${buildFieldGridHtml(type, record)}</div>
+    ${photosHtml}
+  </div>`;
+}
+
+/* ---------------- Edit an existing saved report ---------------- */
+function setEditingState(type, record){
+  const form = document.getElementById(type + 'Form');
+  form.dataset.editingTimestamp = record.timestamp || '';
+  document.getElementById(type + '_editingBanner').classList.add('active');
+  const statusMsg = document.getElementById(type + '_statusMsg');
+  statusMsg.textContent = 'Editing existing report — click "Update in Google Sheet" to save your changes.';
+  statusMsg.className = 'status-msg';
+  const saveBtn = document.getElementById(type + '_saveBtn');
+  saveBtn.textContent = 'Update in Google Sheet';
+}
+
+function clearEditingState(type){
+  const form = document.getElementById(type + 'Form');
+  delete form.dataset.editingTimestamp;
+  document.getElementById(type + '_editingBanner').classList.remove('active');
+  document.getElementById(type + '_saveBtn').textContent = 'Save to Google Sheet';
+}
+
+function loadReportForEdit(type, record){
+  if (!record) return;
+  const cfg = REPORT_CONFIG[type];
+
+  // Plain fields
+  cfg.fields.forEach(f => {
+    const key = f.id.replace(/^(bd_|ac_|hu_|su_|lv_)/, '');
+    const el = document.getElementById(f.id);
+    if (!el) return;
+    const value = record[key] !== undefined ? record[key] : (record[f.id] !== undefined ? record[f.id] : '');
+    el.value = value || '';
+  });
+
+  // Bus type chips (only breakdown / accident / heldup carry a bus type)
+  const BUS_TYPE_CHIP_CONTAINER = { breakdown:'bd_busTypeOptions', accident:'ac_busTypeOptions', heldup:'hu_busTypeOptions' };
+  const BUS_TYPE_CHIP_HIDDEN = { breakdown:'bd_busType', accident:'ac_busType', heldup:'hu_busType' };
+  if (BUS_TYPE_CHIP_CONTAINER[type]){
+    const busTypeVal = record.busType || '';
+    const chipContainer = document.getElementById(BUS_TYPE_CHIP_CONTAINER[type]);
+    chipContainer.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.value === busTypeVal));
+    document.getElementById(BUS_TYPE_CHIP_HIDDEN[type]).value = busTypeVal;
+  }
+
+  // Restore the badge-driving field (accident severity / suspension test result / leave status)
+  const editBadgeField = BADGE_SOURCE_FIELD[type];
+  if (editBadgeField){
+    const badgeKey = editBadgeField.replace(/^(ac_|su_|lv_)/, '');
+    const badgeVal = record[badgeKey] || '';
+    const badgeInput = document.getElementById(editBadgeField);
+    if (badgeInput) badgeInput.value = badgeVal;
+    const topBadge = document.getElementById(type + '_severityBadge');
+    if (topBadge){
+      if (badgeVal){
+        let cls = '';
+        if (type === 'accident') cls = badgeVal === 'Fatal' ? ' fatal' : ' nonfatal';
+        else if (type === 'suspension') cls = badgeVal === 'Fail' ? ' fail' : ' pass';
+        else if (type === 'leave') cls = badgeVal === 'Approved' ? ' approved' : (badgeVal === 'Rejected' ? ' rejected' : ' pending');
+        topBadge.textContent = badgeVal;
+        topBadge.className = 'severity-badge' + cls;
+        topBadge.style.display = 'inline-block';
+      } else {
+        topBadge.style.display = 'none';
+      }
+    }
+  }
+
+  // Existing photos are stored as links (not files) — show them for reference only;
+  // they are not re-attached to the outgoing save, so mention that in the count label.
+  const photoUrls = getPhotoUrls(record);
+  photos[type] = [];
+  THUMB_RENDERERS[type]();
+  const countEl = document.getElementById(PHOTO_COUNT_IDS[type]);
+  if (photoUrls.length){
+    countEl.textContent = `${photoUrls.length} existing photo(s) on this report (view them in "View Reports"). Upload new ones only if you want to replace/add photos.`;
+  }
+
+  setEditingState(type, record);
+  updatePreview(type);
+  showTab(type);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+document.getElementById('breakdown_cancelEditBtn').addEventListener('click', () => clearEditingState('breakdown'));
+document.getElementById('accident_cancelEditBtn').addEventListener('click', () => clearEditingState('accident'));
+document.getElementById('heldup_cancelEditBtn').addEventListener('click', () => clearEditingState('heldup'));
+document.getElementById('suspension_cancelEditBtn').addEventListener('click', () => clearEditingState('suspension'));
+document.getElementById('leave_cancelEditBtn').addEventListener('click', () => clearEditingState('leave'));
+
+function initSearch(type){
+  const queryInput = document.getElementById(type + '_searchQuery');
+  const searchBtn = document.getElementById(type + '_searchBtn');
+  const clearBtn = document.getElementById(type + '_clearSearchBtn');
+  const statusEl = document.getElementById(type + '_searchStatus');
+  const resultsEl = document.getElementById(type + '_searchResults');
+
+  async function performSearch(){
+    const q = queryInput.value.trim();
+    if (!q){ statusEl.textContent = 'Enter a driver name, bus number, or other detail to search.'; statusEl.className = 'search-status err'; return; }
+    if (SCRIPT_URL.indexOf('PASTE_YOUR') !== -1){ statusEl.textContent = 'Connect the Google Sheet first.'; statusEl.className = 'search-status err'; return; }
+    searchBtn.disabled = true;
+    statusEl.textContent = 'Searching...';
+    statusEl.className = 'search-status';
+    resultsEl.innerHTML = '';
+    try{
+      const res = await fetch(SCRIPT_URL + '?search=' + encodeURIComponent(q) + '&type=' + encodeURIComponent(REPORT_CONFIG[type].reportType));
+      const data = await res.json();
+      const results = (data && data.results) || [];
+      if (results.length){
+        resultsEl.innerHTML = results.map(r => renderResultCard(type, r)).join('');
+        statusEl.textContent = `${results.length} matching report(s) found.`;
+        statusEl.className = 'search-status ok';
+      } else {
+        statusEl.textContent = 'No matching reports found.';
+        statusEl.className = 'search-status err';
+      }
+    }catch(err){
+      statusEl.textContent = 'Search failed — check connection or Script URL.';
+      statusEl.className = 'search-status err';
+    }finally{
+      searchBtn.disabled = false;
+    }
+  }
+  searchBtn.addEventListener('click', performSearch);
+  queryInput.addEventListener('keydown', function(e){ if (e.key === 'Enter'){ e.preventDefault(); performSearch(); } });
+  clearBtn.addEventListener('click', function(){ queryInput.value = ''; statusEl.textContent = ''; statusEl.className = 'search-status'; resultsEl.innerHTML = ''; });
+}
+initSearch('breakdown');
+initSearch('accident');
+initSearch('heldup');
+initSearch('suspension');
+initSearch('leave');
+
+/* ---------------- View Reports tab ---------------- */
+const VIEW_CONFIG = {
+  breakdown: {
+    reportType: 'Breakdown Report',
+    dateKey: 'date',
+    columns: [
+      {key:'date', label:'Date'},
+      {key:'driverId', label:'Driver ID'},
+      {key:'driverName', label:'Driver Name'},
+      {key:'busNo', label:'Bus No'},
+      {key:'depot', label:'Depot'},
+      {key:'location', label:'Location'}
+    ]
+  },
+  accident: {
+    reportType: 'Accident Report',
+    dateKey: 'reportDate',
+    columns: [
+      {key:'reportDate', label:'Date'},
+      {key:'driverId', label:'Driver ID'},
+      {key:'driverName', label:'Driver Name'},
+      {key:'busNo', label:'Bus No'},
+      {key:'depot', label:'Depot'},
+      {key:'severity', label:'Severity'}
+    ]
+  },
+  heldup: {
+    reportType: 'Held Up Vehicle Report',
+    dateKey: 'date',
+    columns: [
+      {key:'date', label:'Date'},
+      {key:'busNo', label:'Bus No'},
+      {key:'depot', label:'Depot'},
+      {key:'location', label:'Location'}
+    ]
+  },
+  suspension: {
+    reportType: 'Suspension / Alcohol Test Report',
+    dateKey: 'date',
+    columns: [
+      {key:'date', label:'Date'},
+      {key:'driverId', label:'Staff ID'},
+      {key:'driverName', label:'Name'},
+      {key:'testResult', label:'Test Result'},
+      {key:'status', label:'Status'},
+      {key:'depot', label:'Depot'}
+    ]
+  },
+  leave: {
+    reportType: 'Leave Report',
+    dateKey: 'fromDate',
+    columns: [
+      {key:'fromDate', label:'From'},
+      {key:'toDate', label:'To'},
+      {key:'driverId', label:'Staff ID'},
+      {key:'driverName', label:'Name'},
+      {key:'leaveType', label:'Leave Type'},
+      {key:'status', label:'Status'}
+    ]
+  }
+};
+
+let viewData = { breakdown: [], accident: [], heldup: [], suspension: [], leave: [] };
+let viewSort = { key: null, dir: 1 };
+let viewSelected = new Set();   // stable keys (record.timestamp) checked for export — NOT row indices,
+                                 // because indices shift whenever the table is re-sorted
+let viewDetailKey = null;       // stable key of the report currently open in the detail panel below the table
+
+// Every saved report carries a unique timestamp (set at save time and used elsewhere
+// for edit-matching), so it doubles as a stable row identity that survives re-sorting.
+function rowKeyOf(record, fallbackIndex){
+  return (record && record.timestamp) ? record.timestamp : ('__row' + fallbackIndex);
+}
+
+function updateExportBar(type){
+  const bar = document.getElementById('view_exportBar');
+  const rows = viewData[type] || [];
+  bar.style.display = rows.length ? 'flex' : 'none';
+  document.getElementById('view_selCount').textContent = viewSelected.size + ' selected';
+  document.getElementById('view_printSelectedBtn').disabled = viewSelected.size === 0;
+  document.getElementById('view_printCurrentBtn').disabled = viewDetailKey === null;
+  document.getElementById('view_printAllBtn').disabled = rows.length === 0;
+}
+
+function renderViewTable(type){
+  const cfg = VIEW_CONFIG[type];
+  const rows = [...viewData[type]];
+  if (viewSort.key){
+    rows.sort((a,b) => {
+      const av = (a[viewSort.key] || '').toString().toLowerCase();
+      const bv = (b[viewSort.key] || '').toString().toLowerCase();
+      if (av < bv) return -1 * viewSort.dir;
+      if (av > bv) return 1 * viewSort.dir;
+      return 0;
+    });
+  }
+  const wrap = document.getElementById('view_tableWrap');
+  if (!rows.length){
+    wrap.innerHTML = '<div class="preview-empty">No reports loaded yet. Set your filters above and click "Load Reports".</div>';
+    updateExportBar(type);
+    return;
+  }
+  const allChecked = rows.length > 0 && rows.every((r, i) => viewSelected.has(rowKeyOf(r, i)));
+  let html = '<table class="view-table"><thead><tr>';
+  html += `<th class="check-col no-sort-col"><input type="checkbox" id="view_selectAll" ${allChecked ? 'checked' : ''}></th>`;
+  cfg.columns.forEach(c => {
+    const sorted = viewSort.key === c.key;
+    html += `<th data-key="${c.key}" class="${sorted ? 'sorted' : ''}">${escapeHtml(c.label)}${sorted ? (viewSort.dir === 1 ? ' ▲' : ' ▼') : ''}</th>`;
+  });
+  html += '<th></th></tr></thead><tbody>';
+  rows.forEach((r, i) => {
+    const rk = rowKeyOf(r, i);
+    const checked = viewSelected.has(rk);
+    html += `<tr class="${checked ? 'row-selected' : ''}">`;
+    html += `<td class="check-col"><input type="checkbox" class="view-row-check" data-key="${escapeHtml(rk)}" ${checked ? 'checked' : ''}></td>`;
+    cfg.columns.forEach(c => { html += `<td>${escapeHtml(r[c.key] || '')}</td>`; });
+    html += `<td class="view-actions-col"><button type="button" class="view-detail-btn" data-key="${escapeHtml(rk)}">View</button><button type="button" class="view-edit-btn" data-key="${escapeHtml(rk)}">Edit</button></td></tr>`;
+  });
+  html += '</tbody></table>';
+  wrap.innerHTML = html;
+
+  wrap.querySelectorAll('th[data-key]').forEach(th => {
+    th.addEventListener('click', () => {
+      const key = th.dataset.key;
+      if (viewSort.key === key) viewSort.dir *= -1; else { viewSort.key = key; viewSort.dir = 1; }
+      renderViewTable(type);
+    });
+  });
+  wrap.querySelectorAll('.view-detail-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const rk = btn.dataset.key;
+      const record = rows.find((r, i) => rowKeyOf(r, i) === rk);
+      if (!record) return;
+      viewDetailKey = rk;
+      document.getElementById('view_detail').innerHTML = renderResultCard(type, record);
+      document.getElementById('view_detail').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      updateExportBar(type);
+    });
+  });
+  wrap.querySelectorAll('.view-edit-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const rk = btn.dataset.key;
+      const record = rows.find((r, i) => rowKeyOf(r, i) === rk);
+      if (record) loadReportForEdit(type, record);
+    });
+  });
+  const selectAllBox = document.getElementById('view_selectAll');
+  if (selectAllBox){
+    selectAllBox.addEventListener('change', function(){
+      if (this.checked){ rows.forEach((r, i) => viewSelected.add(rowKeyOf(r, i))); }
+      else { rows.forEach((r, i) => viewSelected.delete(rowKeyOf(r, i))); }
+      renderViewTable(type);
+    });
+  }
+  wrap.querySelectorAll('.view-row-check').forEach(box => {
+    box.addEventListener('change', function(){
+      const rk = this.dataset.key;
+      if (this.checked) viewSelected.add(rk); else viewSelected.delete(rk);
+      renderViewTable(type);
+    });
+  });
+
+  updateExportBar(type);
+}
+
+async function loadViewReports(){
+  const type = document.getElementById('view_type').value;
+  const cfg = VIEW_CONFIG[type];
+  const statusEl = document.getElementById('view_status');
+  if (SCRIPT_URL.indexOf('PASTE_YOUR') !== -1){
+    statusEl.textContent = 'Connect the Google Sheet first.';
+    statusEl.className = 'search-status err';
+    return;
+  }
+  statusEl.textContent = 'Loading...';
+  statusEl.className = 'search-status';
+  document.getElementById('view_tableWrap').innerHTML = '';
+  document.getElementById('view_detail').innerHTML = '';
+  viewSelected.clear();
+  viewDetailKey = null;
+  try{
+    const params = new URLSearchParams({
+      list: '1',
+      type: cfg.reportType,
+      query: val('view_query'),
+      dateFrom: val('view_dateFrom'),
+      dateTo: val('view_dateTo')
+    });
+    const res = await fetch(SCRIPT_URL + '?' + params.toString());
+    const data = await res.json();
+    viewData[type] = (data && data.results) || [];
+    viewSort = { key: cfg.dateKey, dir: -1 };
+    renderViewTable(type);
+    statusEl.textContent = `${viewData[type].length} report(s) loaded.`;
+    statusEl.className = 'search-status ok';
+  }catch(err){
+    statusEl.textContent = 'Load failed — check connection or Script URL.';
+    statusEl.className = 'search-status err';
+    updateExportBar(type);
+  }
+}
+
+document.getElementById('view_loadBtn').addEventListener('click', loadViewReports);
+document.getElementById('view_clearBtn').addEventListener('click', () => {
+  document.getElementById('view_query').value = '';
+  document.getElementById('view_dateFrom').value = '';
+  document.getElementById('view_dateTo').value = '';
+  document.getElementById('view_status').textContent = '';
+  document.getElementById('view_status').className = 'search-status';
+  document.getElementById('view_tableWrap').innerHTML = '';
+  document.getElementById('view_detail').innerHTML = '';
+  viewSelected.clear();
+  viewDetailKey = null;
+  document.getElementById('view_exportBar').style.display = 'none';
+});
+document.getElementById('view_type').addEventListener('change', () => {
+  document.getElementById('view_tableWrap').innerHTML = '';
+  document.getElementById('view_detail').innerHTML = '';
+  viewSelected.clear();
+  viewDetailKey = null;
+  document.getElementById('view_exportBar').style.display = 'none';
+});
+
+/* ---- Export selected / current / all reports as a clean PDF (report-only, no table) ---- */
+function exportReportsToPdf(type, records){
+  if (!records.length){ alert('Nothing to export — pick at least one report first.'); return; }
+  const area = document.getElementById('view_printArea');
+  area.innerHTML = records.map(r => buildPrintReportPage(type, r)).join('');
+  const viewSheet = document.getElementById('viewForm');
+  viewSheet.classList.add('active', 'print-active', 'printing-mode');
+  window.print();
+  setTimeout(() => {
+    viewSheet.classList.remove('print-active', 'printing-mode');
+    area.innerHTML = '';
+  }, 500);
+}
+document.getElementById('view_printSelectedBtn').addEventListener('click', () => {
+  const type = val('view_type');
+  const rows = viewData[type] || [];
+  const selectedRecords = rows.filter((r, i) => viewSelected.has(rowKeyOf(r, i)));
+  exportReportsToPdf(type, selectedRecords);
+});
+document.getElementById('view_printCurrentBtn').addEventListener('click', () => {
+  const type = val('view_type');
+  const rows = viewData[type] || [];
+  const record = rows.find((r, i) => rowKeyOf(r, i) === viewDetailKey);
+  if (!record){ alert('Click "View" on a report first.'); return; }
+  exportReportsToPdf(type, [record]);
+});
+document.getElementById('view_printAllBtn').addEventListener('click', () => {
+  const type = val('view_type');
+  exportReportsToPdf(type, viewData[type] || []);
+});
+
+/* ---------------- Collect + Save ---------------- */
+function collectData(type){
+  const cfg = REPORT_CONFIG[type];
+  const form = document.getElementById(type + 'Form');
+  const editingTimestamp = form.dataset.editingTimestamp || '';
+  const data = {
+    timestamp: editingTimestamp || new Date().toISOString(),
+    reportType: cfg.reportType,
+    photos: photos[type]
+  };
+  if (editingTimestamp){
+    // Tell the Apps Script backend this is an update to an existing row,
+    // matched by its original timestamp, rather than a brand-new report.
+    data.isUpdate = true;
+    data.originalTimestamp = editingTimestamp;
+  }
+  cfg.fields.forEach(f => { data[f.id.replace(/^(bd_|ac_|hu_|su_|lv_)/,'')] = val(f.id); });
+  return data;
+}
+
+function initSave(type){
+  const form = document.getElementById(type + 'Form');
+  const statusMsg = document.getElementById(type + '_statusMsg');
+  const saveBtn = document.getElementById(type + '_saveBtn');
+  const thumbRenderer = THUMB_RENDERERS[type];
+
+  form.addEventListener('submit', async function(e){
+    e.preventDefault();
+    if (type === 'accident' && !val('ac_reportDate')){
+      statusMsg.textContent = 'Please enter the Report Date before saving.';
+      statusMsg.className = 'status-msg err';
+      return;
+    }
+    if (type === 'breakdown' && !val('bd_date')){
+      statusMsg.textContent = 'Please enter the Date of Breakdown before saving.';
+      statusMsg.className = 'status-msg err';
+      return;
+    }
+    if (type === 'heldup' && !val('hu_date')){
+      statusMsg.textContent = 'Please enter the Date Held Up before saving.';
+      statusMsg.className = 'status-msg err';
+      return;
+    }
+    if (type === 'suspension' && !val('su_date')){
+      statusMsg.textContent = 'Please enter the Date of Incident before saving.';
+      statusMsg.className = 'status-msg err';
+      return;
+    }
+    if (type === 'leave' && !val('lv_fromDate')){
+      statusMsg.textContent = 'Please enter the Leave From Date before saving.';
+      statusMsg.className = 'status-msg err';
+      return;
+    }
+    if (SCRIPT_URL.indexOf('PASTE_YOUR') !== -1){
+      statusMsg.textContent = 'Google Sheet not connected yet — add your Apps Script URL in the code.';
+      statusMsg.className = 'status-msg err';
+      return;
+    }
+    const data = collectData(type);
+    const wasEditing = !!form.dataset.editingTimestamp;
+    saveBtn.disabled = true;
+    statusMsg.textContent = wasEditing ? 'Updating...' : 'Saving...';
+    statusMsg.className = 'status-msg';
+    try{
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(data)
+      });
+      statusMsg.textContent = wasEditing ? 'Report updated in Google Sheet ✓' : 'Saved to Google Sheet ✓';
+      statusMsg.className = 'status-msg ok';
+      form.reset();
+      photos[type] = [];
+      thumbRenderer();
+      document.querySelectorAll(`#${form.id} .chip`).forEach(c => c.classList.remove('active'));
+      document.querySelectorAll(`#${form.id} input[type=hidden]`).forEach(h => h.value = '');
+      const topBadgeEl = document.getElementById(type + '_severityBadge');
+      if (topBadgeEl){
+        topBadgeEl.style.display = 'none';
+        topBadgeEl.className = 'severity-badge';
+      }
+      clearEditingState(type);
+      updatePreview(type);
+    }catch(err){
+      statusMsg.textContent = 'Could not save — check your internet connection or Script URL.';
+      statusMsg.className = 'status-msg err';
+    }finally{
+      saveBtn.disabled = false;
+    }
+  });
+}
+initSave('breakdown');
+initSave('accident');
+initSave('heldup');
+initSave('suspension');
+initSave('leave');
+
+/* ---------------- Clear form (toolbar) ---------------- */
+function clearCurrent(){
+  const active = document.querySelector('.sheet.active');
+  const type = active.dataset.type;
+  if (type === 'view'){
+    document.getElementById('view_clearBtn').click();
+    return;
+  }
+  if (!confirm('Clear all entries on this form?')) return;
+  active.querySelectorAll('input[type=text], input[type=date], input[type=time], input[type=tel], select, textarea').forEach(i => i.value = '');
+  active.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  active.querySelectorAll('input[type=hidden]').forEach(h => h.value = '');
+  photos[type] = [];
+  THUMB_RENDERERS[type]();
+  clearEditingState(type);
+  const clearTopBadge = document.getElementById(type + '_severityBadge');
+  if (clearTopBadge){ clearTopBadge.style.display = 'none'; clearTopBadge.className = 'severity-badge'; }
+  const statusEl = document.getElementById(type + '_searchStatus');
+  if (statusEl){ statusEl.textContent = ''; statusEl.className = 'search-status'; }
+  document.getElementById(type + '_searchResults').innerHTML = '';
+  updatePreview(type);
+}
+
+/* ---------------- Print / Save as PDF ---------------- */
+function printCurrent(){
+  const active = document.querySelector('.sheet.active');
+  if (active.dataset.type === 'view'){
+    // The toolbar's generic print button now points people to the
+    // dedicated per-report export controls on the View Reports tab,
+    // which print only the report content (not the table/filters).
+    alert('Use the "Save Selected / Viewed / All as PDF" buttons on the View Reports tab to export just the report(s) — not the table.');
+    return;
+  }
+  document.querySelectorAll('.sheet').forEach(s => s.classList.remove('print-active'));
+  active.classList.add('print-active');
+  window.print();
+  setTimeout(() => active.classList.remove('print-active'), 500);
+}
+function printBoth(){
+  document.querySelectorAll('.sheet[data-type="breakdown"], .sheet[data-type="accident"], .sheet[data-type="heldup"], .sheet[data-type="suspension"], .sheet[data-type="leave"]').forEach(s => s.classList.add('print-active'));
+  window.print();
+  setTimeout(() => document.querySelectorAll('.sheet').forEach(s => s.classList.remove('print-active')), 500);
+}
+
+/* Initial preview render */
+updatePreview('breakdown');
+updatePreview('accident');
+updatePreview('heldup');
+updatePreview('suspension');
+updatePreview('leave');
+</script>
+
+</body>
+</html>

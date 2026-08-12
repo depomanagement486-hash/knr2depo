@@ -1,0 +1,2568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Driver Operation Report | Chakra E-Trans (Karimnagar) Pvt. Ltd.</title>
+<meta name="description" content="Driver Operation Report entry, search, and reporting tool for Chakra E-Trans (Karimnagar) Private Limited, Karimnagar Depot.">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0b4f8a">
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%230b4f8a'/%3E%3Cpath d='M16 20a4 4 0 0 1 4-4h24a4 4 0 0 1 4 4v20a4 4 0 0 1-4 4H20a4 4 0 0 1-4-4V20Z' fill='%23fff'/%3E%3Ccircle cx='23' cy='45' r='4' fill='%23fff'/%3E%3Ccircle cx='41' cy='45' r='4' fill='%23fff'/%3E%3Crect x='19' y='22' width='26' height='10' rx='2' fill='%230b4f8a'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Telugu:wght@400;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --border:#000;
+    --header-bg:#f4f4f4;
+    --accent:#0b4f8a;
+    --accent-dark:#083c69;
+    --accent-light:#eaf2fa;
+    --ok:#1a7f37;
+    --ok-dark:#166534;
+    --danger:#b3261e;
+    --danger-dark:#8f1f18;
+    --edit:#a5590d;
+    --edit-dark:#8a4b00;
+    --ink:#1c2733;
+    --muted:#5b6b7c;
+  }
+  *{box-sizing:border-box;}
+  body{
+    font-family:'Inter', Arial, "Noto Sans Telugu", sans-serif;
+    margin:0;
+    background:linear-gradient(180deg,#eef2f6 0%,#e6ebf1 100%);
+    color:var(--ink);
+    position:relative;
+  }
+  /* Blurred background photo behind everything. Put a file named
+     background.jpeg in the SAME FOLDER as this HTML file (next to it,
+     not in a subfolder) — this ::before layer covers the full viewport,
+     sits behind all content (z-index:-1), and is blurred so the app on
+     top stays readable. blur(6px) is roughly a "30%" blur on a normal
+     screen-sized photo; raise/lower the px value in filter: blur(...)
+     to make it blurrier or sharper. */
+  body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background-image:url('background.jpeg');
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    filter:blur(6px);
+    transform:scale(1.05); /* avoids blurred edges showing at the viewport border */
+    z-index:-1;
+  }
+  .app-shell{
+    max-width:1150px;
+    margin:0 auto;
+    padding:18px;
+  }
+  .app-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:14px;
+    padding:2px 2px 10px;
+  }
+  .app-header h1{
+    font-size:16px;
+    margin:0;
+    color:var(--accent-dark);
+    font-weight:800;
+    letter-spacing:.2px;
+  }
+  .app-header span{
+    font-size:12px;
+    color:var(--muted);
+    font-weight:600;
+  }
+  .tabbar{
+    display:flex;
+    gap:4px;
+    margin-bottom:16px;
+    border-bottom:2px solid var(--accent);
+  }
+  .tab-btn{
+    flex:1;
+    padding:12px 10px;
+    background:#dbe5ee;
+    border:1px solid #b7c4d0;
+    border-bottom:none;
+    border-radius:8px 8px 0 0;
+    cursor:pointer;
+    font-weight:700;
+    font-size:14px;
+    color:#33475b;
+    transition:.15s;
+    font-family:inherit;
+  }
+  .tab-btn:hover{background:#cddce9;}
+  .tab-btn.active{
+    background:var(--accent);
+    color:#fff;
+    box-shadow:0 -2px 0 var(--accent-dark) inset;
+  }
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+  .toolbar{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+    align-items:center;
+    background:#fff;
+    border:1px solid #ccd6df;
+    border-radius:10px;
+    padding:12px 16px;
+    margin-bottom:16px;
+    box-shadow:0 1px 3px rgba(20,40,70,.08);
+  }
+  .toolbar label{font-size:13px;font-weight:700;color:#33475b;display:flex;align-items:center;gap:6px;}
+  .toolbar select, .toolbar input{
+    padding:7px 9px;
+    border:1px solid #b7c4d0;
+    border-radius:6px;
+    font-size:13px;
+    font-family:inherit;
+  }
+  .toolbar .autofill-hint{
+    width:100%;
+    font-size:11.5px;
+    color:var(--muted);
+    font-weight:600;
+  }
+  .pill{
+    padding:4px 12px;
+    border-radius:20px;
+    font-size:12px;
+    font-weight:700;
+    letter-spacing:.2px;
+  }
+  .pill.shift{background:#fde9d9;color:#8a4b00;}
+  .pill.trip{background:#dff1e0;color:#1a7f37;}
+  .btn{
+    padding:9px 16px;
+    border-radius:7px;
+    border:none;
+    font-weight:700;
+    font-size:13px;
+    cursor:pointer;
+    font-family:inherit;
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    transition:.15s;
+  }
+  .btn-save{background:var(--ok);color:#fff;}
+  .btn-save:hover{background:var(--ok-dark);}
+  .btn-pdf{background:var(--danger);color:#fff;}
+  .btn-pdf:hover{background:var(--danger-dark);}
+  .btn-secondary{background:var(--accent);color:#fff;}
+  .btn-secondary:hover{background:var(--accent-dark);}
+  .btn-edit{background:var(--edit);color:#fff;}
+  .btn-edit:hover{background:var(--edit-dark);}
+  .btn-cancel{background:#e2e8f0;color:#33475b;}
+  .btn-cancel:hover{background:#cbd5e1;}
+  .btn:disabled{opacity:.5;cursor:not-allowed;}
+  #status-msg{
+    font-size:13px;
+    font-weight:700;
+    margin-left:auto;
+  }
+  #status-msg.ok{color:var(--ok);}
+  #status-msg.err{color:var(--danger);}
+  #status-msg.busy{color:var(--edit);}
+  .paper{
+    background:#fff;
+    border:1.5px solid var(--border);
+    padding:0;
+    margin-bottom:20px;
+    box-shadow:0 2px 8px rgba(20,40,70,.10);
+    border-radius:2px;
+    overflow:hidden;
+  }
+  .paper.editing{
+    box-shadow:0 0 0 3px rgba(165,89,13,.25), 0 2px 8px rgba(20,40,70,.10);
+  }
+  .paper-head{
+    display:flex;
+    justify-content:space-between;
+    border-bottom:1.5px solid var(--border);
+    font-size:12px;
+    font-weight:700;
+    background:#fafbfc;
+  }
+  .paper-head div{padding:5px 8px;}
+  .paper-title{
+    text-align:center;
+    font-weight:800;
+    font-size:15px;
+    padding:9px 4px;
+    border-bottom:1.5px solid var(--border);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    flex-wrap:wrap;
+    background:linear-gradient(180deg,#ffffff, #f6f9fc);
+  }
+  .brandmark{font-size:11px;font-weight:600;color:#555;}
+  .paper-sub{
+    display:flex;
+    flex-wrap:wrap;
+    border-bottom:1.5px solid var(--border);
+    font-size:12px;
+    background:#fcfdfe;
+  }
+  .paper-sub > div{
+    padding:6px 8px;
+    border-right:1px solid var(--border);
+    display:flex;
+    align-items:center;
+    gap:6px;
+    flex:1;
+    min-width:150px;
+    font-weight:600;
+  }
+  .paper-sub > div:last-child{border-right:none;}
+  .paper-sub input{
+    border:none;
+    border-bottom:1px solid #999;
+    font-size:12px;
+    padding:3px 4px;
+    width:100%;
+    background:transparent;
+    font-family:inherit;
+    font-weight:400;
+  }
+  .paper-sub input:focus{outline:none;border-bottom:1.5px solid var(--accent);background:var(--accent-light);}
+  .identity-block{
+    display:flex;
+    flex-wrap:wrap;
+    border-bottom:1.5px solid var(--border);
+    background:#eaf2fa;
+  }
+  .identity-block .id-field{
+    flex:1;
+    min-width:160px;
+    padding:7px 10px;
+    border-right:1px solid var(--border);
+  }
+  .identity-block .id-field:last-child{border-right:none;}
+  .identity-block label{
+    display:block;
+    font-size:11.5px;
+    font-weight:700;
+    color:var(--accent-dark);
+  }
+  .identity-block label .te{display:inline;font-weight:400;color:#555;font-size:10.5px;margin-left:4px;}
+  .identity-block input{
+    width:100%;
+    border:none;
+    border-bottom:1px solid #999;
+    background:transparent;
+    font-size:13px;
+    padding:4px 2px;
+    font-family:inherit;
+    margin-top:2px;
+  }
+  .identity-block input:focus{outline:none;border-bottom:1.5px solid var(--accent);background:#fff;}
+  .identity-block.readonly{background:#f6f9fc;font-size:12px;}
+  .identity-block.readonly > div{flex:1;min-width:160px;padding:6px 10px;border-right:1px solid var(--border);}
+  .identity-block.readonly > div:last-child{border-right:none;}
+  .identity-hint{
+    font-size:11px;
+    color:var(--muted);
+    padding:5px 10px;
+    border-bottom:1px solid #ddd;
+    background:#fbfcfd;
+    font-weight:600;
+  }
+  .trip-count-controls{
+    display:flex;
+    flex-wrap:wrap;
+    align-items:center;
+    gap:10px;
+    padding:8px 10px;
+    border-bottom:1px solid #ddd;
+    background:#fbfcfd;
+    font-size:12.5px;
+    font-weight:700;
+    color:#33475b;
+  }
+  .trip-count-controls .btn{padding:6px 12px;font-size:12px;}
+  table.dor{
+    width:100%;
+    border-collapse:collapse;
+    font-size:12px;
+  }
+  table.dor th, table.dor td{
+    border:1px solid var(--border);
+    padding:4px 6px;
+    vertical-align:middle;
+  }
+  table.dor th{
+    background:var(--header-bg);
+    font-weight:700;
+    text-align:center;
+  }
+  table.dor tbody tr:nth-child(even) td.label-cell{background:#fbfcfd;}
+  table.dor td.label-cell{
+    width:34%;
+    font-weight:600;
+    line-height:1.35;
+  }
+  table.dor td.label-cell .te{
+    display:block;
+    font-weight:400;
+    color:#444;
+    font-size:11px;
+  }
+  table.dor td.data-cell{position:relative;}
+  table.dor td.data-cell .field-wrap{
+    display:flex;
+    align-items:center;
+    gap:3px;
+  }
+  table.dor td.data-cell input, table.dor td.data-cell select{
+    width:100%;
+    border:none;
+    background:transparent;
+    font-size:12px;
+    padding:3px 2px;
+    font-family:inherit;
+  }
+  table.dor td.data-cell input.autofilled{
+    background:#eef8ee;
+  }
+  table.dor td.data-cell input[type="time"]{
+    font-variant-numeric:tabular-nums;
+  }
+  table.dor td.data-cell .unit-suffix{
+    font-size:11px;
+    color:var(--muted);
+    font-weight:700;
+    white-space:nowrap;
+    padding-right:2px;
+  }
+  table.dor td.data-cell input:focus, table.dor td.data-cell select:focus{
+    outline:2px solid var(--accent);
+    background:var(--accent-light);
+    border-radius:3px;
+  }
+  table.dor td.readonly-cell{text-align:center;}
+  .remarks-box{
+    border-top:1.5px solid var(--border);
+    padding:7px 8px;
+    font-size:12px;
+    background:#fcfdfe;
+  }
+  .remarks-box textarea{
+    width:100%;
+    border:1px solid #b7c4d0;
+    border-radius:5px;
+    min-height:44px;
+    font-size:12px;
+    padding:5px;
+    font-family:inherit;
+  }
+  .sig-row{
+    display:flex;
+    flex-wrap:wrap;
+    border-top:1.5px solid var(--border);
+    font-size:12px;
+  }
+  .sig-row > div{
+    flex:1;
+    min-width:150px;
+    padding:9px 8px;
+    border-right:1px solid var(--border);
+  }
+  .sig-row > div:last-child{border-right:none;}
+  .sig-row input{
+    width:100%;
+    border:none;
+    border-bottom:1px solid #999;
+    background:transparent;
+    padding:4px 2px;
+    font-size:12px;
+    margin-top:16px;
+    font-family:inherit;
+  }
+  .checklist{
+    border-top:1.5px solid var(--border);
+    padding:9px 8px;
+    font-size:12px;
+    display:flex;
+    flex-wrap:wrap;
+    gap:16px;
+    background:#fcfdfe;
+  }
+  .checklist label{display:flex;align-items:center;gap:6px;}
+  .log-filters{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    align-items:flex-end;
+    background:#fff;
+    border:1px solid #ccd6df;
+    border-radius:10px;
+    padding:14px 16px;
+    margin-bottom:16px;
+    box-shadow:0 1px 3px rgba(20,40,70,.08);
+  }
+  .log-filters .field{display:flex;flex-direction:column;gap:4px;}
+  .log-filters label{font-size:12px;font-weight:700;color:#33475b;}
+  .log-filters input, .log-filters select{
+    padding:7px 9px;border:1px solid #b7c4d0;border-radius:6px;font-size:13px;font-family:inherit;
+  }
+  .log-filters .hint{font-size:11px;color:var(--muted);width:100%;}
+  .log-entry-wrap{margin-bottom:26px;}
+  .log-entry-actions{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+    margin-bottom:8px;
+  }
+  .log-entry-tag{
+    font-size:12px;
+    font-weight:700;
+    color:var(--muted);
+    background:#eef2f6;
+    padding:5px 10px;
+    border-radius:6px;
+  }
+  .log-entry-buttons{display:flex;gap:8px;}
+  #logs-empty{
+    text-align:center;
+    color:#7a8a99;
+    padding:40px 0;
+    font-size:14px;
+  }
+  .no-match-banner{
+    background:#fff4e5;
+    border:1px solid #f3c98b;
+    color:#8a4b00;
+    padding:10px 14px;
+    border-radius:8px;
+    font-size:13px;
+    font-weight:600;
+    margin-bottom:14px;
+  }
+  .sheet-doc{
+    background:#fff;
+    border:1px solid #ccd6df;
+    border-radius:10px;
+    padding:16px 18px;
+    margin-bottom:16px;
+    box-shadow:0 1px 3px rgba(20,40,70,.08);
+  }
+  .sheet-doc h3{margin-top:0;color:var(--accent);}
+  .sheet-doc table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:12px;
+    margin-top:8px;
+  }
+  .sheet-doc th, .sheet-doc td{
+    border:1px solid #d0d7de;
+    padding:5px 7px;
+    text-align:left;
+  }
+  .sheet-doc th{background:#f1f5f9;}
+  .sheet-doc code{
+    background:#f1f5f9;
+    padding:1px 5px;
+    border-radius:4px;
+    font-size:12px;
+  }
+  .gsheet-toolbar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:#f8fafc;
+    border:1px solid #d0d7de;
+    border-bottom:none;
+    border-radius:8px 8px 0 0;
+    padding:8px 12px;
+    font-size:12px;
+    color:var(--muted);
+    font-weight:600;
+  }
+  .gsheet-toolbar .dot{width:9px;height:9px;border-radius:50%;background:#0f9d58;display:inline-block;}
+  .gsheet-filter-bar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    background:#fbfcfd;
+    border:1px solid #d0d7de;
+    border-top:none;
+    padding:8px 12px;
+    font-size:12px;
+    color:var(--muted);
+    font-weight:600;
+    flex-wrap:wrap;
+  }
+  .gsheet-filter-bar label{display:flex;align-items:center;gap:6px;font-weight:700;color:#33475b;}
+  .gsheet-filter-bar input[type="date"]{
+    padding:6px 8px;
+    border:1px solid #b7c4d0;
+    border-radius:6px;
+    font-size:12px;
+    font-family:inherit;
+  }
+  .gsheet-filter-bar .gf-hint{width:100%;font-weight:600;color:var(--muted);font-size:11px;}
+  .gsheet-scroll{
+    overflow:auto;
+    border:1px solid #d0d7de;
+    border-radius:0 0 8px 8px;
+    max-height:520px;
+    background:#fff;
+  }
+  table.gsheet{
+    border-collapse:collapse;
+    font-size:11.5px;
+    font-family:Arial, sans-serif;
+  }
+  table.gsheet th, table.gsheet td{
+    border:1px solid #e1e5ea;
+    padding:4px 8px;
+    white-space:nowrap;
+    text-align:left;
+  }
+  table.gsheet thead tr.colletters th{
+    background:#f1f3f4;
+    color:#5f6368;
+    text-align:center;
+    font-weight:600;
+    position:sticky;
+    top:0;
+    z-index:3;
+  }
+  table.gsheet thead tr.headerrow th{
+    background:#eef2f6;
+    color:#1c2733;
+    font-weight:700;
+    position:sticky;
+    top:24px;
+    z-index:2;
+    min-width:120px;
+    cursor:pointer;
+    user-select:none;
+  }
+  table.gsheet thead tr.headerrow th:hover{background:#dfe8f0;}
+  table.gsheet thead tr.headerrow th .sort-arrow{
+    display:inline-block;
+    margin-left:4px;
+    font-size:10px;
+    color:var(--accent);
+  }
+  table.gsheet thead tr.headerrow th.sorted{background:var(--accent-light);}
+  table.gsheet tbody th.rownum{
+    background:#f1f3f4;
+    color:#5f6368;
+    text-align:center;
+    font-weight:600;
+    position:sticky;
+    left:0;
+    z-index:1;
+  }
+  table.gsheet thead tr.colletters th.corner{
+    position:sticky;
+    left:0;
+    z-index:4;
+    background:#f1f3f4;
+  }
+  table.gsheet tbody tr:nth-child(even) td{background:#fafbfc;}
+  table.gsheet tbody tr:hover td{background:#eaf2fa;}
+  .pivot-wrap{
+    display:grid;
+    grid-template-columns:260px 1fr;
+    gap:16px;
+    margin-top:8px;
+  }
+  @media (max-width:820px){ .pivot-wrap{grid-template-columns:1fr;} }
+  .pivot-controls{
+    background:#f8fafc;
+    border:1px solid #d0d7de;
+    border-radius:10px;
+    padding:14px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    align-self:start;
+  }
+  .pivot-controls .pc-field label{
+    display:block;
+    font-size:11px;
+    font-weight:800;
+    text-transform:uppercase;
+    letter-spacing:.4px;
+    color:var(--accent-dark);
+    margin-bottom:5px;
+  }
+  .pivot-controls select{
+    width:100%;
+    padding:7px 8px;
+    border:1px solid #b7c4d0;
+    border-radius:6px;
+    font-size:12.5px;
+    font-family:inherit;
+    background:#fff;
+  }
+  .pivot-controls .pc-hint{font-size:11px;color:var(--muted);}
+  .pivot-filters{
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    max-height:170px;
+    overflow:auto;
+    border:1px solid #e1e5ea;
+    border-radius:6px;
+    padding:8px;
+    background:#fff;
+  }
+  .pivot-filters label{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-size:12px;
+    font-weight:500;
+    color:#33475b;
+  }
+  .pivot-result{min-width:0;}
+  .pivot-summary{
+    font-size:12px;
+    font-weight:700;
+    color:var(--muted);
+    margin-bottom:8px;
+  }
+  table.pivot-table{
+    border-collapse:collapse;
+    width:100%;
+    font-size:12.5px;
+  }
+  table.pivot-table th, table.pivot-table td{
+    border:1px solid #d0d7de;
+    padding:6px 10px;
+    text-align:right;
+  }
+  table.pivot-table th{
+    background:var(--accent);
+    color:#fff;
+    text-align:center;
+    font-weight:700;
+  }
+  table.pivot-table td.rowhead{
+    text-align:left;
+    font-weight:700;
+    background:#eef2f6;
+    color:#1c2733;
+  }
+  table.pivot-table tfoot td{
+    font-weight:800;
+    background:#fdeecb;
+  }
+  .pivot-scroll{overflow:auto;border-radius:8px;border:1px solid #d0d7de;}
+  .print-footer{display:none;}
+  @media print{
+    @page{margin:12mm;}
+    body{background:#fff;}
+    .tabbar, .toolbar, .log-filters, .log-entry-actions, .app-header, .no-print{display:none !important;}
+    .app-shell{max-width:100%;padding:0;}
+    .paper{border:1.5px solid #000;page-break-after:always;box-shadow:none;}
+    table.dor td.data-cell input, table.dor td.data-cell select{border-bottom:1px solid #999;}
+    .print-footer{
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      border-top:1px solid #000;
+      padding:4px 8px;
+      font-size:10px;
+      color:#333;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+  <div class="app-header no-print">
+    <div>
+      <h1>Driver Operation Report</h1>
+      <span>Chakra E-Trans (Karimnagar) Private Limited &middot; Karimnagar Depot</span>
+    </div>
+  </div>
+
+  <div class="tabbar no-print" role="tablist" aria-label="Driver Operation Report sections">
+    <button class="tab-btn active" id="tabbtn-new-entry" data-tab="new-entry" role="tab" aria-selected="true" aria-controls="tab-new-entry" type="button">New Entry</button>
+    <button class="tab-btn" id="tabbtn-view-logs" data-tab="view-logs" role="tab" aria-selected="false" aria-controls="tab-view-logs" type="button">View / Search / Edit Logs</button>
+    <button class="tab-btn" id="tabbtn-sheet-format" data-tab="sheet-format" role="tab" aria-selected="false" aria-controls="tab-sheet-format" type="button">Google Sheet Format</button>
+  </div>
+
+  <div class="tab-panel active" id="tab-new-entry" role="tabpanel" aria-labelledby="tabbtn-new-entry">
+    <div class="toolbar">
+      <label>Model / En-Route
+        <select id="enroute-select"></select>
+      </label>
+      <label>Auto-detect by ID
+        <input type="text" id="quick-id-input" placeholder="Service No / Driver ID / Driver Name">
+      </label>
+      <button class="btn btn-secondary" type="button" id="btn-quick-load">Load Route</button>
+      <span id="mode-pill" class="pill shift">Shift-wise</span>
+      <button class="btn btn-save" id="btn-save">Save to Google Sheet</button>
+      <button class="btn btn-secondary" id="btn-back-to-logs">Back to Saved Logs</button>
+      <button class="btn btn-pdf" id="btn-pdf">Download / Print PDF</button>
+      <span id="status-msg" role="status" aria-live="polite"></span>
+      <span class="autofill-hint">Tip: pick the <b>Date</b> first. Then either choose <b>Model / En-Route</b> yourself, or type a <b>Service No / Driver ID / Driver Name</b> into <b>Auto-detect by ID</b> and click <b>Load Route</b> — the correct log sheet style (Shift-wise or Trip-wise) loads automatically and the Service No / Driver ID / Driver Name fill themselves in from the Duty Chart. If that ID covers more than one service, you'll get a dropdown to pick which one. <b>Bus No is always typed in manually.</b> Driver details are entered once and apply to whichever shift(s)/trip(s) you actually fill in below.</span>
+    </div>
+
+    <div class="toolbar no-print" id="quick-match-picker" style="display:none;"></div>
+
+    <div id="form-mount"></div>
+  </div>
+
+  <div class="tab-panel" id="tab-view-logs" role="tabpanel" aria-labelledby="tabbtn-view-logs">
+    <div class="log-filters">
+      <div class="field">
+        <label>Date</label>
+        <input type="date" id="filter-date">
+      </div>
+      <div class="field">
+        <label>Bus No</label>
+        <input type="text" id="filter-bus" placeholder="e.g. TG02T1104">
+      </div>
+      <div class="field">
+        <label>Driver ID</label>
+        <input type="text" id="filter-driverid" placeholder="e.g. 30659">
+      </div>
+      <div class="field">
+        <label>Driver Name</label>
+        <input type="text" id="filter-drivername" placeholder="e.g. Ravi Kumar">
+      </div>
+      <div class="field">
+        <label>Sheet Type</label>
+        <select id="filter-mode">
+          <option value="">All</option>
+          <option value="shift">Shift-wise</option>
+          <option value="trip">Trip-wise</option>
+        </select>
+      </div>
+      <button class="btn btn-secondary" id="btn-load-logs">Search Logs</button>
+      <div class="hint">Search by Driver ID or Driver Name to quickly find a wrongly-entered record, then click <b>Edit This Record</b> on it to correct it in place — no need to re-enter the whole form.</div>
+    </div>
+    <div class="toolbar no-print" id="logs-pdf-toolbar">
+      <label style="display:flex;align-items:center;gap:6px;"><input type="checkbox" id="chk-select-all"> Select All</label>
+      <button class="btn btn-pdf" id="btn-pdf-selected">Save Selected as PDF</button>
+      <button class="btn btn-pdf" id="btn-pdf-all">Save All Log Sheets as PDF</button>
+      <span class="autofill-hint">Tick individual log sheets below to save just those, or use the buttons above to save everything currently loaded. Each record still has its own <b>PDF this record</b> button too.</span>
+    </div>
+    <div id="logs-mount"></div>
+    <div id="logs-empty">No logs loaded yet. Set filters (optional) and click "Search Logs".</div>
+  </div>
+
+  <div class="tab-panel" id="tab-sheet-format" role="tabpanel" aria-labelledby="tabbtn-sheet-format">
+
+    <div class="sheet-doc">
+      <h3>Live Google Sheet view</h3>
+      <p>This pulls rows straight out of your linked Google Sheet through Apps Script &mdash; nothing on this tab is sample or hardcoded data. It reads the single <code>DOR</code> tab that <code>saveEntry</code> writes to, using the 52 column headings above.</p>
+      <div class="gsheet-toolbar">
+        <span class="dot"></span>
+        <span style="font-weight:700;">Sheet: DOR</span>
+        <button class="btn btn-secondary" id="btn-load-sheet">Load / Refresh</button>
+        <button class="btn btn-save" id="btn-export-xlsx">Save as Excel</button>
+        <button class="btn btn-pdf" id="btn-export-pdf">Save as PDF</button>
+        <button class="btn btn-edit" id="btn-print-sheet">Print</button>
+        <span><b id="gsheet-rowcount">0</b> rows loaded</span>
+      </div>
+      <div class="gsheet-filter-bar">
+        <label>Date Range:
+          <input type="date" id="gsheet-date-from">
+        </label>
+        <span>to</span>
+        <input type="date" id="gsheet-date-to">
+        <button class="btn btn-secondary" id="btn-gsheet-filter" style="padding:6px 12px;font-size:12px;">Filter</button>
+        <button class="btn btn-cancel" id="btn-gsheet-clear-filter" style="padding:6px 12px;font-size:12px;">Clear</button>
+        <span class="gf-hint">Pick a From/To date and click <b>Filter</b> to show only rows in that range &mdash; the table, Save as Excel, Save as PDF, and Print all use only what's currently shown.</span>
+      </div>
+      <div class="gsheet-scroll" id="gsheet-mount">
+        <div style="padding:26px;text-align:center;color:#7a8a99;">Click <b>Load / Refresh</b> to pull the current rows from your Google Sheet.</div>
+      </div>
+    </div>
+
+    <div class="sheet-doc">
+      <h3>Pivot Table &mdash; filter &amp; summarize</h3>
+      <p>Builds a pivot straight from whichever sheet is loaded above. Rows / Columns / Values / Filter options are populated from that sheet's real column headers &mdash; load a sheet first.</p>
+
+      <div class="pivot-wrap">
+        <div class="pivot-controls">
+          <div class="pc-field">
+            <label>Rows</label>
+            <select id="pv-rows"><option value="">— load a sheet first —</option></select>
+          </div>
+          <div class="pc-field">
+            <label>Columns (optional)</label>
+            <select id="pv-cols"><option value="">— None —</option></select>
+          </div>
+          <div class="pc-field">
+            <label>Values</label>
+            <select id="pv-values"></select>
+          </div>
+          <div class="pc-field">
+            <label>Summarize by</label>
+            <select id="pv-agg">
+              <option value="count">COUNT</option>
+              <option value="sum">SUM</option>
+              <option value="avg">AVERAGE</option>
+              <option value="min">MIN</option>
+              <option value="max">MAX</option>
+            </select>
+          </div>
+          <div class="pc-field">
+            <label>Filter field</label>
+            <select id="pv-filter-field"></select>
+          </div>
+          <div class="pc-field">
+            <div class="pivot-filters" id="pv-filter-values"></div>
+          </div>
+          <div class="pc-hint">Tip: after loading, try Rows = <b>En-Route</b>, Values = <b>Ending KM</b>, Summarize = SUM.</div>
+        </div>
+
+        <div class="pivot-result">
+          <div class="pivot-summary" id="pv-summary">No data loaded yet.</div>
+          <div class="pivot-scroll">
+            <table class="pivot-table" id="pv-table"></table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/* ================== GOOGLE APPS SCRIPT CONNECTIONS ==================
+   Two separate backends are used:
+
+   1) SCRIPT_URL — the DOR log-sheet backend. saveEntry / getLogs /
+      updateEntry / getSheetData all go here. getSheetExportLinks is no
+      longer used — Excel/PDF export now happens entirely client-side
+      (see "CLIENT-SIDE EXPORT" below) so it no longer opens a Google
+      export URL that prompts for Google account access.
+
+   2) DUTY_SCRIPT_URL — the Duty Chart backend (Code.gs with doGet
+      ?action=list&sheet=<TabName>). Each date (e.g. "2026-07-29") is
+      its own tab in that spreadsheet, with columns:
+      slotId, servNo, category, driverRT, schDept, schArvl, regNo,
+      empId, empName, phone, status, note.
+      We use this ONLY to look up and auto-fill Bus No / Driver ID /
+      Driver Name on the New Entry (and Edit) forms, based on the Date
+      + whatever Service No / Driver ID / Driver Name was typed in.
+      This file is a completely standalone HTML file — it is NOT
+      pasted inside either Apps Script project — so it talks to both
+      scripts over fetch(), not google.script.run.
+   ==================================================================== */
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzW-QA4J_brWe0hPIeSroirFy2a9fr1GRiPuZSqrnbYQ3UbjK-1cp45n6knWoalf9J2/exec'; // e.g. https://script.google.com/macros/s/AKfycb.../exec
+const DUTY_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxZ6LVEAIJZMSbUaEczU4pAb9Reno9WLhdHnnqEdCuar-ooTGwUyLu7_qCeceiUMRC1ow/exec'; // Duty Chart backend (doGet ?action=list&sheet=<date>)
+
+/* SECURITY NOTE: this file runs entirely in the depot staff's browser, so
+   anyone who views the page source can see SCRIPT_URL/DUTY_SCRIPT_URL and
+   could call them directly — that is unavoidable for a client-only HTML
+   app talking to a public Apps Script Web App. APP_ACCESS_KEY below is
+   sent with every request as a light gatekeeper (keeps out casual/scanner
+   traffic), NOT real authentication — anyone with the page source can also
+   read this key. Real protection requires the Apps Script side (Code.gs)
+   to check payload.accessKey / e.parameter.key against a value it keeps
+   secret in Script Properties, and reject/ignore requests that don't
+   match. Ask your Apps Script developer to add that check; changing the
+   key here alone does nothing without it. */
+const APP_ACCESS_KEY = 'CHANGE_ME_TO_MATCH_APPS_SCRIPT';
+
+function isConfigured(){
+  return SCRIPT_URL && SCRIPT_URL.indexOf('PASTE_YOUR') === -1;
+}
+
+function isDutyConfigured(){
+  return DUTY_SCRIPT_URL && DUTY_SCRIPT_URL.indexOf('PASTE_YOUR') === -1;
+}
+
+function callApi(action, payload){
+  return fetch(SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+    body: JSON.stringify({ action: action, payload: payload || {}, accessKey: APP_ACCESS_KEY })
+  })
+    .then(res => res.json())
+    .then(json => {
+      if (!json.ok) throw new Error(json.error || 'Unknown error from Apps Script');
+      return json.result;
+    });
+}
+
+const dutyChartCache = {}; // date -> Promise<Array<row>>
+
+function fetchDutyChart(date){
+  if (!date) return Promise.resolve([]);
+  if (!isDutyConfigured()) return Promise.resolve([]);
+  if (dutyChartCache[date]) return dutyChartCache[date];
+
+  const url = DUTY_SCRIPT_URL + '?action=list&sheet=' + encodeURIComponent(date) + '&key=' + encodeURIComponent(APP_ACCESS_KEY);
+  const p = fetch(url)
+    .then(res => res.json())
+    .then(json => {
+      if (json && json.error){
+        console.warn('Duty chart lookup:', json.error);
+        return [];
+      }
+      return Array.isArray(json) ? json : [];
+    })
+    .catch(err => {
+      console.warn('Duty chart fetch failed:', err);
+      return [];
+    });
+
+  dutyChartCache[date] = p;
+  return p;
+}
+
+function findDutyMatch(rows, query){
+  const norm = s => (s === undefined || s === null) ? '' : String(s).trim().toLowerCase();
+  const servNoQ = norm(query.servNo);
+  const empIdQ = norm(query.empId);
+  const nameQ = norm(query.empName);
+
+  if (servNoQ){
+    const m = rows.find(r => norm(r.servNo) === servNoQ);
+    if (m) return m;
+  }
+  if (empIdQ){
+    const m = rows.find(r => norm(r.empId) === empIdQ);
+    if (m) return m;
+  }
+  if (nameQ){
+    let m = rows.find(r => norm(r.empName) === nameQ);
+    if (!m) m = rows.find(r => norm(r.empName).includes(nameQ));
+    if (m) return m;
+  }
+  return null;
+}
+
+/* Same matching rules as findDutyMatch, but returns EVERY matching row
+   instead of only the first one. A single Driver ID / Driver Name can
+   legitimately be assigned to 2-3 different services in one day's duty
+   chart, and previously only the first of those was ever surfaced. */
+function findAllDutyMatches(rows, query){
+  const norm = s => (s === undefined || s === null) ? '' : String(s).trim().toLowerCase();
+  const servNoQ = norm(query.servNo);
+  const empIdQ = norm(query.empId);
+  const nameQ = norm(query.empName);
+
+  if (servNoQ){
+    const m = rows.filter(r => norm(r.servNo) === servNoQ);
+    if (m.length) return m;
+  }
+  if (empIdQ){
+    const m = rows.filter(r => norm(r.empId) === empIdQ);
+    if (m.length) return m;
+  }
+  if (nameQ){
+    let m = rows.filter(r => norm(r.empName) === nameQ);
+    if (!m.length) m = rows.filter(r => norm(r.empName).includes(nameQ));
+    if (m.length) return m;
+  }
+  return [];
+}
+
+function markAutofilled(el){
+  if (el) el.classList.add('autofilled');
+}
+
+function sanitizeAutofillValue(v){
+  if (v === undefined || v === null) return '';
+  const s = String(v).trim();
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/.test(s)) return '';
+  return s;
+}
+
+function getPaperEl(paperId){
+  return document.querySelector('.paper[id="' + paperId + '"]') || document.getElementById(paperId);
+}
+
+function attachDutyLookup(paperId, route){
+  const paper = getPaperEl(paperId);
+  if (!paper || !isDutyConfigured()) return;
+
+  const dateInput = paper.querySelector('[data-key="date"]');
+  const servNoEl = paper.querySelector('[data-key="serviceNo"]');
+  const driverIdEl = paper.querySelector('[data-key="driverId"]');
+  const driverNameEl = paper.querySelector('[data-key="driverName"]');
+
+  function lookup(){
+    const date = dateInput ? dateInput.value : '';
+    if (!date) return;
+    const query = {
+      servNo: servNoEl ? servNoEl.value : '',
+      empId: driverIdEl ? driverIdEl.value : '',
+      empName: driverNameEl ? driverNameEl.value : ''
+    };
+    if (!query.servNo && !query.empId && !query.empName) return;
+
+    fetchDutyChart(date).then(rows => {
+      if (!rows.length) return;
+      const match = findDutyMatch(rows, query);
+      if (!match) return;
+
+      if (servNoEl && !servNoEl.value && match.servNo){
+        const sv = sanitizeAutofillValue(match.servNo);
+        if (sv){ servNoEl.value = sv; markAutofilled(servNoEl); }
+      }
+      if (driverIdEl && !driverIdEl.value && match.empId){
+        const sv = sanitizeAutofillValue(match.empId);
+        if (sv){ driverIdEl.value = sv; markAutofilled(driverIdEl); }
+      }
+      if (driverNameEl && !driverNameEl.value && match.empName){
+        const sv = sanitizeAutofillValue(match.empName);
+        if (sv){ driverNameEl.value = sv; markAutofilled(driverNameEl); }
+      }
+    });
+  }
+
+  [servNoEl, driverIdEl, driverNameEl].forEach(el => {
+    if (!el) return;
+    el.addEventListener('change', lookup);
+  });
+  if (dateInput){
+    dateInput.addEventListener('change', lookup);
+  }
+}
+
+const ROUTES = [
+  { model:'SUPER LUXURY', enroute:'KRMR - JBS',        mode:'shift' },
+  { model:'DELUXE',        enroute:'NZB - WGL',         mode:'shift' },
+  { model:'EXPRESS',       enroute:'KNR - JBS (JBS Express)', mode:'shift' },
+  { model:'EXPRESS',       enroute:'KNR - GDK',         mode:'trip'  },
+  { model:'EXPRESS',       enroute:'KNR - JGTL',        mode:'trip'  },
+  { model:'EXPRESS',       enroute:'KNR - KMRY',        mode:'trip'  },
+  { model:'EXPRESS',       enroute:'KNR - MNCL - LXPT', mode:'trip'  },
+  { model:'EXPRESS',       enroute:'KNR - MNTY',        mode:'trip'  },
+  { model:'EXPRESS',       enroute:'KNR - GDK - MNCL',  mode:'trip'  },
+];
+
+const enrouteSelect = document.getElementById('enroute-select');
+ROUTES.forEach((r, i) => {
+  const opt = document.createElement('option');
+  opt.value = i;
+  opt.textContent = `${r.model} — ${r.enroute}`;
+  enrouteSelect.appendChild(opt);
+});
+
+function matchRouteForDutyRow(row){
+  const norm = s => (s === undefined || s === null) ? '' : String(s).trim().toLowerCase();
+  const hay = norm(row.category) + ' ' + norm(row.note) + ' ' + norm(row.schDept) + ' ' + norm(row.schArvl);
+  if (!hay.trim()) return -1;
+
+  let best = -1;
+  let bestScore = 0;
+  ROUTES.forEach((r, i) => {
+    const model = norm(r.model);
+    const enroute = norm(r.enroute);
+    const enroutePieces = enroute.split(/[-()]/).map(p => p.trim()).filter(Boolean);
+    let score = 0;
+    if (model && hay.includes(model)) score += 1;
+    if (enroute && hay.includes(enroute)) score += 2;
+    enroutePieces.forEach(p => { if (p && hay.includes(p)) score += 1; });
+    if (score > bestScore){ bestScore = score; best = i; }
+  });
+  return best;
+}
+
+const quickIdInput = document.getElementById('quick-id-input');
+const quickMatchPicker = document.getElementById('quick-match-picker');
+
+document.getElementById('btn-quick-load').addEventListener('click', quickLoadByDutyId);
+quickIdInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter'){ e.preventDefault(); quickLoadByDutyId(); }
+});
+/* Typing a new ID clears any leftover picker from the previous search
+   so a stale dropdown doesn't linger on screen. */
+quickIdInput.addEventListener('input', clearQuickMatchPicker);
+
+function clearQuickMatchPicker(){
+  quickMatchPicker.style.display = 'none';
+  quickMatchPicker.innerHTML = '';
+}
+
+function describeDutyRow(row){
+  const bits = [];
+  if (row.servNo) bits.push('Svc ' + row.servNo);
+  if (row.category) bits.push(row.category);
+  if (row.schDept) bits.push('Dep ' + sanitizeTimeArtifact(row.schDept));
+  if (row.schArvl) bits.push('Arr ' + sanitizeTimeArtifact(row.schArvl));
+  if (row.regNo) bits.push(row.regNo);
+  return bits.join(' · ') || (row.empName || row.empId || 'Service');
+}
+
+/* Renders a DROPDOWN (not separate buttons) listing every duty-chart
+   service found for the typed ID/Name on that date, ordered exactly as
+   the duty chart returned them (i.e. by time, since that's how the
+   duty chart tab is arranged). Choosing an option immediately loads
+   that service's Service No / Driver ID / Driver Name into the log
+   sheet — either by selecting it (auto-loads) or via the explicit
+   "Load Selected Service" button alongside it. */
+function renderQuickMatchPicker(matches, date){
+  quickMatchPicker.innerHTML = '';
+
+  const label = document.createElement('span');
+  label.className = 'autofill-hint';
+  label.style.width = '100%';
+  label.style.fontWeight = '700';
+  label.style.color = '#33475b';
+  label.textContent = matches.length + ' services found for this ID on ' + date + ' — pick the one you are filling in:';
+  quickMatchPicker.appendChild(label);
+
+  const select = document.createElement('select');
+  select.id = 'quick-match-select';
+  select.style.minWidth = '280px';
+  select.style.flex = '1';
+
+  const placeholder = document.createElement('option');
+  placeholder.value = '';
+  placeholder.textContent = '— Select a service (' + matches.length + ') —';
+  placeholder.disabled = true;
+  placeholder.selected = true;
+  select.appendChild(placeholder);
+
+  matches.forEach((m, i) => {
+    const opt = document.createElement('option');
+    opt.value = String(i);
+    opt.textContent = (i + 1) + '. ' + describeDutyRow(m);
+    select.appendChild(opt);
+  });
+  quickMatchPicker.appendChild(select);
+
+  const loadBtn = document.createElement('button');
+  loadBtn.type = 'button';
+  loadBtn.className = 'btn btn-secondary';
+  loadBtn.textContent = 'Load Selected Service';
+  loadBtn.addEventListener('click', () => {
+    const idx = select.value;
+    if (idx === ''){
+      setStatus('Pick a service from the dropdown first.', 'err');
+      return;
+    }
+    applyDutyMatchToForm(matches[parseInt(idx, 10)], date);
+    clearQuickMatchPicker();
+  });
+  quickMatchPicker.appendChild(loadBtn);
+
+  select.addEventListener('change', () => {
+    const idx = select.value;
+    if (idx === '') return;
+    applyDutyMatchToForm(matches[parseInt(idx, 10)], date);
+    clearQuickMatchPicker();
+  });
+
+  quickMatchPicker.style.display = 'flex';
+  select.focus();
+}
+
+function applyDutyMatchToForm(match, date){
+  const routeIdx = matchRouteForDutyRow(match);
+  if (routeIdx !== -1 && String(enrouteSelect.value) !== String(routeIdx)){
+    enrouteSelect.value = routeIdx;
+    renderForm();
+  }
+
+  const newDateEl = document.querySelector('#entry-paper [data-key="date"]');
+  if (newDateEl) newDateEl.value = date;
+  currentEntryDate = date;
+
+  const servNoEl = document.querySelector('#entry-paper [data-key="serviceNo"]');
+  const driverIdEl = document.querySelector('#entry-paper [data-key="driverId"]');
+  const driverNameEl = document.querySelector('#entry-paper [data-key="driverName"]');
+
+  [servNoEl, driverIdEl, driverNameEl].forEach(el => {
+    if (el){ el.value = ''; el.classList.remove('autofilled'); }
+  });
+
+  if (servNoEl && match.servNo){
+    const sv = sanitizeAutofillValue(match.servNo);
+    if (sv){ servNoEl.value = sv; markAutofilled(servNoEl); }
+  }
+  if (driverIdEl && match.empId){
+    const sv = sanitizeAutofillValue(match.empId);
+    if (sv){ driverIdEl.value = sv; markAutofilled(driverIdEl); }
+  }
+  if (driverNameEl && match.empName){
+    const sv = sanitizeAutofillValue(match.empName);
+    if (sv){ driverNameEl.value = sv; markAutofilled(driverNameEl); }
+  }
+
+  quickIdInput.value = '';
+  setStatus(routeIdx !== -1
+    ? 'Loaded ' + ROUTES[routeIdx].model + ' — ' + ROUTES[routeIdx].enroute + ' (' + (ROUTES[routeIdx].mode === 'shift' ? 'Shift-wise' : 'Trip-wise') + '), Service ' + (match.servNo || '') + '. Now type in the Bus No.'
+    : 'Driver details filled in for Service ' + (match.servNo || '') + ', but the Model / En-Route couldn\'t be auto-detected — please pick it from the dropdown.', 'ok');
+  quickIdInput.focus();
+}
+
+function quickLoadByDutyId(){
+  const idVal = quickIdInput.value.trim();
+  const dateEl = document.querySelector('#entry-paper [data-key="date"]');
+  const date = dateEl ? dateEl.value : '';
+
+  clearQuickMatchPicker();
+
+  if (!idVal){ setStatus('Type a Service No / Driver ID / Driver Name first.', 'err'); return; }
+  if (!date){ setStatus('Pick the Date first, then click Load Route.', 'err'); return; }
+  if (!isDutyConfigured()){ setStatus('Duty Chart lookup is not configured (DUTY_SCRIPT_URL).', 'err'); return; }
+
+  setStatus('Looking up duty chart...', 'busy');
+  fetchDutyChart(date).then(rows => {
+    if (!rows.length){ setStatus('No duty chart found for ' + date + '.', 'err'); return; }
+    const matches = findAllDutyMatches(rows, { servNo: idVal, empId: idVal, empName: idVal });
+    if (!matches.length){ setStatus('No match found for "' + idVal + '" on ' + date + '.', 'err'); return; }
+
+    if (matches.length > 1){
+      setStatus(matches.length + ' services found for "' + idVal + '" on ' + date + ' — pick one from the dropdown below.', 'ok');
+      renderQuickMatchPicker(matches, date);
+      return;
+    }
+
+    applyDutyMatchToForm(matches[0], date);
+  }).catch(err => setStatus('Lookup failed: ' + err.message, 'err'));
+}
+
+const SHIFT_ROWS = [
+  ['serviceNo','Service No', 'సర్వీసు నెం', 'text'],
+  ['busNo','Bus No', 'బస్ నెం', 'text'],
+  ['driverName','Driver Name', 'డ్రైవర్ పేరు', 'text'],
+  ['driverId','Driver ID', 'డ్రైవర్ ఐడి', 'text'],
+  ['schOutShed','Karimnagar Schedule Out Shedding time', 'కరీంనగర్ షెడ్యూల్ ఔట్ షెడ్డింగ్ టైమ్', 'time'],
+  ['schInShed','Karimnagar Schedule in Shedding time', 'కరీంనగర్ షెడ్యూల్ ఇన్ షెడ్డింగ్ టైమ్', 'time'],
+  ['actOutShed','Karimnagar Actual Out shedding time', 'కరీంనగర్ యాక్చువల్ ఔట్ షెడ్డింగ్', 'time'],
+  ['socStart','SOC Start %', 'SOC ప్రారంభం %', 'percent'],
+  ['startKm1','Starting KM', 'ప్రారంభ కిలోమీటర్లు', 'km'],
+  ['waitKrmr','Waiting Start time for Karimnagar point', 'కరీంనగర్ పాయింట్ కోసం వేచి ఉన్న సమయం', 'time'],
+  ['atKrmr','At Karimnagar Point time', 'కరీంనగర్ పాయింట్ టైమ్', 'time'],
+  ['movedKrmr','Moved from Karimnagar Point time', 'కరీంనగర్ పాయింట్ నుండి తరలించబడింది', 'time'],
+  ['reachedJbs','Reached at JBS depot time', 'JBS డిపో చేరుకున్న సమయం', 'time'],
+  ['socEnd1','SOC End %', 'SOC ముగింపు %', 'percent'],
+  ['endKm1','Ending KM', 'ముగింపు కిలోమీటర్లు', 'km'],
+  ['chgStart','Charging Start time', 'ఛార్జింగ్ ప్రారంభ సమయం', 'time'],
+  ['chgEnd','Charging End time', 'ఛార్జింగ్ ముగింపు సమయం', 'time'],
+  ['socChgEnd','SOC at charging end %', 'ఛార్జింగ్ ముగింపులో SOC %', 'percent'],
+  ['waitJbs','Waiting Start time for JBS point', 'JBS పాయింట్ కోసం వేచి ఉన్న సమయం', 'time'],
+  ['atJbs','At JBS Point time', 'JBS పాయింట్ సమయం', 'time'],
+  ['movedJbs','Moved from JBS point time', 'JBS పాయింట్ నుండి తరలించబడింది', 'time'],
+  ['startKm2','Starting KM', 'ప్రారంభ కిలోమీటర్లు', 'km'],
+  ['reachedKrmr','Reached to Karimnagar time', 'కరీంనగర్ కి చేరుకున్న సమయం', 'time'],
+  ['socEndKrmr','SOC % end at Karimnagar', 'కరీంనగర్ కు చేరుకున్న ముగింపు SOC %', 'percent'],
+  ['endKm2','Ending KM', 'ముగింపు కిలోమీటర్లు', 'km'],
+];
+
+const TRIP_ROWS = [
+  ['serviceNo','Service No', 'సర్వీసు నెం', 'text'],
+  ['busNo','Bus No', 'బస్ నెం', 'text'],
+  ['driverName','Driver Name', 'డ్రైవర్ పేరు', 'text'],
+  ['driverId','Driver ID', 'డ్రైవర్ ఐడి', 'text'],
+  ['startKrmr','Start from Karimnagar (Time)', 'కరీంనగర్ నుండి ప్రారంభం (సమయం)', 'time'],
+  ['socStart1','SOC Start (%)', 'SOC ప్రారంభం', 'percent'],
+  ['startKm1','Starting KM', 'ప్రారంభం KM.', 'km'],
+  ['atKrmr','At Karimnagar Point (Time)', 'కరీంనగర్ పాయింట్ చేరుకున్న సమయం', 'time'],
+  ['movedKrmr','Moved from Karimnagar Point (Time)', 'కరీంనగర్ పాయింట్ నుండి తరలించబడిన సమయం', 'time'],
+  ['reachedStand','Reached at Bus Stand (Time)', 'బస్ స్టాండ్ కి చేరిన సమయం', 'time'],
+  ['socEnd1','SOC End (%)', 'SOC ముగింపు', 'percent'],
+  ['endKm1','Ending KM', 'ముగింపు KM.', 'km'],
+  ['movedPoint','Moved from point (Time)', 'పాయింట్ నుండి తరలించబడిన సమయం', 'time'],
+  ['socStart2','SOC Start (%)', 'SOC ప్రారంభం', 'percent'],
+  ['startKm2','Starting KM', 'ప్రారంభం KM.', 'km'],
+  ['reachedKrmr','Reached to Karimnagar (Time)', 'కరీంనగర్ కి చేరుకున్న సమయం', 'time'],
+  ['socEnd2','SOC End (%) at Karimnagar', 'SOC ముగింపు', 'percent'],
+  ['endKm2','Ending KM', 'ముగింపు KM.', 'km'],
+  ['chgStart','Charging Start (Time)', 'ఛార్జింగ్ ప్రారంభం (సమయం)', 'time'],
+  ['chgEnd','Charging End (Time)', 'ఛార్జింగ్ ముగింపు (సమయం)', 'time'],
+  ['socChgEnd','SOC at charging end %', 'ఛార్జింగ్ ముగింపులో SOC %', 'percent'],
+];
+
+const IDENTITY_KEYS = ['serviceNo','busNo','driverName','driverId'];
+const SHIFT_ROWS_BODY = SHIFT_ROWS.filter(r => !IDENTITY_KEYS.includes(r[0]));
+const TRIP_ROWS_BODY = TRIP_ROWS.filter(r => !IDENTITY_KEYS.includes(r[0]));
+
+function hasColData(c){
+  if (!c) return false;
+  return Object.keys(c).some(k => c[k] !== '' && c[k] !== undefined && c[k] !== null && c[k] !== false);
+}
+
+function findFirstNonEmptyIdentity(prefillColumns){
+  const cols = prefillColumns || {};
+  for (const idx of Object.keys(cols)){
+    const c = cols[idx];
+    if (c && (c.serviceNo || c.busNo || c.driverName || c.driverId)){
+      return { serviceNo:c.serviceNo||'', busNo:c.busNo||'', driverName:c.driverName||'', driverId:c.driverId||'' };
+    }
+  }
+  return { serviceNo:'', busNo:'', driverName:'', driverId:'' };
+}
+
+function renderIdentityBlock(prefill){
+  const fallback = findFirstNonEmptyIdentity(prefill.columns);
+  const ident = {
+    serviceNo: (prefill.serviceNo !== undefined && prefill.serviceNo !== '') ? prefill.serviceNo : fallback.serviceNo,
+    busNo: (prefill.busNo !== undefined && prefill.busNo !== '') ? prefill.busNo : fallback.busNo,
+    driverName: (prefill.driverName !== undefined && prefill.driverName !== '') ? prefill.driverName : fallback.driverName,
+    driverId: (prefill.driverId !== undefined && prefill.driverId !== '') ? prefill.driverId : fallback.driverId
+  };
+  return `
+  <div class="identity-block">
+    <div class="id-field"><label>Service No<span class="te">సర్వీసు నెం</span></label><input type="text" data-key="serviceNo" value="${ident.serviceNo || ''}"></div>
+    <div class="id-field"><label>Bus No<span class="te">బస్ నెం</span></label><input type="text" data-key="busNo" value="${ident.busNo || ''}"></div>
+    <div class="id-field"><label>Driver Name<span class="te">డ్రైవర్ పేరు</span></label><input type="text" data-key="driverName" value="${ident.driverName || ''}"></div>
+    <div class="id-field"><label>Driver ID<span class="te">డ్రైవర్ ఐడి</span></label><input type="text" data-key="driverId" value="${ident.driverId || ''}"></div>
+  </div>`;
+}
+
+function applyIdentityToActiveColumns(data){
+  Object.keys(data.columns || {}).forEach(idx => {
+    const col = data.columns[idx];
+    const ownData = Object.keys(col).some(k => !IDENTITY_KEYS.includes(k) && col[k] !== '' && col[k] !== undefined && col[k] !== null && col[k] !== false);
+    if (ownData){
+      IDENTITY_KEYS.forEach(k => { if (data[k]) col[k] = data[k]; });
+    } else {
+      Object.keys(col).forEach(k => { delete col[k]; });
+    }
+  });
+  return data;
+}
+
+function activeColumnIndices(entryColumns, maxCols){
+  const idxs = [];
+  for (let i = 0; i < maxCols; i++){
+    if (hasColData((entryColumns || {})[i])) idxs.push(i);
+  }
+  return idxs;
+}
+
+function renderInputCell(key, col, type, value){
+  let v = value === undefined || value === null ? '' : value;
+  const dataAttrs = `data-key="${key}"${col !== undefined ? ` data-col="${col}"` : ''}`;
+  if (type === 'time'){
+    v = sanitizeTimeArtifact(v);
+    return `<div class="field-wrap"><input type="time" ${dataAttrs} value="${v}"></div>`;
+  }
+  if (type === 'percent'){
+    return `<div class="field-wrap"><input type="number" min="0" max="100" step="0.1" ${dataAttrs} value="${v}"><span class="unit-suffix">%</span></div>`;
+  }
+  if (type === 'km'){
+    return `<div class="field-wrap"><input type="number" min="0" step="0.1" ${dataAttrs} value="${v}"><span class="unit-suffix">km</span></div>`;
+  }
+  return `<input type="text" ${dataAttrs} value="${v}">`;
+}
+
+function sanitizeTimeArtifact(v){
+  if (v === undefined || v === null) return v;
+  const s = String(v);
+  const m = s.match(/^1899-12-(?:29|30|31)T(\d{2}):(\d{2}):\d{2}/);
+  if (m) return m[1] + ':' + m[2];
+  return v;
+}
+
+function printFooterHtml(){
+  const now = new Date();
+  const stamp = now.toLocaleDateString('en-GB') + ' ' + now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+  return `<div class="print-footer">
+    <span>Chakra E-Trans (Karimnagar) Pvt. Ltd. &mdash; Karimnagar Depot &mdash; Internal use only</span>
+    <span>Generated ${stamp}</span>
+  </div>`;
+}
+
+function formatDisplayValue(type, value){
+  if (value === undefined || value === null || value === '') return '';
+  if (value === true) return '✔';
+  if (value === false) return '';
+  if (type === 'time') return sanitizeTimeArtifact(value);
+  if (type === 'percent') return `${value}%`;
+  if (type === 'km') return `${value} km`;
+  return value;
+}
+
+function buildShiftForm(route, paperId, prefill){
+  prefill = prefill || {};
+  const cols = ['Shift 1','Shift 2'];
+  const colData = prefill.columns || {};
+  const rowsHtml = SHIFT_ROWS_BODY.map(([key,en,te,type]) => {
+    const cells = cols.map((c,i) => {
+      const v = colData[i] ? colData[i][key] : undefined;
+      return `<td class="data-cell">${renderInputCell(key, i, type, v)}</td>`;
+    }).join('');
+    return `<tr><td class="label-cell">${en}<span class="te">${te}</span></td>${cells}</tr>`;
+  }).join('');
+
+  return `
+  <div class="paper" id="${paperId}">
+    <div class="paper-head">
+      <div>Maintenance No: 80198 21275</div>
+      <div>Operations No: 8019821276</div>
+    </div>
+    <div class="paper-title">
+      <span class="brandmark">Chakra E-Trans<br>Karimnagar Private Limited</span>
+      CHAKRA E-TRANS (KARIMNAGAR) PRIVATE LIMITED
+      <span class="brandmark">JBM Group</span>
+    </div>
+    <div class="paper-sub">
+      <div>Driver Reporting Time: <input type="time" data-key="reportingTime" value="${prefill.reportingTime || ''}"></div>
+      <div>Tim Time: <input type="time" data-key="timTime" value="${prefill.timTime || ''}"></div>
+    </div>
+    <div class="paper-sub">
+      <div>Date: <input type="date" data-key="date" value="${prefill.date || ''}"></div>
+      <div>Model: <input type="text" value="${route.model}" readonly></div>
+      <div>En-Route: <input type="text" value="${route.enroute}" readonly></div>
+    </div>
+    ${renderIdentityBlock(prefill)}
+    <div class="identity-hint">Driver details above apply to whichever shift(s) you actually fill in below — leave a shift's column blank if it wasn't worked; only shifts with data get saved &amp; printed.</div>
+    <table class="dor">
+      <thead>
+        <tr><th scope="col" style="width:34%"></th><th scope="col">Shift 1 (Morning)</th><th scope="col">Shift 2 (Evening)</th></tr>
+      </thead>
+      <tbody>${rowsHtml}</tbody>
+    </table>
+    <div class="remarks-box">
+      <b>Remarks/Bus Complaints - రిమార్క్స్/బస్సు ఫిర్యాదులు</b>
+      <textarea data-key="remarks">${prefill.remarks || ''}</textarea>
+    </div>
+    <div class="sig-row">
+      <div>Shift 1 Driver Signature<input type="text" data-key="sigShift1" value="${prefill.sigShift1 || ''}"></div>
+      <div>Shift 2 Driver Signature<input type="text" data-key="sigShift2" value="${prefill.sigShift2 || ''}"></div>
+      <div>Supervisor Signature<input type="text" data-key="sigSupervisor" value="${prefill.sigSupervisor || ''}"></div>
+      <div>Received Signature<input type="text" data-key="sigReceived" value="${prefill.sigReceived || ''}"></div>
+    </div>
+    <div class="checklist">
+      <label><input type="checkbox" data-key="chkStepney" ${prefill.chkStepney ? 'checked' : ''}> Stepney</label>
+      <label><input type="checkbox" data-key="chkJockey" ${prefill.chkJockey ? 'checked' : ''}> Jockey & Rod</label>
+      <label><input type="checkbox" data-key="chkToolBox" ${prefill.chkToolBox ? 'checked' : ''}> Tool Box</label>
+      <label><input type="checkbox" data-key="chkSpareWheel" ${prefill.chkSpareWheel ? 'checked' : ''}> Spare Wheel Rod</label>
+      <label><input type="checkbox" data-key="chkFirstAid" ${prefill.chkFirstAid ? 'checked' : ''}> First Aid Kit</label>
+      <label><input type="checkbox" data-key="chkFireExt" ${prefill.chkFireExt ? 'checked' : ''}> Fire Extinguisher</label>
+    </div>
+    ${printFooterHtml()}
+  </div>`;
+}
+
+function buildTripForm(route, paperId, prefill){
+  prefill = prefill || {};
+  const colData = prefill.columns || {};
+  let tripCount = prefill.tripCount;
+  if (!tripCount){
+    const filledIdxs = Object.keys(colData).map(Number).filter(i => hasColData(colData[i]));
+    tripCount = filledIdxs.length ? Math.max(...filledIdxs) + 1 : 1;
+  }
+  tripCount = Math.min(6, Math.max(1, tripCount));
+  const cols = Array.from({length: tripCount}, (_, i) => 'Trip ' + (i + 1));
+  const rowsHtml = TRIP_ROWS_BODY.map(([key,en,te,type]) => {
+    const cells = cols.map((c,i) => {
+      const v = colData[i] ? colData[i][key] : undefined;
+      return `<td class="data-cell">${renderInputCell(key, i, type, v)}</td>`;
+    }).join('');
+    return `<tr><td class="label-cell">${en}<span class="te">${te}</span></td>${cells}</tr>`;
+  }).join('');
+
+  return `
+  <div class="paper" id="${paperId}" data-tripcount="${tripCount}">
+    <div class="paper-head">
+      <div>Maintenance No: 80198 21275</div>
+      <div>Operations No: 8019821276</div>
+    </div>
+    <div class="paper-title">
+      <span class="brandmark">Chakra E-Trans<br>Karimnagar Private Limited</span>
+      CHAKRA E-TRANS (KARIMNAGAR) PRIVATE LIMITED
+      <span class="brandmark">JBM Group</span>
+    </div>
+    <div class="paper-sub">
+      <div>Driver Reporting Time: <input type="time" data-key="reportingTime" value="${prefill.reportingTime || ''}"></div>
+      <div>Tim Time: <input type="time" data-key="timTime" value="${prefill.timTime || ''}"></div>
+    </div>
+    <div class="paper-sub">
+      <div>Date: <input type="date" data-key="date" value="${prefill.date || ''}"></div>
+      <div>Model: <input type="text" value="${route.model}" readonly></div>
+      <div>En-Route: <input type="text" value="${route.enroute}" readonly></div>
+    </div>
+    ${renderIdentityBlock(prefill)}
+    <div class="trip-count-controls no-print">
+      <span>Trips today: <b>${tripCount}</b> (max 6)</span>
+      <button type="button" class="btn btn-secondary btn-add-trip" ${tripCount >= 6 ? 'disabled' : ''}>+ Add Trip</button>
+      <button type="button" class="btn btn-cancel btn-remove-trip" ${tripCount <= 1 ? 'disabled' : ''}>- Remove Last Trip</button>
+    </div>
+    <table class="dor">
+      <thead>
+        <tr><th scope="col" style="width:26%"></th>${cols.map(c=>`<th scope="col">${c}</th>`).join('')}</tr>
+      </thead>
+      <tbody>${rowsHtml}</tbody>
+    </table>
+    <div class="remarks-box">
+      <b>Remarks/Bus Complaints - రిమార్క్స్/బస్సు ఫిర్యాదులు</b>
+      <textarea data-key="remarks">${prefill.remarks || ''}</textarea>
+    </div>
+    <div class="sig-row">
+      <div>Driver Signature<input type="text" data-key="sigDriver" value="${prefill.sigDriver || ''}"></div>
+      <div>Receiver Signature - DP<input type="text" data-key="sigDp" value="${prefill.sigDp || ''}"></div>
+      <div>Receiver Signature - VP1<input type="text" data-key="sigVp1" value="${prefill.sigVp1 || ''}"></div>
+      <div>Receiver Signature - VP2<input type="text" data-key="sigVp2" value="${prefill.sigVp2 || ''}"></div>
+      <div>Supervisor Signature<input type="text" data-key="sigSupervisor" value="${prefill.sigSupervisor || ''}"></div>
+    </div>
+    ${printFooterHtml()}
+  </div>`;
+}
+
+function resizeTripForm(paperId, route, delta){
+  const paper = getPaperEl(paperId);
+  if (!paper) return;
+  const current = collectFormData(paperId, route);
+  let count = parseInt(paper.dataset.tripcount || '1', 10);
+  count = Math.min(6, Math.max(1, count + delta));
+  current.tripCount = count;
+  const parent = paper.parentElement;
+  parent.innerHTML = buildTripForm(route, paperId, current);
+  attachDutyLookup(paperId, route);
+  attachTripCountControls(paperId, route);
+}
+
+function attachTripCountControls(paperId, route){
+  const paper = getPaperEl(paperId);
+  if (!paper) return;
+  const addBtn = paper.querySelector('.btn-add-trip');
+  const removeBtn = paper.querySelector('.btn-remove-trip');
+  if (addBtn) addBtn.addEventListener('click', () => resizeTripForm(paperId, route, 1));
+  if (removeBtn) removeBtn.addEventListener('click', () => resizeTripForm(paperId, route, -1));
+}
+
+const formMount = document.getElementById('form-mount');
+const modePill = document.getElementById('mode-pill');
+
+function todayISO(){
+  const d = new Date();
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+let currentEntryDate = todayISO();
+
+function renderForm(){
+  const route = ROUTES[enrouteSelect.value];
+  modePill.textContent = route.mode === 'shift' ? 'Shift-wise' : 'Trip-wise';
+  modePill.className = 'pill ' + route.mode;
+  formMount.innerHTML = route.mode === 'shift'
+    ? buildShiftForm(route, 'entry-paper', { date: currentEntryDate })
+    : buildTripForm(route, 'entry-paper', { date: currentEntryDate });
+  attachDutyLookup('entry-paper', route);
+  if (route.mode === 'trip') attachTripCountControls('entry-paper', route);
+
+  const dateEl = document.querySelector('#entry-paper [data-key="date"]');
+  if (dateEl){
+    dateEl.addEventListener('change', () => {
+      currentEntryDate = dateEl.value || todayISO();
+    });
+  }
+}
+enrouteSelect.addEventListener('change', renderForm);
+renderForm();
+
+const DEPOT_NAME = 'Karimnagar';
+const GSHEET_HEADERS = [
+  'SL.NO','Depot Name','Date (dd-mm-yyyy)','Bus No. (With full registration)','Route No','Duty','Shift',
+  'Driver ID/Badge No.','Schedule Start Time (hh:mm)','Schedule End Time (hh:mm)','Actual Start Time (hh:mm)',
+  'Actual End Time (hh:mm)','Start Punc.','Route Completion Time (hh:mm)','Schedule Km','Route Km Loss',
+  'Act. Route Km','Schedule Trip','Actual Trip','Miss Trip','Odometer Start Reading (A)',
+  'Odometer End Reading (B)','Odometer  Diff. Km (B-A)','Diffrence','Account Responsible',
+  'Reason For Kilometer Loss','After Sales Reason','Penalty Infraction','Remarks','Route Start SOC % (C)',
+  'Route End SOC % (D)','SOC Consumption On Route % (C-D)','SOC  Per KM','Run Kilometer  Per  SOC',
+  'DOR KWh/km (odo)','DOR KWH/KM (ACT)','DCR KWh/km (odo)','DCR KWH/KM (ACT)','DOR KWH','DCR KWH',
+  'DCR Charged SOC','Energy Absorption','Battery size In KWH','VP1','VP2','DP','Penalty','Model 9M/12M',
+  'En-Route','Model','Row ID','Group ID'
+];
+function toDDMMYYYY(iso){
+  if (!iso) return '';
+  const parts = String(iso).split('-');
+  if (parts.length !== 3) return iso;
+  const [y,m,d] = parts;
+  return `${d}-${m}-${y}`;
+}
+
+function buildSheetRows(data){
+  const isShift = data.mode === 'shift';
+  const colLabels = isShift ? ['Shift 1','Shift 2'] : Array.from({length: data.tripCount || Object.keys(data.columns||{}).length || 1}, (_,i)=>'Trip '+(i+1));
+  const groupId = `${data.date || ''}_${(data.enroute || '').replace(/\s+/g,'')}_${Date.now()}`;
+
+  return colLabels.map((label, i) => {
+    const c = (data.columns && data.columns[i]) || {};
+    const schedStart = isShift ? c.schOutShed : '';
+    const schedEnd = isShift ? c.schInShed : '';
+    const actStart = isShift ? c.actOutShed : c.startKrmr;
+    const actEnd = c.reachedKrmr;
+    const socStart = isShift ? c.socStart : c.socStart1;
+    const socEnd = isShift ? c.socEndKrmr : c.socEnd2;
+    const odoStart = c.startKm1;
+    const odoEnd = c.endKm2;
+
+    const row = {};
+    GSHEET_HEADERS.forEach(h => { row[h] = ''; });
+    row['Depot Name'] = DEPOT_NAME;
+    row['Date (dd-mm-yyyy)'] = toDDMMYYYY(data.date);
+    row['Bus No. (With full registration)'] = c.busNo || '';
+    row['Route No'] = data.enroute || '';
+    row['Duty'] = isShift ? 'Shift' : 'Trip';
+    row['Shift'] = label;
+    row['Driver ID/Badge No.'] = c.driverId || '';
+    row['Schedule Start Time (hh:mm)'] = schedStart || '';
+    row['Schedule End Time (hh:mm)'] = schedEnd || '';
+    row['Actual Start Time (hh:mm)'] = actStart || '';
+    row['Actual End Time (hh:mm)'] = actEnd || '';
+    row['Odometer Start Reading (A)'] = odoStart || '';
+    row['Odometer End Reading (B)'] = odoEnd || '';
+    row['Remarks'] = data.remarks || '';
+    row['Route Start SOC % (C)'] = socStart || '';
+    row['Route End SOC % (D)'] = socEnd || '';
+    row['En-Route'] = data.enroute || '';
+    row['Model'] = data.model || '';
+    row['Group ID'] = groupId;
+    return row;
+  });
+}
+
+function collectFormData(paperId, route){
+  const paper = document.getElementById(paperId);
+  const data = { mode: route.mode, model: route.model, enroute: route.enroute, columns: {} };
+
+  paper.querySelectorAll('[data-key]').forEach(el => {
+    const key = el.dataset.key;
+    const col = el.dataset.col;
+    let val = el.type === 'checkbox' ? el.checked : el.value;
+    if (col !== undefined){
+      if (!data.columns[col]) data.columns[col] = {};
+      data.columns[col][key] = val;
+    } else {
+      data[key] = val;
+    }
+  });
+
+  const paperEl = getPaperEl(paperId);
+  if (paperEl && paperEl.dataset && paperEl.dataset.tripcount){
+    data.tripCount = parseInt(paperEl.dataset.tripcount, 10) || undefined;
+  }
+  return data;
+}
+
+const statusMsg = document.getElementById('status-msg');
+function setStatus(text, cls){
+  statusMsg.textContent = text;
+  statusMsg.className = cls;
+}
+
+document.getElementById('btn-save').addEventListener('click', () => {
+  const route = ROUTES[enrouteSelect.value];
+  const data = collectFormData('entry-paper', route);
+  applyIdentityToActiveColumns(data);
+  data.sheetHeaders = GSHEET_HEADERS;
+  data.sheetRows = buildSheetRows(data);
+  setStatus('Saving...', 'busy');
+  if (isConfigured()){
+    callApi('saveEntry', data)
+      .then(res => {
+        setStatus('Saved to Google Sheet (' + res.rowsWritten + ' row(s)). Fresh form ready for the next entry.', 'ok');
+        quickIdInput.value = '';
+        clearQuickMatchPicker();
+        renderForm();
+      })
+      .catch(err => setStatus('Save failed: ' + err.message, 'err'));
+  } else {
+    console.log('DOR entry payload', data);
+    setStatus('SCRIPT_URL not set yet — paste your Apps Script Web App URL near the top of this file to save.', 'err');
+  }
+});
+
+document.getElementById('btn-back-to-logs').addEventListener('click', () => {
+  document.querySelector('.tab-btn[data-tab="view-logs"]').click();
+});
+
+document.getElementById('btn-pdf').addEventListener('click', () => {
+  window.print();
+});
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-selected', 'false'); });
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    btn.setAttribute('aria-selected', 'true');
+    const map = {'new-entry':'tab-new-entry','view-logs':'tab-view-logs','sheet-format':'tab-sheet-format'};
+    document.getElementById(map[btn.dataset.tab]).classList.add('active');
+    if (btn.dataset.tab === 'view-logs' && !logsAutoLoaded){
+      logsAutoLoaded = true;
+      loadLogs();
+    }
+  });
+});
+
+const logsMount = document.getElementById('logs-mount');
+const logsEmpty = document.getElementById('logs-empty');
+let lastLoadedEntries = [];
+
+document.getElementById('btn-load-logs').addEventListener('click', loadLogs);
+
+function buildLogFilters(){
+  return {
+    date: document.getElementById('filter-date').value.trim(),
+    busNo: document.getElementById('filter-bus').value.trim(),
+    driverId: document.getElementById('filter-driverid').value.trim(),
+    driverName: document.getElementById('filter-drivername').value.trim(),
+    mode: document.getElementById('filter-mode').value.trim()
+  };
+}
+
+function entryMatchesFilters(entry, filters){
+  if (filters.date && String(entry.date || '').slice(0,10) !== filters.date) return false;
+  if (filters.mode && entry.mode !== filters.mode) return false;
+  const cols = Object.values(entry.columns || {});
+  if (filters.busNo){
+    const q = filters.busNo.toLowerCase();
+    if (!cols.some(c => (c.busNo || '').toLowerCase().includes(q))) return false;
+  }
+  if (filters.driverId){
+    const q = filters.driverId.toLowerCase();
+    if (!cols.some(c => (c.driverId || '').toLowerCase().includes(q))) return false;
+  }
+  if (filters.driverName){
+    const q = filters.driverName.toLowerCase();
+    if (!cols.some(c => (c.driverName || '').toLowerCase().includes(q))) return false;
+  }
+  return true;
+}
+
+function applyClientFilterAndRender(entries, filters){
+  const filtered = (entries || []).filter(e => entryMatchesFilters(e, filters));
+  lastLoadedEntries = filtered;
+  renderLogs(filtered);
+}
+
+function ddmmyyyyToIso(v){
+  if (!v) return '';
+  const s = String(v).trim();
+  // Defensive guard: if the Date column comes back as a bare time like
+  // "00:00" (usually caused by that Sheet column being formatted as
+  // Time instead of Date, so every date's midnight time-portion is all
+  // that shows), treat it as missing rather than silently displaying a
+  // wrong date. See the Date (dd-mm-yyyy) column format in the sheet.
+  if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(s)) return '';
+  const m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if (m) return `${m[3]}-${m[2].padStart(2,'0')}-${m[1].padStart(2,'0')}`;
+  return s;
+}
+
+const REMARK_EXTRA_FIELDS = [
+  ['serviceNo', /Service No:\s*([^|—]+)/],
+  ['driverName', /Driver:\s*([^|—]+)/],
+  ['waitKrmr', /Wait@Karimnagar:\s*([^|—]+)/],
+  ['atKrmr', /At Karimnagar:\s*([^|—]+)/],
+  ['movedKrmr', /Moved Karimnagar:\s*([^|—]+)/],
+  ['reachedJbs', /Reached JBS:\s*([^|—]+)/],
+  ['reachedStand', /Reached Stand:\s*([^|—]+)/],
+  ['movedPoint', /Moved Point:\s*([^|—]+)/],
+  ['chgStart', /Charge Start:\s*([^|—]+)/],
+  ['chgEnd', /Charge End:\s*([^|—]+)/],
+  ['socChgEnd', /SOC@ChargeEnd:\s*([^|—%]+)/],
+  ['waitJbs', /Wait@JBS:\s*([^|—]+)/],
+  ['atJbs', /At JBS:\s*([^|—]+)/],
+  ['movedJbs', /Moved JBS:\s*([^|—]+)/]
+];
+
+function parseRemarksExtras(remarksStr){
+  const s = String(remarksStr || '');
+  const extras = {};
+  REMARK_EXTRA_FIELDS.forEach(([key, re]) => {
+    const m = s.match(re);
+    if (m) extras[key] = m[1].trim();
+  });
+  const leftover = s
+    .split(' — ')
+    .map(part => part.trim())
+    .filter(part => {
+      const pieces = part.split(' | ').map(p => p.trim()).filter(Boolean);
+      if (!pieces.length) return false;
+      return !pieces.every(p => REMARK_EXTRA_FIELDS.some(([, re]) => re.test(p)));
+    })
+    .join(' — ');
+  extras.remarks = leftover;
+  return extras;
+}
+
+function reconstructEntriesFromSheet(sheet){
+  const headers = sheet.headers || [];
+  const rows = sheet.rows || [];
+  const idx = {};
+  headers.forEach((h, i) => { idx[h] = i; });
+  const has = h => idx[h] !== undefined;
+  const cell = (r, h) => has(h) ? r[idx[h]] : '';
+
+  const groups = {};
+  const order = [];
+  rows.forEach((r, rIdx) => {
+    const gid = (has('Group ID') && cell(r, 'Group ID'))
+      ? String(cell(r, 'Group ID'))
+      : [cell(r,'Date (dd-mm-yyyy)'), cell(r,'Route No'), cell(r,'Bus No. (With full registration)')].join('|');
+    if (!groups[gid]){ groups[gid] = []; order.push(gid); }
+    groups[gid].push({ r, rIdx });
+  });
+
+  return order.map(gid => {
+    const g = groups[gid];
+    const first = g[0].r;
+    const dutyVal = String(cell(first, 'Duty') || '').toLowerCase();
+    const mode = dutyVal.indexOf('trip') !== -1 ? 'trip' : 'shift';
+    const columns = {};
+    let lastGeneralRemarks = '';
+    g.forEach((entryRow, ci) => {
+      const r = entryRow.r;
+      const parsedExtras = parseRemarksExtras(cell(r, 'Remarks'));
+      lastGeneralRemarks = parsedExtras.remarks;
+      delete parsedExtras.remarks;
+      columns[ci] = Object.assign({
+        busNo: cell(r, 'Bus No. (With full registration)') || '',
+        driverId: cell(r, 'Driver ID/Badge No.') || '',
+        schOutShed: sanitizeTimeArtifact(cell(r, 'Schedule Start Time (hh:mm)') || ''),
+        schInShed: sanitizeTimeArtifact(cell(r, 'Schedule End Time (hh:mm)') || ''),
+        actOutShed: sanitizeTimeArtifact(cell(r, 'Actual Start Time (hh:mm)') || ''),
+        reachedKrmr: sanitizeTimeArtifact(cell(r, 'Actual End Time (hh:mm)') || ''),
+        socStart: cell(r, 'Route Start SOC % (C)') || '',
+        socEndKrmr: cell(r, 'Route End SOC % (D)') || '',
+        startKm1: cell(r, 'Odometer Start Reading (A)') || '',
+        endKm2: cell(r, 'Odometer End Reading (B)') || ''
+      }, parsedExtras);
+    });
+    return {
+      id: (has('Row ID') && cell(first, 'Row ID')) || gid,
+      mode: mode,
+      date: ddmmyyyyToIso(cell(first, 'Date (dd-mm-yyyy)')),
+      model: cell(first, 'Model') || '',
+      enroute: cell(first, 'En-Route') || cell(first, 'Route No') || '',
+      remarks: lastGeneralRemarks,
+      columns: columns
+    };
+  });
+}
+
+let logsAutoLoaded = false;
+
+function loadLogs(){
+  const filters = buildLogFilters();
+  logsMount.innerHTML = '';
+  logsEmpty.textContent = 'Loading logs...';
+  logsEmpty.style.display = 'block';
+
+  if (!isConfigured()){
+    logsEmpty.textContent = 'SCRIPT_URL not set yet — paste your Apps Script Web App URL near the top of this file to view saved logs.';
+    return;
+  }
+
+  callApi('getLogs', filters)
+    .then(entries => {
+      const list = Array.isArray(entries) ? entries : [];
+      if (list.length){
+        applyClientFilterAndRender(list, filters);
+      } else {
+        return loadLogsFromRawSheet(filters);
+      }
+    })
+    .catch(err => {
+      console.warn('getLogs failed, falling back to the raw DOR sheet:', err);
+      return loadLogsFromRawSheet(filters);
+    });
+}
+
+function loadLogsFromRawSheet(filters){
+  return callApi('getSheetData')
+    .then(sheet => {
+      const entries = reconstructEntriesFromSheet(sheet || { headers: [], rows: [] });
+      applyClientFilterAndRender(entries, filters);
+    })
+    .catch(err => {
+      logsEmpty.textContent = 'Failed to load logs: ' + err.message;
+      logsEmpty.style.display = 'block';
+    });
+}
+
+function renderLogs(entries){
+  logsMount.innerHTML = '';
+  const selectAllCb = document.getElementById('chk-select-all');
+  if (selectAllCb) selectAllCb.checked = false;
+  if (!entries || entries.length === 0){
+    logsEmpty.textContent = 'No matching logs found. Try a shorter Driver ID / Name, or clear the Date and Bus No filters.';
+    logsEmpty.style.display = 'block';
+    return;
+  }
+  logsEmpty.style.display = 'none';
+
+  entries.forEach((entry, idx) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'log-entry-wrap';
+    wrap.dataset.idx = idx;
+    wrap.appendChild(buildLogEntryBlock(entry, idx));
+    logsMount.appendChild(wrap);
+  });
+}
+
+function buildLogEntryBlock(entry, idx){
+  const block = document.createElement('div');
+  const paperId = 'log-paper-' + idx;
+
+  const actions = document.createElement('div');
+  actions.className = 'log-entry-actions no-print';
+
+  const tagWrap = document.createElement('label');
+  tagWrap.style.display = 'flex';
+  tagWrap.style.alignItems = 'center';
+  tagWrap.style.gap = '8px';
+  tagWrap.style.cursor = 'pointer';
+
+  const selectCb = document.createElement('input');
+  selectCb.type = 'checkbox';
+  selectCb.className = 'log-select-chk';
+  selectCb.dataset.paperid = paperId;
+
+  const tag = document.createElement('span');
+  tag.className = 'log-entry-tag';
+  tag.textContent = `${entry.date || '—'} · ${entry.enroute || ''} ${entry.id ? '· Row ' + entry.id : ''}`;
+
+  tagWrap.appendChild(selectCb);
+  tagWrap.appendChild(tag);
+
+  const btnGroup = document.createElement('div');
+  btnGroup.className = 'log-entry-buttons';
+
+  const editBtn = document.createElement('button');
+  editBtn.className = 'btn btn-edit';
+  editBtn.textContent = 'Edit This Record';
+  editBtn.addEventListener('click', () => switchToEdit(block, entry, idx));
+
+  const pdfBtn = document.createElement('button');
+  pdfBtn.className = 'btn btn-pdf';
+  pdfBtn.textContent = 'PDF this record';
+  pdfBtn.addEventListener('click', () => printSingle(paperId));
+
+  btnGroup.appendChild(editBtn);
+  btnGroup.appendChild(pdfBtn);
+  actions.appendChild(tagWrap);
+  actions.appendChild(btnGroup);
+  block.appendChild(actions);
+
+  const paperDiv = document.createElement('div');
+  paperDiv.id = paperId;
+  paperDiv.innerHTML = entry.mode === 'shift' ? buildLogPaperShift(entry) : buildLogPaperTrip(entry);
+  block.appendChild(paperDiv);
+
+  return block;
+}
+
+function readonlyRows(rowsDef, labels, colIdxs, colData){
+  return rowsDef.map(([key,en,te,type]) => {
+    const cells = colIdxs.map(i => {
+      const v = (colData[i] && colData[i][key] !== undefined) ? colData[i][key] : '';
+      return `<td class="readonly-cell">${formatDisplayValue(type, v)}</td>`;
+    }).join('');
+    return `<tr><td class="label-cell">${en}<span class="te">${te}</span></td>${cells}</tr>`;
+  }).join('');
+}
+
+// Same guard as ddmmyyyyToIso, applied at *display* time too, so a bad
+// date value is caught even when it comes straight from getLogs() and
+// never passes through ddmmyyyyToIso at all.
+function safeDisplayDate(v){
+  const s = String(v || '').trim();
+  if (!s) return '';
+  if (/^\d{1,2}:\d{2}(:\d{2})?$/.test(s)) return '⚠ date missing (check sheet)';
+  return s;
+}
+
+function identityReadonlyBlock(entry){
+  const ident = findFirstNonEmptyIdentity(entry.columns);
+  return `
+  <div class="identity-block readonly">
+    <div><b>Service No:</b> ${ident.serviceNo || '—'}</div>
+    <div><b>Bus No:</b> ${ident.busNo || '—'}</div>
+    <div><b>Driver Name:</b> ${ident.driverName || '—'}</div>
+    <div><b>Driver ID:</b> ${ident.driverId || '—'}</div>
+  </div>`;
+}
+
+function buildLogPaperShift(entry){
+  const baseLabels = ['Shift 1 (Morning)','Shift 2 (Evening)'];
+  let colIdxs = activeColumnIndices(entry.columns || {}, 2);
+  if (!colIdxs.length) colIdxs = [0,1];
+  const labels = colIdxs.map(i => baseLabels[i]);
+  const rowsHtml = readonlyRows(SHIFT_ROWS_BODY, labels, colIdxs, entry.columns || {});
+  return `
+  <div class="paper">
+    <div class="paper-head"><div>Maintenance No: 80198 21275</div><div>Operations No: 8019821276</div></div>
+    <div class="paper-title">CHAKRA E-TRANS (KARIMNAGAR) PRIVATE LIMITED</div>
+    <div class="paper-sub">
+      <div>Date: ${safeDisplayDate(entry.date)}</div>
+      <div>Model: ${entry.model || ''}</div>
+      <div>En-Route: ${entry.enroute || ''}</div>
+      <div>Reporting Time: ${entry.reportingTime || ''}</div>
+    </div>
+    ${identityReadonlyBlock(entry)}
+    <table class="dor">
+      <thead><tr><th scope="col" style="width:34%"></th>${labels.map(l=>`<th scope="col">${l}</th>`).join('')}</tr></thead>
+      <tbody>${rowsHtml}</tbody>
+    </table>
+    <div class="remarks-box"><b>Remarks/Bus Complaints:</b> ${entry.remarks || ''}</div>
+    <div class="sig-row">
+      <div>Shift 1 Signature: ${entry.sigShift1 || ''}</div>
+      <div>Shift 2 Signature: ${entry.sigShift2 || ''}</div>
+      <div>Supervisor: ${entry.sigSupervisor || ''}</div>
+      <div>Received: ${entry.sigReceived || ''}</div>
+    </div>
+    ${printFooterHtml()}
+  </div>`;
+}
+
+function buildLogPaperTrip(entry){
+  let colIdxs = activeColumnIndices(entry.columns || {}, 6);
+  if (!colIdxs.length) colIdxs = [0];
+  const labels = colIdxs.map(i => 'Trip ' + (i + 1));
+  const rowsHtml = readonlyRows(TRIP_ROWS_BODY, labels, colIdxs, entry.columns || {});
+  return `
+  <div class="paper">
+    <div class="paper-head"><div>Maintenance No: 80198 21275</div><div>Operations No: 8019821276</div></div>
+    <div class="paper-title">CHAKRA E-TRANS (KARIMNAGAR) PRIVATE LIMITED</div>
+    <div class="paper-sub">
+      <div>Date: ${safeDisplayDate(entry.date)}</div>
+      <div>Model: ${entry.model || ''}</div>
+      <div>En-Route: ${entry.enroute || ''}</div>
+      <div>Reporting Time: ${entry.reportingTime || ''}</div>
+    </div>
+    ${identityReadonlyBlock(entry)}
+    <table class="dor">
+      <thead><tr><th scope="col" style="width:26%"></th>${labels.map(l=>`<th scope="col">${l}</th>`).join('')}</tr></thead>
+      <tbody>${rowsHtml}</tbody>
+    </table>
+    <div class="remarks-box"><b>Remarks/Bus Complaints:</b> ${entry.remarks || ''}</div>
+    <div class="sig-row">
+      <div>Driver: ${entry.sigDriver || ''}</div>
+      <div>DP: ${entry.sigDp || ''}</div>
+      <div>VP1: ${entry.sigVp1 || ''}</div>
+      <div>VP2: ${entry.sigVp2 || ''}</div>
+      <div>Supervisor: ${entry.sigSupervisor || ''}</div>
+    </div>
+    ${printFooterHtml()}
+  </div>`;
+}
+
+function switchToEdit(block, entry, idx){
+  const route = { model: entry.model, enroute: entry.enroute, mode: entry.mode };
+  const paperId = 'edit-paper-' + idx;
+
+  block.innerHTML = '';
+
+  const actions = document.createElement('div');
+  actions.className = 'log-entry-actions no-print';
+  const tag = document.createElement('span');
+  tag.className = 'log-entry-tag';
+  tag.textContent = `Editing: ${entry.date || '—'} · ${entry.enroute || ''} ${entry.id ? '· Row ' + entry.id : ''}`;
+
+  const btnGroup = document.createElement('div');
+  btnGroup.className = 'log-entry-buttons';
+
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'btn btn-save';
+  saveBtn.textContent = 'Save Changes';
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'btn btn-cancel';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.addEventListener('click', () => {
+    block.innerHTML = '';
+    block.appendChild(buildLogEntryBlock(entry, idx));
+  });
+
+  btnGroup.appendChild(saveBtn);
+  btnGroup.appendChild(cancelBtn);
+  actions.appendChild(tag);
+  actions.appendChild(btnGroup);
+  block.appendChild(actions);
+
+  const editStatus = document.createElement('span');
+  editStatus.style.fontSize = '12px';
+  editStatus.style.fontWeight = '700';
+  editStatus.style.marginLeft = '8px';
+  actions.appendChild(editStatus);
+
+  const paperDiv = document.createElement('div');
+  paperDiv.id = paperId;
+  paperDiv.innerHTML = route.mode === 'shift'
+    ? buildShiftForm(route, paperId, entry)
+    : buildTripForm(route, paperId, entry);
+  paperDiv.querySelector('.paper').classList.add('editing');
+  block.appendChild(paperDiv);
+  attachDutyLookup(paperId, route);
+  if (route.mode === 'trip') attachTripCountControls(paperId, route);
+
+  saveBtn.addEventListener('click', () => {
+    const updated = collectFormData(paperId, route);
+    applyIdentityToActiveColumns(updated);
+    updated.sheetHeaders = GSHEET_HEADERS;
+    updated.sheetRows = buildSheetRows(updated);
+    editStatus.textContent = 'Saving...';
+    editStatus.style.color = 'var(--edit)';
+
+    if (isConfigured()){
+      callApi('updateEntry', { id: entry.id, data: updated })
+        .then(() => {
+          editStatus.textContent = '';
+          const merged = Object.assign({}, entry, updated, { id: entry.id });
+          lastLoadedEntries[idx] = merged;
+          block.innerHTML = '';
+          block.appendChild(buildLogEntryBlock(merged, idx));
+        })
+        .catch(err => {
+          editStatus.textContent = 'Update failed: ' + err.message;
+          editStatus.style.color = 'var(--danger)';
+        });
+    } else {
+      console.log('Updated DOR entry payload', entry.id, updated);
+      editStatus.textContent = 'SCRIPT_URL not set yet — paste your Apps Script Web App URL near the top of this file to save changes.';
+      editStatus.style.color = 'var(--danger)';
+    }
+  });
+}
+
+function getRouteRank(entry){
+  if (!entry) return ROUTES.length;
+  let idx = ROUTES.findIndex(r => r.model === entry.model && r.enroute === entry.enroute);
+  if (idx === -1) idx = ROUTES.findIndex(r => r.enroute === entry.enroute);
+  if (idx === -1) idx = ROUTES.findIndex(r => r.model === entry.model);
+  return idx === -1 ? ROUTES.length : idx;
+}
+
+function printPapers(paperIds){
+  const allWraps = [...document.querySelectorAll('#logs-mount > .log-entry-wrap')];
+  const originalOrder = allWraps.slice();
+
+  const toShow = allWraps.filter(wrap => {
+    const paperDiv = wrap.querySelector('[id^="log-paper-"]');
+    return paperDiv && paperIds.includes(paperDiv.id);
+  });
+  const toHide = allWraps.filter(wrap => !toShow.includes(wrap));
+
+  const ranked = toShow
+    .map((wrap, orig) => ({ wrap, rank: getRouteRank(lastLoadedEntries[parseInt(wrap.dataset.idx, 10)]), orig }))
+    .sort((a, b) => a.rank - b.rank || a.orig - b.orig);
+
+  toHide.forEach(wrap => { wrap.style.display = 'none'; });
+  ranked.forEach(item => {
+    item.wrap.style.display = '';
+    logsMount.appendChild(item.wrap);
+  });
+
+  window.print();
+
+  originalOrder.forEach(wrap => {
+    logsMount.appendChild(wrap);
+    wrap.style.display = '';
+  });
+}
+
+function printSingle(paperId){
+  printPapers([paperId]);
+}
+
+function printSelectedLogs(){
+  const ids = [...document.querySelectorAll('.log-select-chk:checked')].map(cb => cb.dataset.paperid);
+  if (!ids.length){
+    alert('Tick at least one log sheet\'s checkbox first, then click Save Selected as PDF.');
+    return;
+  }
+  printPapers(ids);
+}
+
+function printAllLogs(){
+  if (!lastLoadedEntries.length){
+    alert('No log sheets are loaded yet — search logs first.');
+    return;
+  }
+  const allIds = [...document.querySelectorAll('#logs-mount [id^="log-paper-"]')].map(p => p.id);
+  printPapers(allIds);
+}
+
+document.getElementById('chk-select-all').addEventListener('change', (e) => {
+  document.querySelectorAll('.log-select-chk').forEach(cb => { cb.checked = e.target.checked; });
+});
+document.getElementById('btn-pdf-selected').addEventListener('click', printSelectedLogs);
+document.getElementById('btn-pdf-all').addEventListener('click', printAllLogs);
+
+let CURRENT_SHEET_DATA = { headers: [], rows: [] }; // everything last loaded from the sheet, untouched
+let filteredRows = []; // subset of CURRENT_SHEET_DATA.rows within the chosen date range (or all rows, if no filter set)
+let sortState = { colIndex: -1, dir: 'asc' }; // sort applied to filteredRows
+const DATE_COL_HEADER = 'Date (dd-mm-yyyy)';
+
+/* The sheet stores dates as dd-mm-yyyy text. Parse that into a real Date
+   (midnight local time) so it can be compared against the <input type="date">
+   range pickers, which give yyyy-mm-dd strings. Returns null for anything
+   that isn't a clean dd-mm-yyyy value. */
+function parseSheetDate(v){
+  const s = String(v || '').trim();
+  const m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if (!m) return null;
+  const d = new Date(parseInt(m[3],10), parseInt(m[2],10) - 1, parseInt(m[1],10));
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function applyDateFilter(){
+  const fromVal = document.getElementById('gsheet-date-from').value;
+  const toVal = document.getElementById('gsheet-date-to').value;
+  const dateColIdx = CURRENT_SHEET_DATA.headers.indexOf(DATE_COL_HEADER);
+
+  if (!fromVal && !toVal){
+    filteredRows = CURRENT_SHEET_DATA.rows.slice();
+  } else if (dateColIdx === -1){
+    filteredRows = CURRENT_SHEET_DATA.rows.slice();
+  } else {
+    const fromDate = fromVal ? new Date(fromVal + 'T00:00:00') : null;
+    const toDate = toVal ? new Date(toVal + 'T00:00:00') : null;
+    filteredRows = CURRENT_SHEET_DATA.rows.filter(r => {
+      const rowDate = parseSheetDate(r[dateColIdx]);
+      if (!rowDate) return false;
+      if (fromDate && rowDate < fromDate) return false;
+      if (toDate && rowDate > toDate) return false;
+      return true;
+    });
+  }
+
+  if (sortState.colIndex !== -1){
+    sortRowsByColumn(sortState.colIndex, sortState.dir);
+  }
+  renderGSheetGrid();
+  renderPivot();
+}
+
+function clearDateFilter(){
+  document.getElementById('gsheet-date-from').value = '';
+  document.getElementById('gsheet-date-to').value = '';
+  filteredRows = CURRENT_SHEET_DATA.rows.slice();
+  if (sortState.colIndex !== -1){
+    sortRowsByColumn(sortState.colIndex, sortState.dir);
+  }
+  renderGSheetGrid();
+  renderPivot();
+}
+
+document.getElementById('btn-gsheet-filter').addEventListener('click', applyDateFilter);
+document.getElementById('btn-gsheet-clear-filter').addEventListener('click', clearDateFilter);
+
+function coerceForSort(v){
+  if (v === '' || v === null || v === undefined) return { isNum:false, num:NaN, str:'' };
+  const num = parseFloat(v);
+  const isNum = !isNaN(num) && isFinite(num) && String(v).trim() !== '' && /^-?\d+(\.\d+)?$/.test(String(v).trim());
+  return { isNum, num, str: String(v).toLowerCase() };
+}
+
+function sortRowsByColumn(colIndex, dir){
+  filteredRows.sort((a, b) => {
+    const av = coerceForSort(a[colIndex]);
+    const bv = coerceForSort(b[colIndex]);
+    let cmp;
+    if (av.isNum && bv.isNum){
+      cmp = av.num - bv.num;
+    } else {
+      cmp = av.str < bv.str ? -1 : (av.str > bv.str ? 1 : 0);
+    }
+    return dir === 'asc' ? cmp : -cmp;
+  });
+}
+
+function handleSortClick(colIndex){
+  if (sortState.colIndex === colIndex){
+    sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+  } else {
+    sortState.colIndex = colIndex;
+    sortState.dir = 'asc';
+  }
+  sortRowsByColumn(colIndex, sortState.dir);
+  renderGSheetGrid();
+}
+
+function renderGSheetGrid(){
+  const mount = document.getElementById('gsheet-mount');
+  const headers = CURRENT_SHEET_DATA.headers;
+  const rows = filteredRows;
+  const totalCount = CURRENT_SHEET_DATA.rows.length;
+  document.getElementById('gsheet-rowcount').textContent = rows.length === totalCount ? String(rows.length) : (rows.length + ' of ' + totalCount);
+
+  if (!headers.length){
+    mount.innerHTML = '<div style="padding:26px;text-align:center;color:#7a8a99;">No data loaded yet.</div>';
+    return;
+  }
+  if (!rows.length){
+    mount.innerHTML = '<div style="padding:26px;text-align:center;color:#7a8a99;">The sheet is connected but has no rows yet — submit something on the New Entry tab first.</div>';
+    return;
+  }
+
+  let html = '<table class="gsheet"><thead>';
+  html += '<tr class="colletters"><th class="corner" scope="col"></th>' + headers.map((h,i) => `<th scope="col">${colLetter(i)}</th>`).join('') + '</tr>';
+  html += '<tr class="headerrow"><th class="corner" scope="col">#</th>' + headers.map((h,i) => {
+    const isSorted = sortState.colIndex === i;
+    const arrow = isSorted ? (sortState.dir === 'asc' ? '▲' : '▼') : '';
+    return `<th scope="col" class="${isSorted ? 'sorted' : ''}" data-colidx="${i}" title="Click to sort">${h}<span class="sort-arrow">${arrow}</span></th>`;
+  }).join('') + '</tr>';
+  html += '</thead><tbody>';
+  rows.forEach((r, i) => {
+    html += `<tr><th class="rownum" scope="row">${i+2}</th>` + r.map(v => `<td>${v === '' || v === null || v === undefined ? '' : v}</td>`).join('') + '</tr>';
+  });
+  html += '</tbody></table>';
+  mount.innerHTML = html;
+
+  mount.querySelectorAll('tr.headerrow th[data-colidx]').forEach(th => {
+    th.addEventListener('click', () => handleSortClick(parseInt(th.dataset.colidx, 10)));
+  });
+}
+
+function colLetter(n){
+  let s = '';
+  n = n + 1;
+  while (n > 0){
+    const rem = (n - 1) % 26;
+    s = String.fromCharCode(65 + rem) + s;
+    n = Math.floor((n - 1) / 26);
+  }
+  return s;
+}
+
+document.getElementById('btn-load-sheet').addEventListener('click', loadSheetData);
+
+function loadSheetData(){
+  const mount = document.getElementById('gsheet-mount');
+  mount.innerHTML = '<div style="padding:26px;text-align:center;color:#7a8a99;">Loading from Google Sheet...</div>';
+
+  if (isConfigured()){
+    callApi('getSheetData')
+      .then(res => {
+        CURRENT_SHEET_DATA = res || { headers: [], rows: [] };
+        filteredRows = CURRENT_SHEET_DATA.rows.slice();
+        sortState = { colIndex: -1, dir: 'asc' };
+        document.getElementById('gsheet-date-from').value = '';
+        document.getElementById('gsheet-date-to').value = '';
+        renderGSheetGrid();
+        setupPivotFields();
+        renderPivot();
+      })
+      .catch(err => {
+        mount.innerHTML = `<div style="padding:26px;text-align:center;color:var(--danger);">Failed to load: ${err.message}</div>`;
+      });
+  } else {
+    mount.innerHTML = '<div style="padding:26px;text-align:center;color:var(--muted);">SCRIPT_URL not set yet — paste your Apps Script Web App URL near the top of this file to pull live rows from your Google Sheet.</div>';
+    document.getElementById('gsheet-rowcount').textContent = '0';
+  }
+}
+
+/* ================== CLIENT-SIDE EXPORT ==================
+   Both buttons below used to call getSheetExportLinks on the Apps
+   Script backend and open the resulting Google Drive export URL —
+   that flow makes the browser sign in / grant access to the Google
+   account before the file downloads. Neither button touches Google
+   or the Apps Script backend anymore: both build the file straight
+   from CURRENT_SHEET_DATA (the rows already loaded into this page)
+   using the SheetJS library, so there's no login prompt at all.
+   ============================================================ */
+function currentExportFilename(ext){
+  const now = new Date();
+  const stamp = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+  return 'DOR_' + stamp + '.' + ext;
+}
+
+document.getElementById('btn-export-xlsx').addEventListener('click', () => {
+  if (!CURRENT_SHEET_DATA.headers.length){
+    alert('Load the sheet first, then export.');
+    return;
+  }
+  if (!filteredRows.length){
+    alert('No rows match the current date filter — adjust or clear it first.');
+    return;
+  }
+  // Only the rows currently shown in the table (i.e. filtered + sorted) are exported.
+  const aoa = [CURRENT_SHEET_DATA.headers, ...filteredRows];
+  const ws = XLSX.utils.aoa_to_sheet(aoa);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'DOR');
+  XLSX.writeFile(wb, currentExportFilename('xlsx'));
+});
+
+document.getElementById('btn-export-pdf').addEventListener('click', () => {
+  if (!CURRENT_SHEET_DATA.headers.length){
+    alert('Load the sheet first, then export.');
+    return;
+  }
+  // Reuses the same print-to-PDF approach as the Print button: opens a
+  // clean printable window and triggers the browser print dialog, where
+  // choosing "Save as PDF" as the destination saves the file locally —
+  // no Google sign-in involved. Only the currently filtered/sorted rows
+  // are included, since it prints straight from the on-screen table.
+  openPrintableSheetWindow(true);
+});
+
+document.getElementById('btn-print-sheet').addEventListener('click', () => {
+  openPrintableSheetWindow(false);
+});
+
+function openPrintableSheetWindow(isPdfExport){
+  if (!filteredRows.length){
+    alert('No rows to ' + (isPdfExport ? 'export' : 'print') + ' — load the sheet and/or adjust the date filter first.');
+    return;
+  }
+  const win = window.open('', '_blank');
+  const tableHtml = document.getElementById('gsheet-mount').innerHTML;
+  win.document.write(`<!DOCTYPE html><html><head><title>DOR Sheet</title><style>
+    body{font-family:Arial,sans-serif;margin:16px;}
+    table{border-collapse:collapse;width:100%;font-size:10px;}
+    th,td{border:1px solid #000;padding:3px 5px;white-space:nowrap;}
+    th{background:#f4f4f4;}
+    tr.colletters th{background:#eee;color:#555;}
+    .sort-arrow{display:none;}
+  </style></head><body>${tableHtml}</body></html>`);
+  win.document.close();
+  win.focus();
+  setTimeout(() => win.print(), 300);
+}
+
+const pvRowsSel = document.getElementById('pv-rows');
+const pvColsSel = document.getElementById('pv-cols');
+const pvValsSel = document.getElementById('pv-values');
+const pvAggSel = document.getElementById('pv-agg');
+const pvFilterFieldSel = document.getElementById('pv-filter-field');
+const pvFilterValuesMount = document.getElementById('pv-filter-values');
+
+function setupPivotFields(){
+  const headers = CURRENT_SHEET_DATA.headers;
+  pvRowsSel.innerHTML = '';
+  pvColsSel.innerHTML = '<option value="">— None —</option>';
+  pvValsSel.innerHTML = '';
+  pvFilterFieldSel.innerHTML = '<option value="">— No filter —</option>';
+
+  headers.forEach(h => {
+    pvRowsSel.appendChild(new Option(h, h));
+    pvColsSel.appendChild(new Option(h, h));
+    pvValsSel.appendChild(new Option(h, h));
+    pvFilterFieldSel.appendChild(new Option(h, h));
+  });
+
+  if (headers.includes('En-Route')) pvRowsSel.value = 'En-Route';
+  if (headers.includes('Odometer  Diff. Km (B-A)')) pvValsSel.value = 'Odometer  Diff. Km (B-A)';
+  pvFilterValuesMount.innerHTML = '';
+}
+
+function rowsAsObjects(){
+  const headers = CURRENT_SHEET_DATA.headers;
+  return filteredRows.map(r => {
+    const obj = {};
+    headers.forEach((h,i) => obj[h] = r[i]);
+    return obj;
+  });
+}
+
+function buildFilterCheckboxes(){
+  const field = pvFilterFieldSel.value;
+  if (!field){ pvFilterValuesMount.innerHTML = ''; return; }
+  const objs = rowsAsObjects();
+  const options = [...new Set(objs.map(r => r[field]).filter(v => v !== '' && v != null))];
+  pvFilterValuesMount.innerHTML = options.map(o => `<label><input type="checkbox" value="${o}" checked> ${o}</label>`).join('');
+  pvFilterValuesMount.querySelectorAll('input').forEach(cb => cb.addEventListener('change', renderPivot));
+}
+pvFilterFieldSel.addEventListener('change', () => { buildFilterCheckboxes(); renderPivot(); });
+
+function getCheckedFilterValues(){
+  return [...pvFilterValuesMount.querySelectorAll('input[type=checkbox]:checked')].map(cb => cb.value);
+}
+
+function isNumeric(v){ return typeof v === 'number' || (v !== '' && v !== null && !isNaN(parseFloat(v)) && isFinite(v)); }
+
+function aggregate(values, mode){
+  if (mode === 'count') return values.length;
+  const nums = values.filter(isNumeric).map(v => parseFloat(v));
+  if (nums.length === 0) return mode === 'sum' ? 0 : '—';
+  if (mode === 'sum') return nums.reduce((a,b)=>a+b,0);
+  if (mode === 'avg') return nums.reduce((a,b)=>a+b,0) / nums.length;
+  if (mode === 'min') return Math.min(...nums);
+  if (mode === 'max') return Math.max(...nums);
+  return '';
+}
+function roundVal(v){ return typeof v === 'number' ? Math.round(v * 100) / 100 : v; }
+
+function renderPivot(){
+  const table = document.getElementById('pv-table');
+  const summary = document.getElementById('pv-summary');
+  const headers = CURRENT_SHEET_DATA.headers;
+
+  if (!headers.length){
+    table.innerHTML = '';
+    summary.textContent = 'No data loaded yet.';
+    return;
+  }
+
+  const rowField = pvRowsSel.value;
+  const colField = pvColsSel.value;
+  const valField = pvValsSel.value;
+  const agg = pvAggSel.value;
+  const filterField = pvFilterFieldSel.value;
+  const filterAllowed = filterField ? getCheckedFilterValues() : null;
+
+  const allRows = rowsAsObjects();
+  const filtered = filterField
+    ? allRows.filter(r => filterAllowed.includes(String(r[filterField])))
+    : allRows;
+
+  if (!rowField || !valField){
+    table.innerHTML = '';
+    summary.textContent = 'Pick a Rows field and a Values field.';
+    return;
+  }
+
+  const rowKeys = [...new Set(filtered.map(r => r[rowField]))].filter(v => v !== '' && v != null).sort();
+  const colKeys = colField ? [...new Set(filtered.map(r => r[colField]))].filter(v => v !== '' && v != null).sort() : ['Total'];
+
+  let html = '<thead><tr><th scope="col">' + rowField + '</th>' + colKeys.map(c => `<th scope="col">${c}</th>`).join('') + (colField ? '<th scope="col">Total</th>' : '') + '</tr></thead><tbody>';
+
+  const colTotals = {};
+  colKeys.forEach(c => colTotals[c] = []);
+  let grandTotal = [];
+
+  rowKeys.forEach(rk => {
+    html += `<tr><td class="rowhead">${rk}</td>`;
+    let rowAllVals = [];
+    colKeys.forEach(ck => {
+      const matchRows = filtered.filter(r => r[rowField] === rk && (!colField || r[colField] === ck));
+      const vals = matchRows.map(r => r[valField]);
+      const result = aggregate(vals, agg);
+      html += `<td>${roundVal(result)}</td>`;
+      colTotals[ck].push(...vals);
+      rowAllVals.push(...vals);
+    });
+    if (colField){
+      html += `<td>${roundVal(aggregate(rowAllVals, agg))}</td>`;
+    }
+    grandTotal.push(...rowAllVals);
+    html += '</tr>';
+  });
+
+  html += '</tbody><tfoot><tr><td>Total</td>';
+  colKeys.forEach(ck => { html += `<td>${roundVal(aggregate(colTotals[ck], agg))}</td>`; });
+  if (colField) html += `<td>${roundVal(aggregate(grandTotal, agg))}</td>`;
+  html += '</tr></tfoot>';
+
+  table.innerHTML = html;
+  summary.textContent = `${filtered.length} of ${allRows.length} rows included · ${agg.toUpperCase()}(${String(valField).trim()}) by ${rowField}${colField ? ' × ' + colField : ''}`;
+}
+
+[pvRowsSel, pvColsSel, pvValsSel, pvAggSel].forEach(el => el.addEventListener('change', renderPivot));
+</script>
+</body>
+</html>

@@ -1,0 +1,1128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Driver Duty Chart</title>
+<style>
+  :root{
+    --band:#e3ecdb; --cream:#fdf1d4; --white:#ffffff; --pink:#f7b9bb;
+    --blue:#b9c6e6; --green:#c7e0c2; --border:#8a8a8a; --ink:#1c1c1c; --accent:#2f6f3e;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0; padding:16px; background:#f2f2ee; font-family:"Segoe UI",Arial,sans-serif; color:var(--ink); font-size:13px;}
+
+  .panel{background:var(--white); border:1px solid #ccc; border-radius:8px; padding:12px 14px; margin-bottom:14px;
+    display:flex; flex-wrap:wrap; gap:10px; align-items:flex-end;}
+  .field{display:flex; flex-direction:column; gap:3px;}
+  .field label{font-size:11px; font-weight:600; color:#444;}
+  .field input, .field select{padding:6px 8px; border:1px solid #bbb; border-radius:5px; font-size:12px; min-width:130px;}
+  .field input.wide{min-width:340px;}
+  button{background:var(--accent); color:#fff; border:none; border-radius:5px; padding:7px 14px; font-size:12px; cursor:pointer; font-weight:600;}
+  button.secondary{background:#6b6b6b;}
+  button.danger{background:#a33d3d;}
+  button.small{padding:4px 9px; font-size:11px;}
+  button:hover{filter:brightness(1.08);}
+  .status{font-size:11.5px; color:#555; margin-left:4px;}
+  .status.err{color:#a33d3d; font-weight:600;}
+  .status.ok{color:#2f6f3e; font-weight:600;}
+
+  textarea{width:100%; min-height:100px; font-family:monospace; font-size:11.5px; padding:8px; border:1px solid #bbb; border-radius:5px;}
+
+  .tabs{display:flex; flex-wrap:wrap; gap:4px; margin-bottom:10px;}
+  .tab{padding:7px 13px; background:#ddd8c4; border:1px solid #b8b190; border-bottom:none; border-radius:6px 6px 0 0;
+    cursor:pointer; font-size:12px; font-weight:600; color:#444;}
+  .tab.active{background:var(--band); color:var(--ink); border-color:#8ea87f;}
+  .tab .count{font-weight:400; color:#666; font-size:10.5px;}
+
+  .chart-wrap{border:1px solid var(--border); border-radius:0 6px 6px 6px; overflow:hidden;}
+  table{width:100%; border-collapse:collapse; background:var(--white);}
+  .band-row td{background:var(--band); font-weight:700; text-align:center; border:1px solid var(--border); padding:6px 4px; font-size:13px;}
+  thead.cols th{background:var(--band); border:1px solid var(--border); padding:6px 5px; font-size:11.5px; font-weight:700; text-align:center;}
+  tbody td{border:1px solid #d3d3d3; padding:5px 6px; font-size:12px; text-align:center; white-space:nowrap;}
+  tbody td.name{text-align:left; font-weight:600;}
+  tr.r-even td{background:var(--cream);}
+  tr.r-odd td{background:var(--white);}
+  tr.r-noshow td{background:var(--pink) !important;}
+  tr.r-night td{background:var(--blue) !important;}
+  tr.r-local td{background:var(--green) !important;}
+  tr:hover td{filter:brightness(0.97);}
+
+  .badge{display:inline-block; padding:2px 7px; border-radius:10px; font-size:10.5px; font-weight:700;}
+  .badge.planned{background:#eee; color:#555;}
+  .badge.reassigned{background:#ffe6a3; color:#7a5b00;}
+  .badge.noshow{background:#f7b9bb; color:#7a1f22;}
+  .badge.pool{background:#dfe8ff; color:#1a3fa0;}
+  .badge.tier0{background:#f7b9bb; color:#7a1f22;}
+  .badge.tier1{background:#b9c6e6; color:#1a2f6f;}
+  .badge.tier2{background:#c7e0c2; color:#265a2c;}
+  .badge.local{background:#c7e0c2; color:#265a2c;}
+
+  .mini-btn{padding:3px 7px; font-size:10.5px; border-radius:4px; border:none; cursor:pointer; font-weight:700; margin:1px;}
+  .mini-btn.no{background:var(--pink); color:#5b1113;}
+  .mini-btn.reset{background:#ddd; color:#333;}
+  .mini-btn.del{background:#eee; color:#a33d3d;}
+
+  select.assign-select{font-size:11.5px; padding:2px 3px; max-width:170px;}
+  input.assign-id-input{font-size:11.5px; padding:3px 6px; width:110px; border:1px solid #bbb; border-radius:4px; margin:1px;}
+  input.assign-id-input.bad{border-color:#a33d3d; background:#fbe9e9;}
+
+  .empty{padding:30px; text-align:center; color:#777; font-size:13px;}
+  .footer-note{font-size:11px; color:#777; margin-top:10px; line-height:1.5;}
+  .slot-form{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px; align-items:flex-end;}
+  .slot-form input, .slot-form select{padding:5px 7px; border:1px solid #bbb; border-radius:4px; font-size:11.5px;}
+  .hint-box{padding:8px 12px; background:#f7f5ea; border:1px solid #ddd8c4; border-radius:6px; font-size:11.5px; color:#555; margin-bottom:10px;}
+
+  @media print{
+    .panel, .tabs, .footer-note, .mini-btn, select.assign-select, .badge, input[type=checkbox], input.assign-id-input{display:none !important;}
+    .screen-only{display:none !important;}
+    .print-only{display:inline !important;}
+    body{background:#fff; padding:0;}
+    .chart-wrap{border:none;}
+  }
+  .print-only{display:none;}
+</style>
+</head>
+<body>
+
+<div class="panel">
+  <input type="hidden" id="sheetUrl"
+    value="https://script.google.com/macros/s/AKfycbyAE1POq5C-ousC5-48dsPM1alLxx_6XEeAj2e4uInz2-UDLDxypv8-Y5YevdgSknMG/exec">
+  <input type="hidden" id="dutyUrl"
+    value="https://script.google.com/macros/s/AKfycbxZ6LVEAIJZMSbUaEczU4pAb9Reno9WLhdHnnqEdCuar-ooTGwUyLu7_qCeceiUMRC1ow/exec">
+  <input type="hidden" id="sheetName" value="Drivers">
+  <div class="field">
+    <label>Duty date</label>
+    <input type="date" id="dutyDate">
+  </div>
+  <div class="field"><button id="reloadPoolBtn" class="secondary">Reload driver pool</button></div>
+  <div class="field"><button id="autoAssignBtn" class="secondary">Auto-assign open slots</button></div>
+  <div class="field"><button id="resetDayBtn" class="danger">Clear today's overrides</button></div>
+  <div class="field"><button id="printBtn" class="secondary">Print</button></div>
+  <div class="field"><button id="exportExcelBtn" class="secondary">Save as Excel</button></div>
+  <div class="field"><button id="exportPdfBtn" class="secondary">Save as PDF</button></div>
+  <div class="field"><button id="saveSheetBtn" class="secondary">Save to Google Sheet</button></div>
+  <span id="statusMsg" class="status"></span>
+  <span id="sheetSyncMsg" class="status"></span>
+</div>
+
+<div class="tabs" id="tabBar"></div>
+<div class="chart-wrap" id="chartArea"></div>
+<div class="footer-note" id="footerNote"></div>
+
+<script>
+/* ============================================================
+   DATA MODEL
+   pool driver (mapped from the "Drivers" sheet tab columns):
+     driver_id, employee_id, name, father_name, dob, gender, blood_group,
+     mobile, alt_mobile, email, current_address, permanent_address,
+     city, district, state, ... joining_date, depot, department,
+     designation, shift, employment_type, ... status, assigned_bus, ...
+   -> normalized to:
+     { empId (=driver_id), employeeCode (=employee_id), empName, phone, altPhone,
+       depot, city, district, designation, status, joinDate }
+   slot: { id, servNo, category, night, driverRT, schDept, schArvl, regNo }
+   assignment (per date+slotId): { empId, status, note }
+   stats (per empId): { lastDutyDate, dutyCount }
+   localFlags: { empId: true/false }  -- manual override on top of the Karimnagar auto-detection
+
+   TWO SEPARATE GOOGLE APPS SCRIPT DEPLOYMENTS ARE USED:
+     #sheetUrl  -> the "Driver details" Apps Script/Sheet — read-only source
+                   for the driver pool (the "Drivers" tab). Used by loadPool().
+     #dutyUrl   -> the "Duty chart" Apps Script/Sheet — where each day's
+                   duty chart is written (per-date tab + master "DutyLog" tab)
+                   and read back from. Used by doSyncDutyToSheet() and
+                   loadDutyForDate_().
+   These are two different scripts/spreadsheets, so keep them separate —
+   don't merge them back into one URL field.
+   ============================================================ */
+
+const $ = (id) => document.getElementById(id);
+function setStatus(msg, kind){ const el=$('statusMsg'); el.textContent=msg; el.className='status'+(kind?' '+kind:''); }
+
+/* ---------- lazy-load the export libraries only when actually needed ----------
+   xlsx.full.min.js and html2pdf.bundle.min.js are fairly heavy and only used by
+   the "Save as Excel" / "Save as PDF" buttons, so they're no longer loaded
+   blocking in <head> — they're fetched on first click instead and cached
+   (window.XLSX / window.html2pdf) for any later clicks. */
+function loadScriptOnce_(src){
+  return new Promise((resolve, reject)=>{
+    const existing = document.querySelector(`script[src="${src}"]`);
+    if(existing){
+      if(existing.dataset.loaded === '1') return resolve();
+      existing.addEventListener('load', ()=>resolve());
+      existing.addEventListener('error', ()=>reject(new Error('Failed to load '+src)));
+      return;
+    }
+    const s = document.createElement('script');
+    s.src = src;
+    s.onload = ()=>{ s.dataset.loaded = '1'; resolve(); };
+    s.onerror = ()=> reject(new Error('Failed to load '+src));
+    document.head.appendChild(s);
+  });
+}
+async function ensureXLSX_(){
+  if(window.XLSX) return;
+  await loadScriptOnce_('https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js');
+}
+async function ensureHtml2Pdf_(){
+  if(window.html2pdf) return;
+  await loadScriptOnce_('https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js');
+}
+
+let pool = [];
+let slots = [];
+let assignments = {};
+let stats = {};
+let localFlags = {};
+let activeTab = 'ALL';
+
+/* Fixed duty categories, in priority order for assignment:
+   0 = Super Luxury (EJ...), 1 = Deluxe (ED...), 2 = every Express category (JBS/GDK/JGTL/MNTY/KMR) */
+const KNOWN_CATEGORIES = ['Super Luxury','Deluxe','JBS Express','GDK Express','JGTL Express','MNTY Express','KMR Express'];
+const CATEGORY_LABEL = {
+  'ALL':'All Duties','REPORT':'Duty Report','SPARE':'Spare Drivers',
+  'POOL':'Driver Pool','ROTATION':'Rotation Overview','SLOTS':'Manage Slots'
+};
+
+/* ---------- category derived straight from the Serv No prefix ---------- */
+function deriveCategory(servNo){
+  const s = String(servNo||'').trim().toUpperCase();
+  if(/^EJ/.test(s)) return 'Super Luxury';
+  if(/^ED/.test(s)) return 'Deluxe';
+  if(/^JE/.test(s)) return 'JBS Express';
+  if(/JGTL/.test(s)) return 'JGTL Express';
+  if(/MNTY/.test(s)) return 'MNTY Express';
+  if(/KMR/.test(s)) return 'KMR Express';
+  if(/GDK/.test(s)) return 'GDK Express';
+  return 'Other'; // fallback for any future serv no that doesn't match a known prefix
+}
+function categoryTier(cat){
+  if(cat === 'Super Luxury') return 0;
+  if(cat === 'Deluxe') return 1;
+  return 2; // all Express categories + Other
+}
+function isNightRow(servNo){ return /N\/?W/i.test(String(servNo||'')); }
+
+/* ---------- seed slot template (Serv No / RT / Dept / Arvl / Reg, from your original charts) ---------- */
+function seedSlots(){
+  const c1 = [
+    ['EJ 01','11:20','00:20','08:00',''],['EJ 03','11:40','00:40','08:15','7001/02'],
+    ['EJ 07','00:50','01:50','09:40','7003/04'],['EJ 11','01:40','02:40','10:30','7005/06'],
+    ['EJ 13','02:00','03:00','11:00','7007/08'],['EJ 15','02:20','03:20','11:30','7009/10'],
+    ['EJ 17','02:50','03:50','11:50','7011/12'],['EJ 19','03:20','04:20','12:20','7013/14'],
+    ['EJ 21','03:40','04:40','12:40','7015/16'],['EJ 23','03:50','04:50','13:15','7017/18'],
+    ['ED 20 N/W','03:15','04:15','17:05',''],['ED 21 N/W','03:55','04:55','17:45',''],
+    ['ED 22 N/W','04:30','05:30','18:25',''],['ED 23 N/W','05:30','06:30','19:05',''],
+    ['ED 24 N/W','06:00','07:00','19:45',''],['ED 18 W/N','07:00','08:00','20:30',''],
+    ['EJ 33','05:50','06:50','15:00','7025/26'],['EJ 37','06:30','07:30','15:30','7027/28'],
+    ['EJ 41','07:00','08:00','16:35','7029/30'],['EJ 43','07:10','08:10','16:45','7031/32'],
+    ['EJ 49','08:30','09:30','17:40','7033/34'],['EJ 53','09:05','10:05','18:10','7035/36'],
+    ['EJ 57','09:40','10:40','18:50','7037/38'],['EJ 63','10:30','11:30','19:30','7039/40'],
+    ['EJ 65','10:50','11:50','19:50','']
+  ];
+  const c2 = [
+    ['EJ 02','11:00','12:00','20:00','7041/42'],['EJ 04','11:20','12:20','20:20','7043/44'],
+    ['EJ 08','11:40','12:40','20:30',''],['EJ 12','12:20','13:20','21:15',''],
+    ['EJ 14','12:35','13:35','21:35','7045/46'],['EJ 16','12:50','13:50','21:55','7047/48'],
+    ['EJ 20','13:50','14:50','22:50','7049/50'],['ED 12','14:10','15:10','23:20',''],
+    ['EJ 72','14:40','15:40','23:30',''],['EJ 24','14:55','15:55','23:40','7051/52'],
+    ['EJ 28','15:10','16:10','00:10','7053/54'],['EJ 30','15:40','16:40','00:30',''],
+    ['ED 12','16:00','17:00','00:50','7055/56'],['EJ 36','16:40','17:40','01:50','7057/58'],
+    ['EJ 38','16:55','17:55','02:10',''],['ED 12','17:20','18:20','02:15','7059/60'],
+    ['ED 12','17:35','18:35','02:55','7061/62'],['EJ 44','17:50','18:50','03:05',''],
+    ['EJ 80','18:05','19:05','03:15',''],['EJ 46','18:20','19:20','03:30','7063/64'],
+    ['EJ 50','19:00','20:00','04:10','7065/66'],['EJ 54','19:40','20:40','04:40','7067/68'],
+    ['EJ 58','20:30','21:30','05:30',''],['EJ 60','20:50','21:50','06:10','7069/70'],
+    ['EJ 62','21:20','22:20','06:30',''],['EJ 64','21:50','22:50','07:00','7071/72']
+  ];
+  const c3 = [
+    ['JE 15','02:05','03:05','11:00',''],['JE 17','02:35','03:35','11:45',''],
+    ['JE 19','03:05','04:05','12:15',''],['JE 05','03:35','04:35','12:45',''],
+    ['KR JGTL 01','03:50','04:50','20:20',''],['JE 07','03:50','04:50','13:30',''],
+    ['JE 09','04:10','05:10','13:40',''],['KR MNTY 02','04:30','05:30','19:15',''],
+    ['KR JGTL 02','04:50','05:50','21:20',''],['JE 11','04:50','05:50','14:10',''],
+    ['JE 21','05:10','06:10','14:20',''],['JE 23','05:30','06:30','14:40',''],
+    ['KR KMR 01','03:45','04:45','15:50',''],['KR JGTL 03','05:50','06:50','22:20',''],
+    ['JE 25','06:00','07:00','14:50',''],['JE 27','06:10','07:10','15:30',''],
+    ['JE 29','06:30','07:30','16:00',''],['KR MNTY 04','06:50','07:50','21:10',''],
+    ['JE 31','07:00','08:00','16:30',''],['JE 33','07:50','08:50','17:10',''],
+    ['KR KMR 03','05:00','06:00','17:00',''],['KR-GDK 15','04:00','05:00','21:10',''],
+    ['KR-GDK 16','04:25','05:25','21:30',''],['KR KMR 04','05:30','06:30','17:30',''],
+    ['KR KMR 05','06:00','07:00','18:00',''],['KR KMR 06','06:30','07:30','18:30',''],
+    ['KR-GDK 07','05:10','06:10','22:30',''],['KR-GDK 08','08:05','09:05','06:00',''],
+    ['KR-GDK 09','10:05','11:05','10:00',''],['KR-GDK 10','05:30','06:30','23:00',''],
+    ['KR-GDK 11','05:00','06:00','20:30',''],['KR-GDK 12','05:40','06:40','20:50',''],
+    ['KR-GDK 13','06:00','07:00','21:40',''],['KR-GDK 14','06:30','07:30','22:40',''],
+    ['JE 16','13:10','14:10','22:00',''],['JE 18','13:40','14:40','22:50',''],
+    ['JE20','13:50','14:50','23:30',''],['JE 06','14:50','15:50','00:00',''],
+    ['JE 08','15:05','16:05','00:30',''],['JE 10','15:50','16:50','00:45',''],
+    ['JE 12','16:20','17:20','01:00',''],['JE 22','16:20','17:20','02:30',''],
+    ['JE 24','16:35','17:35','02:00',''],['JE 26','16:50','17:50','02:00',''],
+    ['JE 28','17:05','18:05','02:15',''],['JE 30','17:40','18:40','02:45',''],
+    ['JE 32','18:00','19:00','03:00',''],['JE 34','18:50','19:50','04:00','']
+  ];
+  const all = [...c1, ...c2, ...c3];
+  return all.map((row, i) => makeSlot(i+1, row[0], row[1], row[2], row[3], row[4]));
+}
+function makeSlot(id, servNo, rt, dept, arvl, reg){
+  return {
+    id: 'slot_'+id, servNo,
+    category: deriveCategory(servNo), night: isNightRow(servNo),
+    driverRT: rt, schDept: dept, schArvl: arvl, regNo: reg
+  };
+}
+
+/* ---------- persistence ----------
+   All five pieces of state now live under one storage key ("duty:state") so
+   loading the app is a single round trip instead of five sequential ones.
+   For anyone who used the app before this change, migrateOldKeys_() reads the
+   old per-field keys once, folds them into duty:state, and from then on only
+   the combined key is used. */
+async function loadPersisted(){
+  let loadedCombined = false;
+  try{
+    const s = await window.storage.get('duty:state', false);
+    if(s){
+      const data = JSON.parse(s.value) || {};
+      slots = data.slots || [];
+      pool = data.pool || [];
+      assignments = data.assignments || {};
+      stats = data.stats || {};
+      localFlags = data.localFlags || {};
+      loadedCombined = true;
+    }
+  }catch(e){}
+
+  if(!loadedCombined){
+    await migrateOldKeys_();
+  }
+
+  if(!slots.length) slots = seedSlots();
+  slots.forEach(s=>{ if(!s.category) s.category = deriveCategory(s.servNo); });
+}
+
+async function migrateOldKeys_(){
+  try{ const s=await window.storage.get('duty:slots',false); if(s) slots=JSON.parse(s.value); }catch(e){}
+  try{ const p=await window.storage.get('duty:pool',false); if(p) pool=JSON.parse(p.value); }catch(e){}
+  try{ const a=await window.storage.get('duty:assignments',false); if(a) assignments=JSON.parse(a.value); }catch(e){}
+  try{ const st=await window.storage.get('duty:stats',false); if(st) stats=JSON.parse(st.value); }catch(e){}
+  try{ const lf=await window.storage.get('duty:localFlags',false); if(lf) localFlags=JSON.parse(lf.value); }catch(e){}
+  await saveState_(); // write the combined key so every future load is a single round trip
+}
+
+async function saveState_(){
+  try{
+    await window.storage.set('duty:state', JSON.stringify({slots, pool, assignments, stats, localFlags}), false);
+  }catch(e){ console.error('Storage save failed', e); }
+}
+/* Old function names kept as-is so every existing call site (saveSlots(),
+   savePool(), etc.) keeps working unchanged — they all just write the one
+   combined key now. */
+async function saveSlots(){ await saveState_(); }
+async function savePool(){ await saveState_(); }
+async function saveAssignments(){ await saveState_(); }
+async function saveStats(){ await saveState_(); }
+async function saveLocalFlags(){ await saveState_(); }
+
+/* ---------- flexible column matching (normalizes case / spaces / underscores) ---------- */
+function pick(obj, ...keys){
+  for(const k of keys){
+    for(const ok of Object.keys(obj)){
+      if(ok.toLowerCase().replace(/[^a-z0-9]/g,'') === k.toLowerCase().replace(/[^a-z0-9]/g,'')) return obj[ok];
+    }
+  }
+  return '';
+}
+/* Mapped straight from the "Drivers" sheet tab columns.
+   driver_id (e.g. ECD-00001) is the unique key used everywhere in this app —
+   employee_id (e.g. EMP8973) is kept alongside just for display/reference. */
+function normalizeDriver(obj){
+  return {
+    empId: String(pick(obj,'driver_id','employee_id')).trim(),
+    employeeCode: pick(obj,'employee_id'),
+    empName: pick(obj,'name'),
+    phone: pick(obj,'mobile') || pick(obj,'alt_mobile'),
+    altPhone: pick(obj,'alt_mobile'),
+    depot: pick(obj,'depot'),
+    city: pick(obj,'city'),
+    district: pick(obj,'district'),
+    designation: pick(obj,'designation') || 'Driver',
+    status: pick(obj,'status') || 'Active',
+    joinDate: pick(obj,'joining_date')
+  };
+}
+
+/* ---------- fetch driver pool from Apps Script (auto-loads silently on open) ----------
+   Uses #sheetUrl — the "Driver details" deployment.
+   Primary path: ?action=list&sheet=<tab name> — reads that exact tab directly
+   (matches the generic sheet-sync handler added to Code.gs).
+   Fallback: if that comes back with zero usable rows (e.g. the tab name typed
+   here doesn't match the live sheet), automatically retries with the older
+   ?action=list&type=drivers path before giving up, so a small naming mismatch
+   doesn't silently leave the pool empty. */
+async function loadPool(){
+  let baseUrl = $('sheetUrl').value.trim();
+  const sheetName = ($('sheetName').value || 'Drivers').trim();
+  if(!baseUrl){ setStatus('No driver details URL configured.', 'err'); return; }
+
+  setStatus('Loading driver pool…');
+  try{
+    let data = await fetchPool_(baseUrl, 'sheet=' + encodeURIComponent(sheetName));
+    let rows = normalizeIncomingRows_(data);
+    let usedFallback = false;
+
+    if(!rows.some(r => normalizeDriver(r).empId)){
+      // Zero usable rows from the sheet-name lookup — try the legacy type= path.
+      usedFallback = true;
+      data = await fetchPool_(baseUrl, 'type=drivers');
+      rows = normalizeIncomingRows_(data);
+    }
+
+    applyIncomingPool(rows);
+    if(pool.length){
+      setStatus('Loaded ' + pool.length + ' drivers' + (usedFallback ? ' (via type=drivers fallback).' : ' from "' + sheetName + '".'), 'ok');
+    } else {
+      setStatus('Connected, but 0 drivers came back — check the "sheet" name (currently "' + sheetName + '") matches the tab in the spreadsheet, and that rows have a driver_id.', 'err');
+    }
+  }catch(err){
+    setStatus('Could not load the driver pool: ' + err.message, 'err');
+  }
+}
+
+async function fetchPool_(baseUrl, listQuery){
+  let url = baseUrl;
+  if(!/[?&]action=/.test(url)) url += (url.includes('?') ? '&' : '?') + 'action=list';
+  url += '&' + listQuery;
+  const res = await fetch(url, {method:'GET'});
+  const text = await res.text();
+  if(!res.ok) throw new Error('HTTP ' + res.status + ' — ' + text.slice(0,150));
+  try{ return JSON.parse(text); }
+  catch(e){
+    if(/^\s*</.test(text)) throw new Error('The URL returned a webpage, not data — check the Apps Script deployment / sheet name.');
+    return parseCSV(text);
+  }
+}
+
+function parseCSV(text){
+  const lines = text.trim().split(/\r?\n/);
+  const headers = lines[0].split(',').map(h=>h.trim());
+  return lines.slice(1).filter(l=>l.trim()).map(line=>{
+    const cells = line.split(',');
+    const obj = {};
+    headers.forEach((h,i)=> obj[h] = (cells[i]||'').trim());
+    return obj;
+  });
+}
+function normalizeIncomingRows_(data){
+  if(!Array.isArray(data)){
+    if(data && Array.isArray(data.rows)) data = data.rows;
+    else if(data && Array.isArray(data.drivers)) data = data.drivers;
+    else if(data && Array.isArray(data.data)) data = data.data;
+    else return [];
+  }
+  return data;
+}
+function applyIncomingPool(rows){
+  pool = rows.map(normalizeDriver).filter(d=>d.empId);
+  pool.forEach(d=>{ if(!stats[d.empId]) stats[d.empId] = {lastDutyDate:null, dutyCount:0}; });
+  savePool(); saveStats();
+  render();
+}
+
+/* ---------- fairness ordering (used for the Express categories, and as no-show fallback) ---------- */
+function fairnessSort(ids){
+  return [...ids].sort((a,b)=>{
+    const sa = stats[a] || {lastDutyDate:null,dutyCount:0};
+    const sb = stats[b] || {lastDutyDate:null,dutyCount:0};
+    if(!sa.lastDutyDate && sb.lastDutyDate) return -1;
+    if(sa.lastDutyDate && !sb.lastDutyDate) return 1;
+    if(sa.lastDutyDate !== sb.lastDutyDate) return (sa.lastDutyDate||'').localeCompare(sb.lastDutyDate||'');
+    return sa.dutyCount - sb.dutyCount;
+  });
+}
+/* ---------- seniority ordering (used for Super Luxury & Deluxe: earliest joined first) ---------- */
+function senioritySort(ids){
+  const map = {}; pool.forEach(d=>{ map[d.empId] = d; });
+  return [...ids].sort((a,b)=>{
+    const da = (map[a] && map[a].joinDate) || '';
+    const db = (map[b] && map[b].joinDate) || '';
+    if(!da && db) return 1;
+    if(da && !db) return -1;
+    if(da !== db) return da.localeCompare(db);
+    return a.localeCompare(b);
+  });
+}
+function bumpStat(empId, date){
+  if(!stats[empId]) stats[empId] = {lastDutyDate:null, dutyCount:0};
+  stats[empId].lastDutyDate = date;
+  stats[empId].dutyCount += 1;
+}
+function currentDate(){ return $('dutyDate').value || new Date().toISOString().slice(0,10); }
+
+/* ---------- Karimnagar auto-detection for spare drivers (manual override still allowed) ---------- */
+function isLocal(d){
+  if(localFlags.hasOwnProperty(d.empId)) return !!localFlags[d.empId];
+  const loc = ((d.district||'') + ' ' + (d.city||'')).toLowerCase();
+  return loc.includes('karimnagar');
+}
+function toggleLocal(empId){
+  const d = pool.find(p=>p.empId===empId);
+  localFlags[empId] = d ? !isLocal(d) : true;
+  saveLocalFlags();
+
+  if(activeTab === 'SPARE'){
+    // Targeted DOM update: just this row's highlight class + the small plan
+    // table, instead of rebuilding the tab bar and the whole Spare table.
+    const local = d ? isLocal(d) : true;
+    const row = document.querySelector(`#chartArea tr[data-emp="${empId}"]`);
+    if(row){
+      const idx = Number(row.dataset.idx || 0);
+      row.className = local ? 'r-local' : (idx % 2 === 0 ? 'r-even' : 'r-odd');
+    }
+    const planTable = $('localSparePlanTable');
+    if(planTable){
+      const localSpares = currentSpares.filter(sp=>isLocal(sp));
+      planTable.innerHTML = renderLocalSparePlanRows_(localSpares);
+    }
+  } else {
+    render();
+  }
+}
+window.toggleLocal = toggleLocal;
+
+/* ---------- push today's duty chart to the Google Sheet ----------
+   Uses #dutyUrl — the "Duty chart" deployment (separate from the driver
+   details sheet used by loadPool()).
+   POSTs { action:'saveDuty', date, rows:[...] } to that Apps Script
+   deployment. The backend (see Code.gs) rebuilds a per-date tab (named after
+   the date, e.g. "2026-07-29") every time this runs, and upserts the same
+   rows into a master "DutyLog" tab keyed by Date+SlotID — so re-saving the
+   same day just updates existing rows instead of duplicating them.
+   Auto-fires after every action that changes today's assignments
+   (auto-assign, no-show, manual reassign, reset). Failures are shown in
+   the small status text next to the toolbar but never block the UI. */
+let syncTimer = null;
+function syncDutyToSheet(){
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(doSyncDutyToSheet, 400); // debounce rapid successive edits
+}
+async function doSyncDutyToSheet(){
+  const baseUrl = $('dutyUrl').value.trim();
+  const syncEl = $('sheetSyncMsg');
+  if(!baseUrl){
+    if(syncEl){ syncEl.textContent = 'No duty chart URL configured.'; syncEl.className = 'status err'; }
+    return;
+  }
+  const today = currentDate();
+
+  const rows = buildDutyRows_(today);
+
+  if(syncEl){ syncEl.textContent = 'Saving to Google Sheet…'; syncEl.className = 'status'; }
+  try{
+    // text/plain content-type avoids a CORS preflight against the Apps Script web app
+    const res = await fetch(baseUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ action:'saveDuty', date: today, rows })
+    });
+    const text = await res.text();
+    let data; try{ data = JSON.parse(text); }catch(e){ data = null; }
+    if(!res.ok || !data || data.error){
+      throw new Error((data && data.error) || ('HTTP ' + res.status));
+    }
+    if(syncEl){ syncEl.textContent = 'Saved to sheet tab "' + today + '" (' + data.savedRows + ' rows) ✓'; syncEl.className = 'status ok'; }
+  }catch(err){
+    if(syncEl){ syncEl.textContent = 'Sheet save failed: ' + err.message; syncEl.className = 'status err'; }
+  }
+}
+$('saveSheetBtn').onclick = () => { doSyncDutyToSheet(); };
+
+/* Shared row-builder: the flat, clean row shape used both for the Google
+   Sheet sync above and for the "Save as Excel" export below, so both stay
+   in sync and neither has to scrape anything from the DOM. */
+function buildDutyRows_(date){
+  return slots.map(s=>{
+    const key = date+'|'+s.id;
+    const a = assignments[key];
+    const driver = a && a.empId ? pool.find(d=>d.empId===a.empId) : null;
+    return {
+      slotId: s.id, servNo: s.servNo, category: s.category,
+      driverRT: s.driverRT, schDept: s.schDept, schArvl: s.schArvl, regNo: s.regNo||'',
+      empId: driver ? driver.empId : '', empName: driver ? driver.empName : '',
+      phone: driver ? driver.phone : '',
+      status: a ? a.status : 'unassigned', note: a ? (a.note||'') : ''
+    };
+  });
+}
+
+/* ---------- pull a previously-saved date's chart back from the Google Sheet ----------
+   Uses #dutyUrl — the "Duty chart" deployment.
+   Local storage only knows about dates this browser has actually assigned.
+   If you pick a date that was saved earlier (this device or another one), there's
+   nothing locally to show — this reads that date's tab back from the sheet (the
+   same per-date tab saveDuty_() in Code.gs writes to) and fills assignments in
+   from it, so the chart shows what was actually saved instead of going blank. */
+async function loadDutyForDate_(date){
+  const baseUrl = $('dutyUrl').value.trim();
+  if(!baseUrl) return;
+
+  const hasLocal = Object.keys(assignments).some(k => k.startsWith(date+'|'));
+  if(hasLocal) return; // don't clobber assignments already made on this device
+
+  try{
+    setStatus('Checking the Google Sheet for a saved chart on ' + date + '…');
+    const data = await fetchPool_(baseUrl, 'sheet=' + encodeURIComponent(date));
+    const rows = normalizeIncomingRows_(data);
+
+    if(!rows.length){
+      setStatus('No saved duty chart found on the sheet for ' + date + ' — starting blank.', 'ok');
+      return;
+    }
+
+    let filled = 0;
+    rows.forEach(r=>{
+      const slotId = r.slotId || r.SlotId || r.slotid;
+      if(!slotId || !r.empId) return; // skip unassigned rows, nothing to restore
+      assignments[date+'|'+slotId] = { empId: r.empId, status: r.status || 'planned', note: r.note || '' };
+      filled++;
+    });
+
+    if(filled){
+      saveAssignments();
+      setStatus('Loaded ' + filled + ' saved assignment(s) for ' + date + ' from the Google Sheet.', 'ok');
+      if(currentDate() === date) render();
+    } else {
+      setStatus('Sheet tab for ' + date + ' exists but has no assigned drivers yet.', 'ok');
+    }
+  }catch(err){
+    setStatus('Could not check the sheet for ' + date + ': ' + err.message, 'err');
+  }
+}
+
+/* Changing the date should immediately show that day's chart/report/spare
+   list — everything already reads currentDate() at render time, it just
+   needed something to trigger a render when the date input changes. It also
+   fetches that date's saved chart from the Google Sheet if this browser has
+   nothing local for it yet. */
+$('dutyDate').onchange = () => {
+  render();
+  loadDutyForDate_(currentDate());
+};
+
+/* ---------- assignment actions ---------- */
+$('reloadPoolBtn').onclick = () => { loadPool(); };
+
+$('autoAssignBtn').onclick = () => {
+  if(!pool.length){ setStatus('Driver pool has not loaded yet — try "Reload driver pool" first.', 'err'); return; }
+  const today = currentDate();
+  const usedToday = new Set(Object.entries(assignments).filter(([k])=>k.startsWith(today+'|')).map(([,v])=>v.empId).filter(Boolean));
+  const activeIds = pool.filter(d=>d.status==='Active' && !usedToday.has(d.empId)).map(d=>d.empId);
+
+  const openSlots = slots.filter(s=>!assignments[today+'|'+s.id]);
+  const superSlots = openSlots.filter(s=>categoryTier(s.category)===0);
+  const deluxeSlots = openSlots.filter(s=>categoryTier(s.category)===1);
+  const expressSlots = openSlots.filter(s=>categoryTier(s.category)===2);
+
+  // Super Luxury and Deluxe: strictly most-senior-first
+  let seniorQueue = senioritySort(activeIds);
+  [superSlots, deluxeSlots].forEach(group=>{
+    group.forEach(s=>{
+      const key = today+'|'+s.id;
+      const empId = seniorQueue.shift();
+      if(!empId){ assignments[key] = {empId:'', status:'noshow', note:'No driver available'}; return; }
+      assignments[key] = {empId, status:'planned', note:''};
+      bumpStat(empId, today);
+    });
+  });
+
+  // All Express categories: whoever is left, filled by fair rotation (least-recently-used first)
+  let expressQueue = fairnessSort(seniorQueue);
+  expressSlots.forEach(s=>{
+    const key = today+'|'+s.id;
+    const empId = expressQueue.shift();
+    if(!empId){ assignments[key] = {empId:'', status:'noshow', note:'No driver available'}; return; }
+    assignments[key] = {empId, status:'planned', note:''};
+    bumpStat(empId, today);
+  });
+
+  saveAssignments(); saveStats();
+  setStatus('Assigned all open slots for ' + today + ' — Super Luxury & Deluxe by seniority, Express categories by rotation.', 'ok');
+  render();
+  syncDutyToSheet();
+};
+
+$('resetDayBtn').onclick = () => {
+  const today = currentDate();
+  Object.keys(assignments).forEach(k=>{ if(k.startsWith(today+'|')) delete assignments[k]; });
+  saveAssignments();
+  setStatus('Cleared overrides for ' + today + '.', 'ok');
+  render();
+  syncDutyToSheet();
+};
+
+$('printBtn').onclick = () => { window.print(); };
+
+/* ---------- Save as Excel ----------
+   Previously this scraped the *rendered* chart <table> with
+   XLSX.utils.table_to_book(). That was slow (had to walk the live DOM,
+   including every "Reassign…" <select> with 100+ <option> tags per row) and
+   buggy: it dumped button labels ("No-show"/"Reset") and full dropdown option
+   lists into cells instead of clean values, and on tabs with two tables
+   (Spare Drivers) it silently only exported the first one.
+   This version builds the workbook straight from the app's own data
+   (slots/assignments/pool/stats) — the same clean row shape already used for
+   the Google Sheet sync — so the export is instant and matches exactly what's
+   on screen, with no UI leftovers. */
+function buildExportWorkbook_(){
+  const today = currentDate();
+  const wb = XLSX.utils.book_new();
+
+  if(activeTab === 'POOL'){
+    if(!pool.length) return null;
+    const data = pool.map((d,i)=>({
+      '#': i+1, 'Driver ID': d.empId, 'Employee ID': d.employeeCode||'', Name: d.empName,
+      Phone: d.phone, Depot: d.depot||'', District: d.district||'', Joined: d.joinDate||'', Status: d.status
+    }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), 'Driver Pool');
+    return wb;
+  }
+
+  if(activeTab === 'ROTATION'){
+    if(!pool.length) return null;
+    const list = pool.map(d=>({...d, ...(stats[d.empId]||{lastDutyDate:null,dutyCount:0})}));
+    const sorted = fairnessSort(list.map(d=>d.empId)).map(id=>list.find(d=>d.empId===id));
+    const data = sorted.map((d,i)=>({
+      '#': i+1, 'Driver ID': d.empId, Name: d.empName,
+      'Last Duty Date': d.lastDutyDate || 'Never assigned', 'Total Duties': d.dutyCount
+    }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), 'Rotation');
+    return wb;
+  }
+
+  if(activeTab === 'SLOTS'){
+    if(!slots.length) return null;
+    const data = slots.map((s,i)=>({
+      '#': i+1, Category: s.category, 'Serv No': s.servNo, 'Driver RT': s.driverRT,
+      'Sch Dept': s.schDept, 'Sch Arvl': s.schArvl, 'Reg No': s.regNo||''
+    }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), 'Manage Slots');
+    return wb;
+  }
+
+  if(activeTab === 'REPORT'){
+    const rows = slots.map(s=>{
+      const a = assignments[today+'|'+s.id];
+      if(!a || !a.empId) return null;
+      const d = pool.find(p=>p.empId===a.empId);
+      return { tier: categoryTier(s.category), category: s.category, servNo: s.servNo,
+        empId: a.empId, name: d?d.empName:'—', phone: d?d.phone:'—' };
+    }).filter(Boolean);
+    if(!rows.length) return null;
+    rows.sort((a,b)=> a.tier-b.tier || a.category.localeCompare(b.category) || a.servNo.localeCompare(b.servNo));
+    const data = rows.map((r,i)=>({
+      '#': i+1, Category: r.category, 'Serv No': r.servNo, 'Driver ID': r.empId,
+      'Driver Name': r.name, 'Phone No': r.phone
+    }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), ('Duty Report ' + today).slice(0,31));
+    return wb;
+  }
+
+  if(activeTab === 'SPARE'){
+    if(!pool.length) return null;
+    const assignedIds = new Set(Object.entries(assignments).filter(([k,v])=>k.startsWith(today+'|') && v.empId).map(([,v])=>v.empId));
+    let spares = pool.filter(d=>d.status==='Active' && !assignedIds.has(d.empId));
+    spares = spares.sort((a,b)=> (isLocal(b)?1:0) - (isLocal(a)?1:0) || a.empName.localeCompare(b.empName));
+    if(!spares.length) return null;
+
+    const data = spares.map((d,i)=>({
+      '#': i+1, 'Driver ID': d.empId, Name: d.empName, Phone: d.phone,
+      Depot: d.depot||'', District: d.district||'', Local: isLocal(d) ? 'Yes' : 'No'
+    }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(data), ('Spare Drivers ' + today).slice(0,31));
+
+    // second sheet: the Local Spare Number Plan — previously dropped entirely
+    // because table_to_book() only ever grabbed the first <table> on the tab.
+    const localSpares = spares.filter(isLocal).map((d,i)=>({'#': i+1, Name: d.empName, Phone: d.phone}));
+    if(localSpares.length){
+      XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(localSpares), 'Local Spare Plan');
+    }
+    return wb;
+  }
+
+  // ALL or a specific duty category — the main chart.
+  // Uses the exact same flat row shape (slotId, servNo, category, driverRT,
+  // schDept, schArvl, regNo, empId, empName, phone, status, note) that gets
+  // written to the Google Sheet, so the Excel export always matches what's
+  // actually saved/pulled there — not a separately-formatted view.
+  let allRows = buildDutyRows_(today);
+  if(activeTab !== 'ALL') allRows = allRows.filter(r=>r.category===activeTab);
+  if(!allRows.length) return null;
+
+  const ws = XLSX.utils.json_to_sheet(allRows);
+  ws['!cols'] = [{wch:8},{wch:12},{wch:13},{wch:9},{wch:9},{wch:9},{wch:10},{wch:12},{wch:20},{wch:13},{wch:12},{wch:22}];
+  XLSX.utils.book_append_sheet(wb, ws, (activeTab||'Chart').slice(0,31));
+  return wb;
+}
+
+$('exportExcelBtn').onclick = async () => {
+  try{
+    setStatus('Loading Excel export tool…');
+    await ensureXLSX_();
+    const wb = buildExportWorkbook_();
+    if(!wb){ setStatus('Nothing to export yet on this tab.', 'err'); return; }
+    XLSX.writeFile(wb, `duty-chart-${(activeTab||'chart').replace(/[^a-z0-9-]+/gi,'_')}-${currentDate()}.xlsx`);
+    setStatus('Excel file downloaded.', 'ok');
+  }catch(e){ setStatus('Excel export failed: ' + e.message, 'err'); }
+};
+
+$('exportPdfBtn').onclick = async () => {
+  const area = $('chartArea');
+  if(!area.querySelector('table')){ setStatus('Nothing to export yet.', 'err'); return; }
+  try{
+    setStatus('Loading PDF export tool…');
+    await ensureHtml2Pdf_();
+    html2pdf().set({
+      filename: `duty-chart-${(activeTab||'chart').replace(/[^a-z0-9-]+/gi,'_')}-${currentDate()}.pdf`,
+      margin: 10,
+      jsPDF: { orientation: 'landscape', unit: 'pt', format: 'a3' }
+    }).from(area).save();
+    setStatus('Generating PDF…', 'ok');
+  }catch(e){ setStatus('PDF export failed: ' + e.message, 'err'); }
+};
+
+function markNoShow(slotId){
+  const s = slots.find(x=>x.id===slotId);
+  const today = currentDate();
+  const key = today+'|'+slotId;
+  const current = assignments[key] ? assignments[key].empId : '';
+  const usedToday = new Set(Object.entries(assignments).filter(([k])=>k.startsWith(today+'|')).map(([,v])=>v.empId).filter(Boolean));
+  const activeIds = pool.filter(d=>d.status==='Active' && d.empId!==current).map(d=>d.empId);
+  const ordered = (s && categoryTier(s.category) < 2) ? senioritySort(activeIds) : fairnessSort(activeIds);
+  const queue = ordered.filter(id=>!usedToday.has(id));
+  const replacement = queue[0];
+  if(replacement){
+    assignments[key] = {empId:replacement, status:'reassigned', note:'Replaced no-show'};
+    bumpStat(replacement, today);
+  } else {
+    assignments[key] = {empId:'', status:'noshow', note:'No replacement available'};
+  }
+  saveAssignments(); saveStats();
+  render();
+  syncDutyToSheet();
+}
+function manualAssign(slotId, empId){
+  if(!empId) return;
+  const today = currentDate();
+  assignments[today+'|'+slotId] = {empId, status:'reassigned', note:'Manually reassigned'};
+  bumpStat(empId, today);
+  saveAssignments(); saveStats();
+  render();
+  syncDutyToSheet();
+}
+/* Reassign-by-ID: type a Driver ID (or Employee ID) into the box next to the
+   dropdown and press Enter — looks the driver up in the pool, and if found,
+   assigns them (name/phone then appear in the row like any other assignment).
+   If the ID doesn't match anyone, the box is flagged red and the reason is
+   shown in the status bar instead of silently doing nothing. */
+function assignById(slotId, rawId, inputEl){
+  const id = String(rawId||'').trim();
+  if(!id) return;
+  const driver = pool.find(d =>
+    d.empId.toLowerCase() === id.toLowerCase() ||
+    (d.employeeCode||'').toLowerCase() === id.toLowerCase()
+  );
+  if(!driver){
+    setStatus('No driver found with ID "' + id + '".', 'err');
+    if(inputEl) inputEl.classList.add('bad');
+    return;
+  }
+  if(driver.status !== 'Active'){
+    setStatus(driver.empName + ' (' + driver.empId + ') is not marked Active.', 'err');
+    if(inputEl) inputEl.classList.add('bad');
+    return;
+  }
+  manualAssign(slotId, driver.empId);
+  setStatus('Assigned ' + driver.empName + ' (' + driver.empId + ').', 'ok');
+}
+window.assignById = assignById;
+function clearOverride(slotId){
+  delete assignments[currentDate()+'|'+slotId];
+  saveAssignments();
+  render();
+  syncDutyToSheet();
+}
+window.markNoShow = markNoShow;
+window.manualAssign = manualAssign;
+window.clearOverride = clearOverride;
+
+/* ---------- slot management ---------- */
+function addSlot(){
+  const servNo = $('slotServ').value.trim();
+  if(!servNo){ setStatus('Serv No is required to add a slot.', 'err'); return; }
+  const id = Date.now();
+  slots.push(makeSlot(id, servNo, $('slotRT').value, $('slotDept').value, $('slotArvl').value, $('slotReg').value));
+  ['slotServ','slotRT','slotDept','slotArvl','slotReg'].forEach(f=>$(f).value='');
+  saveSlots();
+  render();
+}
+function deleteSlot(id){
+  slots = slots.filter(s=>s.id!==id);
+  saveSlots();
+  render();
+}
+window.deleteSlot = deleteSlot;
+
+/* ---------- rendering ---------- */
+function renderTabs(){
+  const bar = $('tabBar');
+  const tabs = ['ALL', ...KNOWN_CATEGORIES, 'REPORT', 'SPARE', 'POOL', 'ROTATION', 'SLOTS'];
+  const today = currentDate();
+  bar.innerHTML = tabs.map(t=>{
+    const label = CATEGORY_LABEL[t] || t;
+    let count;
+    if(t==='ALL') count = slots.length;
+    else if(t==='POOL') count = pool.length;
+    else if(t==='ROTATION') count = pool.length;
+    else if(t==='SLOTS') count = slots.length;
+    else if(t==='REPORT') count = Object.keys(assignments).filter(k=>k.startsWith(today+'|') && assignments[k].empId).length;
+    else if(t==='SPARE'){
+      const assignedIds = new Set(Object.entries(assignments).filter(([k,v])=>k.startsWith(today+'|') && v.empId).map(([,v])=>v.empId));
+      count = pool.filter(d=>d.status==='Active' && !assignedIds.has(d.empId)).length;
+    }
+    else count = slots.filter(s=>s.category===t).length;
+    return `<div class="tab ${t===activeTab?'active':''}" onclick="setTab('${t}')">${label} <span class="count">(${count})</span></div>`;
+  }).join('');
+}
+function setTab(t){ activeTab = t; render(); }
+window.setTab = setTab;
+
+function render(){ renderTabs(); renderBody(); }
+
+function renderBody(){
+  const area = $('chartArea');
+  if(activeTab === 'POOL') return renderPool(area);
+  if(activeTab === 'ROTATION') return renderRotation(area);
+  if(activeTab === 'SLOTS') return renderSlotManager(area);
+  if(activeTab === 'REPORT') return renderReport(area);
+  if(activeTab === 'SPARE') return renderSpare(area);
+  renderChart(area);
+}
+
+function renderChart(area){
+  const today = currentDate();
+  let rows = slots;
+  if(activeTab !== 'ALL') rows = rows.filter(s=>s.category===activeTab);
+
+  if(!rows.length){
+    area.innerHTML = `<div class="empty">No duty slots in this category yet. Add some in the Manage Slots tab — the category is auto-detected from the Serv No prefix.</div>`;
+    return;
+  }
+
+  const options = pool.filter(d=>d.status==='Active')
+    .map(d=>`<option value="${d.empId}">${d.empId} — ${d.empName}</option>`).join('');
+
+  let html = `<table><tbody>
+    <tr class="band-row"><td style="width:14%">Date</td><td colspan="9">${activeTab==='ALL'?'All Duties':activeTab}</td></tr>
+    <tr class="band-row"><td>${today}</td><td colspan="9">Assigned Driver</td></tr>
+  </tbody>
+  <thead class="cols"><tr>
+    <th>S.NO</th><th>Serv No.</th><th>Driver RT</th><th>Sch Dept</th><th>Sch Arvl</th>
+    <th>Reg No</th><th>Driver ID</th><th>Driver Name</th><th>Phone No</th>
+    <th><span class="screen-only">Status / Actions</span><span class="print-only">Remark</span></th>
+  </tr></thead><tbody>`;
+
+  rows.forEach((s,i)=>{
+    const key = today+'|'+s.id;
+    const a = assignments[key];
+    const driver = a && a.empId ? pool.find(d=>d.empId===a.empId) : null;
+    const rowClass = a && a.status==='noshow' ? 'r-noshow'
+      : s.night ? 'r-night'
+      : (i%2===0 ? 'r-even' : 'r-odd');
+    const badge = !a ? '<span class="badge planned">Not assigned</span>'
+      : a.status==='noshow' ? '<span class="badge noshow">No driver</span>'
+      : a.status==='reassigned' ? '<span class="badge reassigned">Reassigned</span>'
+      : '<span class="badge pool">Assigned</span>';
+
+    html += `<tr class="${rowClass}">
+      <td>${i+1}</td><td>${s.servNo}</td><td>${s.driverRT}</td><td>${s.schDept}</td><td>${s.schArvl}</td>
+      <td>${s.regNo||''}</td>
+      <td>${driver?driver.empId:'—'}</td>
+      <td class="name">${driver?driver.empName:'—'}</td>
+      <td>${driver?driver.phone:'—'}</td>
+      <td>
+        <span class="screen-only">
+          ${badge}<br>
+          <select class="assign-select" onchange="manualAssign('${s.id}', this.value)">
+            <option value="">Reassign…</option>${options}
+          </select>
+          <input type="text" class="assign-id-input" placeholder="Enter Driver ID"
+            onkeydown="if(event.key==='Enter'){ assignById('${s.id}', this.value, this); this.value=''; }"
+            oninput="this.classList.remove('bad')">
+          <button class="mini-btn no" onclick="markNoShow('${s.id}')">No-show</button>
+          ${a?`<button class="mini-btn reset" onclick="clearOverride('${s.id}')">Reset</button>`:''}
+        </span>
+        <span class="print-only"></span>
+      </td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  area.innerHTML = html;
+}
+
+function renderPool(area){
+  if(!pool.length){ area.innerHTML = '<div class="empty">No drivers loaded yet. Click "Reload driver pool" above to try fetching the Google Sheet again.</div>'; return; }
+  let html = `<table><tbody><tr class="band-row"><td colspan="9">Driver Pool (${pool.length})</td></tr></tbody>
+  <thead class="cols"><tr><th>#</th><th>Driver ID</th><th>Employee ID</th><th>Name</th><th>Phone</th><th>Depot</th><th>District</th><th>Joined</th><th>Status</th></tr></thead><tbody>`;
+  pool.forEach((d,i)=>{
+    html += `<tr class="${isLocal(d)?'r-local':(i%2===0?'r-even':'r-odd')}">
+      <td>${i+1}</td><td>${d.empId}</td><td>${d.employeeCode||'—'}</td><td class="name">${d.empName}</td><td>${d.phone}</td><td>${d.depot||'—'}</td><td>${d.district||'—'}</td><td>${d.joinDate||'—'}</td><td>${d.status}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  area.innerHTML = html;
+}
+
+function renderRotation(area){
+  if(!pool.length){ area.innerHTML = '<div class="empty">No drivers loaded yet.</div>'; return; }
+  const list = pool.map(d=>({...d, ...(stats[d.empId]||{lastDutyDate:null,dutyCount:0})}));
+  const sorted = fairnessSort(list.map(d=>d.empId)).map(id=>list.find(d=>d.empId===id));
+  let html = `<table><tbody><tr class="band-row"><td colspan="5">Rotation Overview — next in line shown first (used for the Express categories)</td></tr></tbody>
+  <thead class="cols"><tr><th>#</th><th>Driver ID</th><th>Name</th><th>Last Duty Date</th><th>Total Duties</th></tr></thead><tbody>`;
+  sorted.forEach((d,i)=>{
+    html += `<tr class="${i%2===0?'r-even':'r-odd'}">
+      <td>${i+1}</td><td>${d.empId}</td><td class="name">${d.empName}</td>
+      <td>${d.lastDutyDate||'Never assigned'}</td><td>${d.dutyCount}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  area.innerHTML = html;
+}
+
+/* Duty Report: one row per driver who has a duty on the selected date, grouped Super Luxury -> Deluxe -> Express categories */
+function renderReport(area){
+  const today = currentDate();
+  const rows = slots.map(s=>{
+    const key = today+'|'+s.id;
+    const a = assignments[key];
+    if(!a || !a.empId) return null;
+    const d = pool.find(p=>p.empId===a.empId);
+    return {
+      tier: categoryTier(s.category), category: s.category, servNo: s.servNo,
+      empId: a.empId, name: d?d.empName:'—', phone: d?d.phone:'—', status: a.status
+    };
+  }).filter(Boolean);
+
+  if(!rows.length){
+    area.innerHTML = `<div class="empty">No duties assigned yet for ${today}. Use "Auto-assign open slots" or assign drivers manually first.</div>`;
+    return;
+  }
+  rows.sort((a,b)=> a.tier-b.tier || a.category.localeCompare(b.category) || a.servNo.localeCompare(b.servNo));
+
+  let html = `<table><tbody><tr class="band-row"><td colspan="6">Duty Report — ${today}</td></tr></tbody>
+  <thead class="cols"><tr><th>#</th><th>Category</th><th>Serv No.</th><th>Driver ID</th><th>Driver Name</th><th>Phone No</th></tr></thead><tbody>`;
+  rows.forEach((r,i)=>{
+    const rowClass = r.status==='noshow' ? 'r-noshow' : (i%2===0?'r-even':'r-odd');
+    html += `<tr class="${rowClass}">
+      <td>${i+1}</td><td><span class="badge tier${r.tier}">${r.category}</span></td><td>${r.servNo}</td>
+      <td>${r.empId}</td><td class="name">${r.name}</td><td>${r.phone}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  area.innerHTML = html;
+}
+
+/* Spare Drivers: active drivers with no duty today. Karimnagar drivers (by district/city) are
+   auto-marked Local; the checkbox lets you override any individual driver either way. */
+function renderSpare(area){
+  if(!pool.length){ area.innerHTML = '<div class="empty">No drivers loaded yet.</div>'; return; }
+  const today = currentDate();
+  const assignedIds = new Set(Object.entries(assignments).filter(([k,v])=>k.startsWith(today+'|') && v.empId).map(([,v])=>v.empId));
+  let spares = pool.filter(d=>d.status==='Active' && !assignedIds.has(d.empId));
+  // Karimnagar / Local spares first
+  spares = spares.sort((a,b)=> (isLocal(b)?1:0) - (isLocal(a)?1:0) || a.empName.localeCompare(b.empName));
+
+  let html = `<div class="hint-box">Spare drivers are the active drivers with no duty assigned on ${today}. Drivers based in <b>Karimnagar</b> (by district/city) are marked Local automatically — untick or tick the box to override any individual driver. The Local Spare Number Plan below only lists Local spares.</div>`;
+
+  if(!spares.length){
+    html += '<div class="empty">Every active driver has a duty today — no spares left.</div>';
+    area.innerHTML = html;
+    return;
+  }
+
+  html += `<table><tbody><tr class="band-row"><td colspan="8">Spare Drivers (${spares.length})</td></tr></tbody>
+  <thead class="cols"><tr><th>#</th><th>Driver ID</th><th>Name</th><th>Phone</th><th>Depot</th><th>District</th><th>Local</th></tr></thead><tbody>`;
+  spares.forEach((d,i)=>{
+    const local = isLocal(d);
+    html += `<tr data-emp="${d.empId}" data-idx="${i}" class="${local?'r-local':(i%2===0?'r-even':'r-odd')}">
+      <td>${i+1}</td><td>${d.empId}</td><td class="name">${d.empName}</td><td>${d.phone}</td><td>${d.depot||'—'}</td><td>${d.district||'—'}</td>
+      <td><input type="checkbox" ${local?'checked':''} onchange="toggleLocal('${d.empId}')"></td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+
+  const localSpares = spares.filter(d=>isLocal(d));
+  html += `<table id="localSparePlanTable" style="margin-top:14px;">${renderLocalSparePlanRows_(localSpares)}</table>`;
+  area.innerHTML = html;
+  currentSpares = spares; // remembered so toggleLocal() can patch the DOM without a full re-render
+}
+
+/* Just the innerHTML for the small "Local Spare Number Plan" table, split out so
+   toggleLocal() can refresh only this piece instead of the whole Spare tab. */
+function renderLocalSparePlanRows_(localSpares){
+  let body = `<tbody><tr class="band-row"><td colspan="3">Local Spare Number Plan — Karimnagar (${localSpares.length})</td></tr></tbody>
+  <thead class="cols"><tr><th>#</th><th>Name</th><th>Phone No</th></tr></thead><tbody>`;
+  if(!localSpares.length){
+    body += `<tr><td colspan="3" style="text-align:center;color:#777;padding:14px;">No Karimnagar spares available right now.</td></tr>`;
+  } else {
+    localSpares.forEach((d,i)=>{
+      body += `<tr class="${i%2===0?'r-even':'r-odd'}"><td>${i+1}</td><td class="name">${d.empName}</td><td>${d.phone}</td></tr>`;
+    });
+  }
+  body += '</tbody>';
+  return body;
+}
+let currentSpares = [];
+
+function renderSlotManager(area){
+  let html = `<div style="padding:12px; background:#fff;">
+    <div class="hint-box">Category is auto-detected from the Serv No prefix: <b>EJ</b> → Super Luxury, <b>ED</b> → Deluxe, <b>JE</b> → JBS Express, anything with <b>JGTL</b> → JGTL Express, <b>MNTY</b> → MNTY Express, <b>KMR</b> → KMR Express, <b>GDK</b> → GDK Express.</div>
+    <div class="slot-form">
+      <div><label style="font-size:11px;font-weight:600;">Serv No</label><br><input id="slotServ" placeholder="e.g. EJ 90 / ED 30 / JE 40 / KR MNTY 05"></div>
+      <div><label style="font-size:11px;font-weight:600;">Driver RT</label><br><input id="slotRT" placeholder="11:20"></div>
+      <div><label style="font-size:11px;font-weight:600;">Sch Dept</label><br><input id="slotDept" placeholder="12:20"></div>
+      <div><label style="font-size:11px;font-weight:600;">Sch Arvl</label><br><input id="slotArvl" placeholder="20:20"></div>
+      <div><label style="font-size:11px;font-weight:600;">Reg No</label><br><input id="slotReg" placeholder="optional"></div>
+      <div><button id="slotAddBtn">Add slot</button></div>
+    </div>
+  </div>`;
+  html += `<table><thead class="cols"><tr><th>#</th><th>Category</th><th>Serv No.</th><th>Driver RT</th><th>Sch Dept</th><th>Sch Arvl</th><th>Reg No</th><th></th></tr></thead><tbody>`;
+  slots.forEach((s,i)=>{
+    html += `<tr class="${i%2===0?'r-even':'r-odd'}">
+      <td>${i+1}</td><td>${s.category}</td><td>${s.servNo}</td><td>${s.driverRT}</td><td>${s.schDept}</td><td>${s.schArvl}</td><td>${s.regNo||''}</td>
+      <td><button class="mini-btn del" onclick="deleteSlot('${s.id}')">Remove</button></td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  area.innerHTML = html;
+  $('slotAddBtn').onclick = addSlot;
+}
+
+/* ---------- boot ---------- */
+(async function init(){
+  $('dutyDate').value = new Date().toISOString().slice(0,10);
+  await loadPersisted();
+  render();
+  $('footerNote').innerHTML =
+    'The driver pool loads automatically from the connected <b>driver-details</b> Google Sheet\'s <b>Drivers</b> tab each time this page opens (or when you click "Reload driver pool") — first by exact tab name, falling back to the workforce-records type lookup if that comes back empty. ' +
+    'Each day\'s duty chart is saved to and restored from a separate <b>duty-chart</b> Google Sheet: "Save to Google Sheet" writes a per-date tab plus a master DutyLog there, and picking a date on this device pulls it back automatically if nothing is saved locally yet. ' +
+    'Duty history (last date driven, total duties) is saved in this browser so <b>Rotation Overview</b> stays fair over time for the Express categories. ' +
+    '<b>Auto-assign</b> fills Super Luxury and Deluxe strictly by seniority (earliest joining date first), then fills JBS/GDK/JGTL/MNTY/KMR Express by fair rotation. ' +
+    'Use <b>No-show</b> to pull in the next appropriate driver instantly. Check <b>Duty Report</b> for a one-row-per-driver summary of who is working ' +
+    'and their phone number, and <b>Spare Drivers</b> for everyone unassigned that day — Karimnagar-based drivers are auto-marked Local, feeding the ' +
+    'Local Spare Number Plan for quick call-outs. Add, edit, or remove duty slots any time in <b>Manage Slots</b>; category is detected automatically from the Serv No.';
+  loadPool();
+  loadDutyForDate_(currentDate());
+})();
+</script>
+</body>
+</html>
