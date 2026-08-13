@@ -4,225 +4,1020 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Chakra E-Trans | Karimnagar Depot Portal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
-  :root{
-    --bg:#eef2f7; --card:#ffffff; --line:#dfe6ee; --text:#1c2b3a; --muted:#64748b;
-    --blue:#1a3fa0; --blue-dark:#12297a; --blue-tab:#eaf0fb;
-    --green:#1f9254; --green-dark:#177a45; --red:#c0392b; --lime:#8fae1f;
-    --yellow:#fff3b0; --shadow:0 1px 2px rgba(16,32,64,.06), 0 6px 20px rgba(16,32,64,.05);
-  }
-  *{box-sizing:border-box;}
-  html,body{height:100%;margin:0;}
-  body{font-family:"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--text);}
-
-  /* ---------------- LOGIN SCREEN ---------------- */
-  #loginScreen{
-    position:fixed; inset:0; z-index:100;
-    background:#0a1830 url('login-bg.png') center/cover no-repeat;
-    display:flex; align-items:center; justify-content:flex-start;
-  }
-  #loginScreen::before{
-    content:""; position:absolute; inset:0;
-    background:linear-gradient(270deg, rgba(6,14,32,.15) 0%, rgba(6,14,32,.55) 55%, rgba(6,14,32,.75) 100%);
-  }
-  .login-card{
-    position:relative; z-index:2; width:100%; max-width:380px; margin-left:6vw; margin-right:auto;
-    background:rgba(14,24,46,.72); backdrop-filter:blur(6px);
-    border:1px solid rgba(255,255,255,.15); border-radius:14px;
-    padding:32px 30px 26px; color:#fff; box-shadow:0 20px 60px rgba(0,0,0,.45);
-  }
-  .login-card h2{margin:0 0 4px; font-size:20px;}
-  .login-card .tag{font-size:12.5px; color:#b9c8ea; margin-bottom:22px;}
-  .login-card label{display:block; font-size:12px; color:#cfd9f5; margin-bottom:6px; font-weight:600;}
-  .login-card input{
-    width:100%; padding:11px 13px; margin-bottom:16px; border-radius:8px; border:1px solid rgba(255,255,255,.25);
-    background:rgba(255,255,255,.08); color:#fff; font-size:14px; outline:none;
-  }
-  .login-card input::placeholder{color:#9fb0d6;}
-  .login-card input:focus{border-color:var(--lime);}
-  .login-card button{
-    width:100%; padding:12px; border:none; border-radius:8px; font-size:14.5px; font-weight:700;
-    background:linear-gradient(135deg,#c9d84c,#8fae1f); color:#12297a; cursor:pointer;
-  }
-  .login-card button:hover{filter:brightness(1.06);}
-  .login-err{color:#ffb4ac; font-size:12.5px; margin-top:10px; min-height:16px;}
-  .login-hint{font-size:11px; color:#9fb0d6; margin-top:14px; line-height:1.5;}
-
-  /* ---------------- APP SHELL ---------------- */
-  #app{display:none; min-height:100vh; flex-direction:column;}
-
-  #topBanner{
-    position:relative; width:100%; overflow:hidden;
-    background:#0a1830; box-shadow:var(--shadow);
-    display:flex; align-items:center; justify-content:center;
-  }
-  #topBanner .banner-logo{
-    display:block; width:100%; height:auto; max-height:150px; object-fit:contain; object-position:center;
-  }
-  @media(max-width:640px){
-    #topBanner .banner-logo{max-height:90px;}
+  :root {
+    --bg: #f4f6f9;
+    --bg-subtle: #eef1f6;
+    --card: #ffffff;
+    --line: #e2e8f0;
+    --line-strong: #cbd5e1;
+    --text: #0f172a;
+    --text-secondary: #334155;
+    --muted: #64748b;
+    --navy: #0c1e4a;
+    --navy-mid: #132b66;
+    --blue: #1e3a8a;
+    --blue-dark: #0f2660;
+    --blue-soft: #e8eef8;
+    --accent: #a3b82e;
+    --accent-dark: #7a8f18;
+    --accent-soft: #f3f7d9;
+    --green: #15803d;
+    --green-dark: #166534;
+    --green-soft: #dcfce7;
+    --red: #b91c1c;
+    --red-soft: #fee2e2;
+    --amber: #b45309;
+    --amber-soft: #fef3c7;
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+    --shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 4px 12px rgba(15, 23, 42, 0.04);
+    --shadow-lg: 0 8px 30px rgba(15, 23, 42, 0.08);
+    --radius: 10px;
+    --radius-sm: 6px;
+    --font: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --font-display: "DM Sans", "IBM Plex Sans", system-ui, sans-serif;
   }
 
-  .brand{display:flex; align-items:center; gap:12px;}
-  .brand .mark{
-    width:36px;height:36px;border-radius:9px; background:linear-gradient(135deg,#c9d84c,#8fae1f);
-    display:flex;align-items:center;justify-content:center;font-weight:800;color:#12297a;font-size:15px;
-  }
-  .brand h1{font-size:17px;margin:0;font-weight:700;}
-  .brand span{display:block;font-size:11.5px;color:#c7d4f0;font-weight:400;}
-  .logout-btn{background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.3); color:#fff;
-    padding:8px 16px; border-radius:8px; font-size:12.5px; font-weight:600; cursor:pointer;}
-  .logout-btn:hover{background:rgba(255,255,255,.22);}
-
-  #birthdayBar{
-    display:none; align-items:center; gap:12px; flex-wrap:wrap;
-    background:linear-gradient(90deg,#fff3b0,#ffe27a); color:#5a4a1a;
-    padding:10px 26px; font-size:13px; font-weight:600; border-bottom:1px solid #e0c068;
-  }
-  #birthdayBar .bell{font-size:16px;}
-  #birthdayBar .msg{flex:1; min-width:200px;}
-  #birthdayBar .dismiss{
-    background:rgba(0,0,0,.08); border:none; color:#5a4a1a; font-weight:700;
-    border-radius:6px; padding:4px 10px; font-size:12px; cursor:pointer;
-  }
-  #birthdayBar .dismiss:hover{background:rgba(0,0,0,.16);}
-
-  .navtabs{display:flex; align-items:center; gap:6px; background:#0f2a72; padding:0 22px; flex-wrap:wrap;}
-  .navtab{
-    padding:12px 18px; font-size:13.5px; font-weight:600; color:#c7d4f0; cursor:pointer;
-    border-bottom:3px solid transparent;
-  }
-  .navtab.active{color:#fff; border-bottom-color:var(--lime); background:rgba(255,255,255,.05);}
-  .navtab:hover{color:#fff;}
-  .navtabs-right{display:flex; align-items:center; gap:14px; margin-left:auto; padding:8px 0;}
-
-  .page{display:none; flex:1; padding:22px 26px 60px;}
-  .page.active{display:block;}
-  .page.frame-page{padding:0;}
-  .page.frame-page iframe{width:100%; height:calc(100vh - 106px); border:none; display:block;}
-
-  h2.section-title{font-size:17px; margin:0 0 4px;}
-  .section-sub{color:var(--muted); font-size:12.5px; margin-bottom:16px;}
-
-  .card{background:var(--card); border:1px solid var(--line); border-radius:12px; box-shadow:var(--shadow); margin-bottom:20px; overflow:hidden;}
-  .card .card-head{padding:14px 18px; border-bottom:1px solid var(--line); display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;}
-  .card .card-head h3{margin:0; font-size:14.5px;}
-  .card .card-body{padding:14px 18px;}
-
-  table{width:100%; border-collapse:collapse; font-size:12.5px;}
-  thead th{background:#e3ecdb; border:1px solid #b9c6a8; padding:7px 6px; text-align:center; font-weight:700;}
-  tbody td{border:1px solid #d3d3d3; padding:6px 6px; text-align:center;}
-  tbody td.name{text-align:left; font-weight:600;}
-  tr.total-row td{background:#dbe6ff; font-weight:800;}
-  tr.group-row td{background:#f7f1d4; font-weight:700; text-align:left;}
-  .auto-val{color:var(--blue); font-weight:700;}
-  .reported-val{color:var(--green-dark); font-weight:700;}
-  .loss-pos{color:var(--red); font-weight:700;}
-  .loss-zero{color:var(--green-dark); font-weight:700;}
-  input.cell-input{
-    width:64px; padding:4px 5px; border:1px solid #c9c9c9; border-radius:4px; font-size:12px; text-align:center;
-  }
-  input.cell-input.small{width:50px;}
-  input.cell-input.wide{width:90px;}
-
-  .btn{border:none;border-radius:7px;padding:8px 15px;font-size:12.5px;font-weight:600;cursor:pointer;}
-  .btn-primary{background:var(--blue); color:#fff;}
-  .btn-primary:hover{background:var(--blue-dark);}
-  .btn-green{background:var(--green); color:#fff;}
-  .btn-green:hover{background:var(--green-dark);}
-  .btn-outline{background:#fff; color:var(--blue); border:1px solid var(--line);}
-  .btn-outline:hover{background:var(--blue-tab);}
-  .btn-danger{background:#fff; color:var(--red); border:1px solid #f1c9c3;}
-  .btn-danger:hover{background:#fdecea;}
-  .btn-sm{padding:5px 10px; font-size:11.5px;}
-
-  .kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:20px;}
-  .kpi{background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px 16px; box-shadow:var(--shadow);}
-  .kpi .val{font-size:22px; font-weight:800; color:var(--blue);}
-  .kpi .lbl{font-size:11.5px; color:var(--muted); margin-top:2px;}
-  .kpi.manual .val-input{
-    width:100%; border:1px solid var(--line); border-radius:7px; padding:4px 6px;
-    font-size:20px; font-weight:800; color:var(--blue-dark); background:#f7f9fc;
-  }
-  .kpi.manual .lbl{display:flex; align-items:center; gap:5px;}
-  .kpi.manual .lbl .tag-manual{
-    font-size:9px; font-weight:700; color:#a06a00; background:#fff3b0; border-radius:4px; padding:1px 5px;
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
   }
 
-  .route-block{margin-bottom:22px;}
-  .route-head{display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; gap:8px;}
-  .route-head h4{margin:0; font-size:13.5px; color:var(--blue-dark);}
-  .route-head .meta{font-size:11.5px; color:var(--muted);}
-
-  .sync-status{font-size:11.5px; color:var(--muted);}
-  .sync-status.ok{color:var(--green-dark); font-weight:600;}
-  .sync-status.err{color:var(--red); font-weight:600;}
-  .sync-status.busy{color:#a06a00; font-weight:600;}
-
-  /* ---------------- STAFF STRENGTH CARDS ---------------- */
-  .subhead{font-size:12px; font-weight:700; color:var(--blue-dark); text-transform:uppercase; letter-spacing:.04em; margin:2px 0 8px;}
-  .kpi.manual.staff .val-input{color:var(--green-dark); background:#f4faf6;}
-  .kpi.manual.staff .lbl .tag-manual{color:#146c43; background:#d9f2e3;}
-
-  /* ---------------- SPOTLIGHT (BIRTHDAY / LEAVE) FLIP CARD ---------------- */
-  .spotlight-row{display:grid; grid-template-columns:minmax(260px,1fr); gap:12px; margin-bottom:20px;}
-  @media(min-width:560px){ .spotlight-row{grid-template-columns:repeat(auto-fit,minmax(300px,1fr));} }
-  .flip-card{perspective:1400px; height:150px;}
-  .flip-card-inner{
-    position:relative; width:100%; height:100%; text-align:left;
-    transition:transform .7s cubic-bezier(.4,.2,.2,1); transform-style:preserve-3d;
-    border-radius:12px; box-shadow:var(--shadow);
+  /* ========== LOGIN ========== */
+  #loginScreen {
+    position: fixed; inset: 0; z-index: 100;
+    background: #071428 url('login-bg.png') center/cover no-repeat;
+    display: flex; align-items: center; justify-content: flex-start;
   }
-  .flip-card.is-flipped .flip-card-inner{transform:rotateY(180deg);}
-  .flip-face{
-    position:absolute; inset:0; backface-visibility:hidden; border-radius:12px;
-    padding:14px 16px; overflow:hidden; display:flex; flex-direction:column;
-    border:1px solid var(--line);
+  #loginScreen::before {
+    content: "";
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(115deg, rgba(7, 20, 40, 0.88) 0%, rgba(7, 20, 40, 0.55) 42%, rgba(7, 20, 40, 0.25) 100%);
   }
-  .flip-face.flip-front{background:linear-gradient(135deg,#fff8de,#fff3b0);}
-  .flip-face.flip-back{background:linear-gradient(135deg,#e7edfb,#d9e4fb); transform:rotateY(180deg);}
-  .flip-face .flip-title{font-size:12.5px; font-weight:800; color:var(--blue-dark); display:flex; align-items:center; justify-content:space-between; gap:6px; margin-bottom:6px;}
-  .flip-face .flip-title .edit-btn{
-    background:rgba(255,255,255,.6); border:1px solid rgba(18,41,122,.15); color:var(--blue-dark);
-    border-radius:6px; padding:2px 8px; font-size:10.5px; font-weight:700; cursor:pointer;
+  .login-card {
+    position: relative; z-index: 2;
+    width: 100%; max-width: 400px;
+    margin-left: 7vw; margin-right: auto;
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(18px) saturate(1.2);
+    -webkit-backdrop-filter: blur(18px) saturate(1.2);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 16px;
+    padding: 36px 34px 30px;
+    color: #fff;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
   }
-  .flip-face .flip-title .edit-btn:hover{background:#fff;}
-  .flip-face .flip-list{list-style:none; margin:0; padding:0; overflow-y:auto; flex:1; font-size:12.5px;}
-  .flip-face .flip-list li{padding:2px 0; font-weight:600; color:var(--text);}
-  .flip-face .flip-empty{color:var(--muted); font-size:12px; font-style:italic;}
-  .flip-dots{display:flex; gap:5px; margin-top:6px;}
-  .flip-dots span{width:6px; height:6px; border-radius:50%; background:rgba(18,41,122,.2);}
-  .flip-card.is-flipped .flip-dots span:first-child{background:rgba(18,41,122,.2);}
-  .flip-card.is-flipped .flip-dots span:last-child{background:var(--blue-dark);}
-  .flip-card:not(.is-flipped) .flip-dots span:first-child{background:var(--blue-dark);}
+  .login-brand {
+    display: flex; align-items: center; gap: 12px; margin-bottom: 6px;
+  }
+  .login-brand-mark {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: linear-gradient(145deg, #c8d94a, #8fae1f);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 700; font-size: 15px; color: #0f2660;
+    letter-spacing: -0.02em;
+  }
+  .login-card h2 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 22px; font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+  .login-card .tag {
+    font-size: 13px; color: rgba(201, 214, 240, 0.85);
+    margin: 0 0 28px; font-weight: 400;
+  }
+  .login-card label {
+    display: block;
+    font-size: 11.5px; font-weight: 600;
+    color: rgba(207, 217, 245, 0.9);
+    margin-bottom: 7px;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  .login-card input {
+    width: 100%;
+    padding: 12px 14px;
+    margin-bottom: 18px;
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.07);
+    color: #fff;
+    font-size: 14.5px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color 0.15s, background 0.15s;
+  }
+  .login-card input::placeholder { color: rgba(159, 176, 214, 0.7); }
+  .login-card input:focus {
+    border-color: rgba(163, 184, 46, 0.7);
+    background: rgba(255, 255, 255, 0.1);
+  }
+  .login-card button {
+    width: 100%;
+    padding: 13px;
+    margin-top: 4px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14.5px;
+    font-weight: 650;
+    font-family: inherit;
+    background: linear-gradient(135deg, #c9d84c 0%, #9ab52a 100%);
+    color: #0f2660;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+    transition: filter 0.15s, transform 0.1s;
+  }
+  .login-card button:hover { filter: brightness(1.05); }
+  .login-card button:active { transform: scale(0.99); }
+  .login-err {
+    color: #fca5a5;
+    font-size: 12.5px;
+    margin-top: 12px;
+    min-height: 18px;
+  }
+  .login-hint {
+    font-size: 11.5px;
+    color: rgba(159, 176, 214, 0.75);
+    margin-top: 18px;
+    line-height: 1.55;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  .login-hint b { color: rgba(201, 214, 240, 0.95); font-weight: 600; }
 
-  /* ---------------- MODEL COLOR CODING (Shift-wise Summary) ---------------- */
-  #depotTable td.name{vertical-align:middle;}
-  tr.model-superluxury td{background:#fff3b0;}
-  tr.model-delux td{background:#e7d6f7;}
-  tr.model-express td{background:#cfe0fb;}
-  tr.model-other td{background:#f1f1f1;}
-  tr.model-a td{background:#d7f2df;}
-  tr.model-b td{background:#ffe0cf;}
-  tr.model-c td{background:#f9d7e6;}
-  tr.model-d td{background:#dff2f2;}
-  tr.model-superluxury td.name{color:#7a5b00;}
-  tr.model-delux td.name{color:#5a2a8c;}
-  tr.model-express td.name{color:#12297a;}
+  /* ========== APP SHELL ========== */
+  #app {
+    display: none;
+    min-height: 100vh;
+    flex-direction: column;
+    background: var(--bg);
+  }
 
-  @media(max-width:720px){
-    .login-card{margin:0 16px;}
-    #loginScreen{justify-content:center;}
+  #topBanner {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    background: #06122c;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.2);
+    line-height: 0;
+  }
+  #topBanner .banner-logo {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 110px;
+    object-fit: contain;
+    object-position: center center;
+    vertical-align: top;
+  }
+  @media (max-width: 1100px) {
+    #topBanner .banner-logo { max-height: 90px; }
+  }
+  @media (max-width: 720px) {
+    #topBanner .banner-logo { max-height: 68px; }
+  }
+  @media (max-width: 480px) {
+    #topBanner .banner-logo { max-height: 56px; }
+  }
+
+  .logout-btn {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #e2e8f0;
+    padding: 7px 14px;
+    border-radius: 7px;
+    font-size: 12.5px;
+    font-weight: 560;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+  .logout-btn:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  #birthdayBar {
+    display: none;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    background: linear-gradient(90deg, #fef9c3, #fde68a);
+    color: #713f12;
+    padding: 10px 28px;
+    font-size: 13px;
+    font-weight: 550;
+    border-bottom: 1px solid #f0d78a;
+  }
+  #birthdayBar .bell { font-size: 15px; }
+  #birthdayBar .msg { flex: 1; min-width: 200px; }
+  #birthdayBar .dismiss {
+    background: rgba(113, 63, 18, 0.1);
+    border: none;
+    color: #713f12;
+    font-weight: 650;
+    border-radius: 6px;
+    padding: 5px 12px;
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  #birthdayBar .dismiss:hover { background: rgba(113, 63, 18, 0.18); }
+
+  /* Nav */
+  .navtabs {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    background: var(--navy-mid);
+    padding: 0 20px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.15);
+  }
+  .navtab {
+    padding: 13px 16px;
+    font-size: 13px;
+    font-weight: 550;
+    color: rgba(199, 212, 240, 0.75);
+    cursor: pointer;
+    border-bottom: 2.5px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.12s, background 0.12s;
+    letter-spacing: 0.01em;
+  }
+  .navtab:hover { color: #fff; background: rgba(255, 255, 255, 0.04); }
+  .navtab.active {
+    color: #fff;
+    border-bottom-color: var(--accent);
+    background: rgba(255, 255, 255, 0.05);
+  }
+  .navtabs-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-left: auto;
+    padding: 8px 0;
+  }
+  #whoami {
+    font-size: 12.5px;
+    color: rgba(219, 230, 255, 0.7);
+  }
+
+  /* Pages */
+  .page {
+    display: none;
+    flex: 1;
+    padding: 24px 28px 56px;
+    max-width: 1440px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .page.active { display: block; }
+  .page.frame-page { padding: 0; max-width: none; }
+  .page.frame-page iframe {
+    width: 100%;
+    height: calc(100vh - 100px);
+    border: none;
+    display: block;
+  }
+
+  h2.section-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 700;
+    margin: 0 0 6px;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+  .section-sub {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 22px;
+    line-height: 1.55;
+    max-width: 920px;
+  }
+  .section-sub b { color: var(--text-secondary); font-weight: 600; }
+
+  /* Cards */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 20px;
+    overflow: hidden;
+  }
+  .card .card-head {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    background: #fafbfc;
+  }
+  .card .card-head h3 {
+    margin: 0;
+    font-size: 13.5px;
+    font-weight: 650;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .card .card-body { padding: 16px 18px; }
+
+  /* Tables */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+  thead th {
+    background: #f1f5f9;
+    border: 1px solid var(--line);
+    padding: 9px 8px;
+    text-align: center;
+    font-weight: 650;
+    color: var(--text-secondary);
+    font-size: 11.5px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  tbody td {
+    border: 1px solid var(--line);
+    padding: 8px 8px;
+    text-align: center;
+    color: var(--text);
+  }
+  tbody td.name {
+    text-align: left;
+    font-weight: 600;
+    color: var(--text);
+  }
+  tr.total-row td {
+    background: #e8eef8;
+    font-weight: 700;
+    color: var(--blue-dark);
+  }
+  tr.group-row td {
+    background: #f8f5e8;
+    font-weight: 650;
+    text-align: left;
+  }
+  .auto-val { color: var(--blue); font-weight: 650; }
+  .reported-val { color: var(--green-dark); font-weight: 650; }
+  .loss-pos { color: var(--red); font-weight: 650; }
+  .loss-zero { color: var(--green-dark); font-weight: 650; }
+
+  input.cell-input {
+    width: 64px;
+    padding: 5px 6px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius-sm);
+    font-size: 12.5px;
+    text-align: center;
+    font-family: inherit;
+    background: #fff;
+    color: var(--text);
+    transition: border-color 0.12s;
+  }
+  input.cell-input:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.12);
+  }
+  input.cell-input.small { width: 52px; }
+  input.cell-input.wide { width: 130px; }
+
+  /* Buttons */
+  .btn {
+    border: none;
+    border-radius: 7px;
+    padding: 8px 15px;
+    font-size: 12.5px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: background 0.12s, border-color 0.12s, color 0.12s;
+  }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-primary:hover { background: var(--blue-dark); }
+  .btn-green { background: var(--green); color: #fff; }
+  .btn-green:hover { background: var(--green-dark); }
+  .btn-outline {
+    background: #fff;
+    color: var(--blue);
+    border: 1px solid var(--line-strong);
+  }
+  .btn-outline:hover {
+    background: var(--blue-soft);
+    border-color: #94a3b8;
+  }
+  .btn-danger {
+    background: #fff;
+    color: var(--red);
+    border: 1px solid #fecaca;
+  }
+  .btn-danger:hover { background: var(--red-soft); }
+  .btn-sm { padding: 6px 12px; font-size: 12px; }
+
+  /* KPIs */
+  .kpis {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(148px, 1fr));
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+  .kpi {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 14px 16px;
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow 0.15s;
+  }
+  .kpi .val {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--blue);
+    letter-spacing: -0.03em;
+    line-height: 1.15;
+  }
+  .kpi .lbl {
+    font-size: 11.5px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-weight: 500;
+  }
+  .kpi.manual .val-input {
+    width: 100%;
+    border: 1px solid var(--line);
+    border-radius: 7px;
+    padding: 4px 8px;
+    font-size: 20px;
+    font-weight: 700;
+    font-family: var(--font-display);
+    color: var(--blue-dark);
+    background: #f8fafc;
+    letter-spacing: -0.02em;
+  }
+  .kpi.manual .val-input:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.1);
+  }
+  .kpi.manual .lbl {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+  }
+  .kpi.manual .lbl .tag-manual {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--amber);
+    background: var(--amber-soft);
+    border-radius: 4px;
+    padding: 2px 6px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .route-block { margin-bottom: 18px; }
+  .route-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .route-head h4 {
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--blue-dark);
+    font-weight: 650;
+  }
+  .route-head .meta { font-size: 12px; color: var(--muted); }
+  .route-block .card-head h4 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 650;
+    color: var(--text);
+  }
+  .route-block .card-head .meta {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .route-block .card-head .meta b { color: var(--text-secondary); }
+
+  .sync-status {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 500;
+  }
+  .sync-status.ok { color: var(--green-dark); font-weight: 600; }
+  .sync-status.err { color: var(--red); font-weight: 600; }
+  .sync-status.busy { color: var(--amber); font-weight: 600; }
+
+  /* Staff strength */
+  .subhead {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin: 4px 0 10px;
+  }
+  .kpi.staff-live {
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s;
+  }
+  .kpi.staff-live:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow);
+    border-color: #c7d2e8;
+  }
+  .kpi.staff-live .val { color: var(--green-dark); }
+  .kpi.staff-live .lbl {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .kpi.staff-live .lbl .tag-live {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--green-dark);
+    background: var(--green-soft);
+    border-radius: 4px;
+    padding: 2px 6px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  /* Staff modal */
+  .staff-modal-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(15, 23, 42, 0.45);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(2px);
+  }
+  .staff-modal-overlay.open { display: flex; }
+  .staff-modal-box {
+    background: #fff;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+  .staff-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 16px 18px 8px;
+  }
+  .staff-modal-head h4 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 650;
+    color: var(--text);
+  }
+  .staff-modal-close {
+    background: var(--bg-subtle);
+    border: none;
+    border-radius: 7px;
+    width: 28px; height: 28px;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .staff-modal-close:hover {
+    background: var(--line);
+    color: var(--text);
+  }
+  .staff-modal-sub {
+    padding: 0 18px 12px;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+  .staff-modal-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 0 18px 12px;
+  }
+  .staff-modal-tabs button {
+    border: 1px solid var(--line);
+    background: #f8fafc;
+    color: var(--muted);
+    border-radius: 20px;
+    padding: 5px 13px;
+    font-size: 12px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+  .staff-modal-tabs button:hover { background: var(--bg-subtle); }
+  .staff-modal-tabs button.active {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: #fff;
+  }
+  .staff-modal-cols {
+    display: grid;
+    grid-template-columns: 0.5fr 1.4fr 1fr 1fr auto;
+    gap: 8px;
+    padding: 0 18px 6px;
+    font-size: 10.5px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .staff-modal-list {
+    list-style: none;
+    margin: 0;
+    padding: 0 10px 16px;
+    overflow-y: auto;
+  }
+  .staff-modal-row {
+    display: grid;
+    grid-template-columns: 0.5fr 1.4fr 1fr 1fr auto;
+    gap: 8px;
+    align-items: center;
+    padding: 10px 8px;
+    border-radius: 8px;
+    font-size: 13px;
+  }
+  .staff-modal-row:nth-child(odd) { background: #f8fafc; }
+  .staff-modal-row .staff-modal-sno { color: var(--muted); font-weight: 550; }
+  .staff-modal-row .staff-modal-name { font-weight: 650; color: var(--text); }
+  .staff-modal-row .staff-modal-id { color: var(--blue-dark); font-weight: 550; }
+  .staff-modal-row .staff-modal-phone {
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .staff-modal-row .staff-modal-phone .staff-call-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px; height: 22px;
+    margin-left: 5px;
+    border-radius: 50%;
+    background: var(--green-soft);
+    text-decoration: none;
+    font-size: 11px;
+    vertical-align: middle;
+  }
+  .staff-modal-row .staff-modal-phone .staff-call-btn:hover {
+    background: #bbf7d0;
+  }
+  .staff-modal-row .staff-modal-tag {
+    font-size: 10.5px;
+    font-weight: 700;
+    border-radius: 20px;
+    padding: 3px 10px;
+    text-align: center;
+  }
+  .staff-modal-row.present .staff-modal-tag {
+    color: var(--green-dark);
+    background: var(--green-soft);
+  }
+  .staff-modal-row.absent .staff-modal-tag {
+    color: #991b1b;
+    background: var(--red-soft);
+  }
+  .staff-modal-empty {
+    padding: 16px 8px;
+    color: var(--muted);
+    font-style: italic;
+    font-size: 13px;
+  }
+  @media (max-width: 480px) {
+    .staff-modal-cols { display: none; }
+    .staff-modal-row {
+      grid-template-columns: auto 1fr 1fr;
+      row-gap: 2px;
+    }
+    .staff-modal-row .staff-modal-phone { grid-column: 2 / span 2; }
+    .staff-modal-row .staff-modal-tag {
+      grid-column: 2 / span 2;
+      justify-self: start;
+    }
+  }
+
+  /* Leave form modal */
+  .leave-modal-overlay {
+    display: none;
+    position: fixed; inset: 0; z-index: 210;
+    background: rgba(15, 23, 42, 0.5);
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    backdrop-filter: blur(3px);
+  }
+  .leave-modal-overlay.open { display: flex; }
+  .leave-modal-box {
+    background: #fff;
+    border-radius: 14px;
+    width: 100%;
+    max-width: 720px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--line);
+    overflow: hidden;
+  }
+  .leave-modal-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 16px 18px 8px;
+  }
+  .leave-modal-head h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 650;
+    color: var(--text);
+  }
+  .leave-modal-sub {
+    padding: 0 18px 12px;
+    font-size: 12.5px;
+    color: var(--muted);
+  }
+  .leave-modal-body {
+    padding: 0 14px 8px;
+    overflow-y: auto;
+    flex: 1;
+  }
+  .leave-row {
+    display: grid;
+    grid-template-columns: 1.4fr 0.9fr 1fr 1.3fr auto;
+    gap: 8px;
+    align-items: start;
+    padding: 10px 8px;
+    border-radius: 10px;
+    margin-bottom: 6px;
+    background: #f8fafc;
+    border: 1px solid var(--line);
+  }
+  .leave-row label {
+    display: block;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 4px;
+  }
+  .leave-row input {
+    width: 100%;
+    padding: 8px 10px;
+    border: 1px solid var(--line-strong);
+    border-radius: 7px;
+    font-size: 13px;
+    font-family: inherit;
+    color: var(--text);
+    background: #fff;
+  }
+  .leave-row input:focus {
+    outline: none;
+    border-color: var(--blue);
+    box-shadow: 0 0 0 2px rgba(30, 58, 138, 0.12);
+  }
+  .leave-row-remove {
+    margin-top: 18px;
+    background: #fff;
+    border: 1px solid #fecaca;
+    color: var(--red);
+    border-radius: 7px;
+    width: 34px; height: 34px;
+    font-size: 16px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .leave-row-remove:hover { background: var(--red-soft); }
+  .leave-modal-foot {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+    padding: 12px 18px 16px;
+    border-top: 1px solid var(--line);
+    background: #fafbfc;
+  }
+  .leave-modal-foot .leave-status {
+    flex: 1;
+    min-width: 140px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .leave-modal-foot .leave-status.ok { color: var(--green-dark); font-weight: 600; }
+  .leave-modal-foot .leave-status.err { color: var(--red); font-weight: 600; }
+  .leave-modal-foot .leave-status.busy { color: var(--amber); font-weight: 600; }
+  @media (max-width: 640px) {
+    .leave-row {
+      grid-template-columns: 1fr 1fr;
+    }
+    .leave-row .leave-field-reason { grid-column: 1 / -1; }
+    .leave-row-remove {
+      grid-column: 1 / -1;
+      width: 100%;
+      margin-top: 0;
+    }
+  }
+
+  /* Spotlight */
+  .spotlight-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 16px;
+    margin-bottom: 22px;
+    max-width: 520px;
+  }
+  @media (min-width: 560px) {
+    .spotlight-row { grid-template-columns: 1fr 1fr; }
+  }
+
+  .spot-card {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+  }
+  .spot-card.spot-birthday {
+    background: linear-gradient(160deg, #fffbeb 0%, #fef3c7 50%, #fde68a 100%);
+  }
+  .spot-card.spot-leave {
+    background: linear-gradient(160deg, #eff6ff 0%, #dbeafe 50%, #bfdbfe 100%);
+  }
+  .spot-card-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 14px 6px;
+    position: relative;
+    z-index: 2;
+  }
+  .spot-card-head .spot-icon { font-size: 16px; line-height: 1; }
+  .spot-card-head .spot-title {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--blue-dark);
+    flex: 1;
+    letter-spacing: 0.01em;
+  }
+  .spot-card-head .spot-count {
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    background: rgba(15, 38, 96, 0.55);
+    border-radius: 20px;
+    padding: 2px 9px;
+    min-width: 22px;
+    text-align: center;
+  }
+  .spot-card-head .spot-edit-btn {
+    background: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(15, 38, 96, 0.12);
+    color: var(--blue-dark);
+    border-radius: 6px;
+    padding: 3px 9px;
+    font-size: 11px;
+    font-weight: 650;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .spot-card-head .spot-edit-btn:hover { background: #fff; }
+
+  .spot-flip-wrap {
+    flex: 1;
+    position: relative;
+    perspective: 1400px;
+    padding: 0 14px 14px;
+  }
+  .spot-flip-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    transition: transform 0.7s cubic-bezier(0.4, 0.2, 0.2, 1);
+    transform-style: preserve-3d;
+  }
+  .spot-flip-inner.flipped { transform: rotateY(180deg); }
+  .spot-face {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.55);
+  }
+  .spot-face-b { transform: rotateY(180deg); }
+  .spot-face-inner {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 10px 12px;
+    gap: 4px;
+  }
+  .spot-face-inner .spot-emoji { font-size: 24px; margin-bottom: 2px; }
+  .spot-face-inner .spot-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.25;
+  }
+  .spot-face-inner .spot-meta {
+    font-size: 12px;
+    font-weight: 550;
+    color: var(--blue-dark);
+    opacity: 0.85;
+  }
+  .spot-face-inner .spot-empty {
+    color: var(--muted);
+    font-size: 13px;
+    font-style: italic;
+  }
+  .spot-dots {
+    display: flex;
+    justify-content: center;
+    gap: 5px;
+    padding-bottom: 12px;
+  }
+  .spot-dots span {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: rgba(15, 38, 96, 0.2);
+  }
+  .spot-dots span.on { background: var(--blue-dark); }
+
+  /* Model color coding */
+  #depotTable td.name { vertical-align: middle; }
+  tr.model-superluxury td { background: #fef9c3; }
+  tr.model-delux td { background: #f3e8ff; }
+  tr.model-express td { background: #dbeafe; }
+  tr.model-other td { background: #f1f5f9; }
+  tr.model-a td { background: #dcfce7; }
+  tr.model-b td { background: #ffedd5; }
+  tr.model-c td { background: #fce7f3; }
+  tr.model-d td { background: #ccfbf1; }
+  tr.model-superluxury td.name { color: #854d0e; }
+  tr.model-delux td.name { color: #6b21a8; }
+  tr.model-express td.name { color: #1e3a8a; }
+
+  @media (max-width: 720px) {
+    .login-card { margin: 0 16px; }
+    #loginScreen { justify-content: center; }
+    .page { padding: 18px 16px 48px; }
+    .navtabs { padding: 0 10px; }
+    .navtab { padding: 12px 12px; font-size: 12.5px; }
   }
 </style>
+
 </head>
 <body>
 
 <!-- ================= LOGIN SCREEN ================= -->
 <div id="loginScreen">
   <div class="login-card">
-    <h2>Chakra E-Trans</h2>
-    <div class="tag">Karimnagar Depot &middot; Boundless Journeys, Embracing All</div>
+    <div class="login-brand">
+      <div class="login-brand-mark">CE</div>
+      <h2>Chakra E-Trans</h2>
+    </div>
+    <div class="tag">Karimnagar Depot · Boundless Journeys, Embracing All</div>
     <form id="loginForm">
       <label>Username</label>
       <input type="text" id="loginUser" placeholder="Enter username" autocomplete="username">
@@ -263,42 +1058,39 @@
 
   <!-- ---------- DASHBOARD (Depot Summary) ---------- -->
   <div class="page active" id="page-dashboard">
-    <h2 class="section-title">TGSRTC Karimnagar Depot-2 — Depot Summary</h2>
-    <div class="section-sub">Most figures below are computed automatically from the <b>Route Summary</b> tab (which itself is pulled from the DOR sheet) for the selected date — as soon as a DOR entry is logged, it rolls up here by Model, Shift, and Route. Total Fleet is a fixed value; Breakdown/Accident report counts, staff strength, and the leave list are typed in manually for now.</div>
+    
+    <div class="subhead">Depot Staff Strength</div>
+    <div class="kpis" id="staffKpiRow"></div>
 
-    <div class="card">
+    <div class="card" id="fleetCard">
       <div class="card-head">
         <h3>Fleet Composition — Bus Model vs Services</h3>
-        <span style="font-size:11.5px;color:var(--muted);">Fixed reference table</span>
+        <span class="sync-status" id="fleetSyncStatus"></span>
       </div>
       <div class="card-body" style="overflow-x:auto;">
         <table>
           <thead>
             <tr><th style="text-align:left;">Bus Model</th><th>Buses</th><th>Services</th></tr>
           </thead>
-          <tbody>
-            <tr><td class="name">Super Luxury</td><td>40</td><td>80</td></tr>
-            <tr><td class="name">Deluxe</td><td>10</td><td>10</td></tr>
-            <tr><td class="name">Express JBS</td><td>14</td><td>28</td></tr>
-            <tr><td class="name">Express GDK</td><td>18</td><td>18</td></tr>
-            <tr><td class="name">Express KMR</td><td>6</td><td>6</td></tr>
-            <tr><td class="name">Express MNTY</td><td>4</td><td>4</td></tr>
-            <tr><td class="name">Express JGTL</td><td>4</td><td>4</td></tr>
-            <tr><td class="name">Express MNCL &amp; LXPT</td><td>4</td><td>4</td></tr>
-            <tr class="total-row"><td>Total Operated Buses / Services</td><td>100</td><td>154</td></tr>
-          </tbody>
+          <tbody id="fleetTableBody"></tbody>
         </table>
-        <div style="margin-top:10px; font-size:12px; color:var(--muted);">
-          <b>Total Buses: 104</b> &nbsp;(Operated: 100&nbsp;•&nbsp;Spare: 4)
+        <div style="margin-top:10px; display:flex; align-items:center; gap:16px; flex-wrap:wrap;">
+          <div style="font-size:12px; color:var(--muted);">
+            <b>Total Buses: <span id="fleetTotalBuses">0</span></b>
+            &nbsp;(Operated: <span id="fleetOperatedBuses">0</span>&nbsp;•&nbsp;Spare:
+            <input type="number" min="0" id="fleetSpareBuses" class="cell-input small" value="4">)
+          </div>
+          <button class="btn btn-green btn-sm" id="fleetSaveBtn">💾 Save to Sheet</button>
+          <button class="btn btn-outline btn-sm" id="fleetReloadBtn">⟲ Reload from Sheet</button>
         </div>
       </div>
     </div>
 
-    <div class="subhead">Depot Staff Strength</div>
-    <div class="kpis" id="staffKpiRow"></div>
-
     <div class="subhead">Today at the Depot</div>
-    <div class="spotlight-row" id="spotlightRow"></div>
+    <div class="spotlight-row">
+      <div id="birthdaySpot"></div>
+      <div id="leaveSpot"></div>
+    </div>
 
     <div class="kpis" id="kpiRow"></div>
 
@@ -311,12 +1103,12 @@
         <table id="depotTable"></table>
       </div>
     </div>
+
   </div>
+
 
   <!-- ---------- ROUTE SUMMARY ---------- -->
   <div class="page" id="page-routes">
-    <h2 class="section-title">Route Summary — Buses &amp; Trip KMs</h2>
-    <div class="section-sub">This page is pulled live from the <b>DOR (Driver Operation Report)</b> sheet for the selected date — every row logged on the DOR form appears here automatically, grouped by route ("En-Route"), with no manual entry needed. Pick a date and this page syncs automatically; use <b>Sync from DOR Sheet</b> to refresh on demand. Totals recalculate instantly and flow through to the Depot Summary tab.</div>
     <div style="margin-bottom:16px; display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
       <span style="font-size:11.5px;color:var(--muted);">Date:
         <input type="date" id="routesDate" class="cell-input wide">
@@ -353,10 +1145,66 @@
    to it by the Driver Operation Report form is pulled in live via
    ?action=getSheetData and grouped by "En-Route" / "Model" to build
    both tables — nothing here is typed in or stored locally anymore.
+
+   REQUIRED Apps Script handlers on this Web App (redeploy after adding):
+
+   function doGet(e) {
+     const action = (e.parameter.action || '').trim();
+     try {
+       if (action === 'getSheetData') return jsonOut_(getDORSheetData_());
+       if (action === 'getFleetComposition') return jsonOut_(getFleetComposition_());
+       if (action === 'getLeaveList') {
+         const date = e.parameter.date || '';
+         if (!date) return jsonOut_({ ok:false, error:'Missing date' });
+         return jsonOut_({ ok:true, result: getLeaveList_(date) });
+       }
+       return jsonOut_({ ok:false, error:'Unknown action: ' + action });
+     } catch (err) {
+       return jsonOut_({ ok:false, error:String(err) });
+     }
+   }
+
+   function doPost(e) {
+     try {
+       const body = JSON.parse(e.postData.contents || '{}');
+       if (body.action === 'saveFleetComposition')
+         return jsonOut_(saveFleetComposition_(body.models||[], body.spare||0));
+       if (body.action === 'saveLeaveList')
+         return jsonOut_(saveLeaveList_(body.date, body.entries||[]));
+       return jsonOut_({ ok:false, error:'Unknown action: ' + (body.action||'') });
+     } catch (err) {
+       return jsonOut_({ ok:false, error:String(err) });
+     }
+   }
+
+   function jsonOut_(obj) {
+     return ContentService.createTextOutput(JSON.stringify(obj))
+       .setMimeType(ContentService.MimeType.JSON);
+   }
+
+   function getDORSheetData_() {
+     const ss = SpreadsheetApp.getActiveSpreadsheet();
+     const sh = ss.getSheetByName('DOR');
+     if (!sh) return { ok:false, error:'Sheet "DOR" not found' };
+     const values = sh.getDataRange().getDisplayValues();
+     if (!values || values.length < 2)
+       return { ok:true, result:{ headers:[], rows:[] } };
+     const headers = values[0];
+     const rows = values.slice(1).filter(row =>
+       row.some(cell => String(cell).trim() !== '')
+     );
+     return { ok:true, result:{ headers:headers, rows:rows } };
+   }
    ============================================================ */
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzW-QA4J_brWe0hPIeSroirFy2a9fr1GRiPuZSqrnbYQ3UbjK-1cp45n6knWoalf9J2/exec";
-const DRIVERS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxR-gfM22idcXBTbqJxWcqQ2DqWg_WFLBQ2NHESB8krGZqsZbnYJB7YSndyKEze9Kip/exec"; // Drivers sheet — used only for the birthday check
+// Legacy drivers URL (action=list only) — no longer used for birthdays.
+// Birthdays + driver roster now come from STAFF_SCRIPT_URL?type=drivers&action=list
+const DRIVERS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxR-gfM22idcXBTbqJxWcqQ2DqWg_WFLBQ2NHESB8krGZqsZbnYJB7YSndyKEze9Kip/exec";
+/* Depot Reports backend (Breakdown / Accident / Held Up / Suspension / Leave).
+   Deployed Apps Script Web App — powers live KPI counts on Depot Summary. */
+const REPORTS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwf2B2SkkY96_6opqeBmfK3JDOl71WiMklv-Z5j8rWy38e6IjwZXO6onL5xXT1zve6lNA/exec";
 function sheetConfigured(){ return SCRIPT_URL && SCRIPT_URL.indexOf('PASTE_') !== 0; }
+function reportsConfigured(){ return REPORTS_SCRIPT_URL && REPORTS_SCRIPT_URL.indexOf('PASTE_') !== 0; }
 
 /* ==========================================================================
    LOGIN
@@ -377,6 +1225,8 @@ function showApp(username){
   // Route Summary / Depot Summary are already showing today's real figures
   // instead of yesterday's cached numbers.
   syncLogIntoRoutes(true);
+  loadFleetComposition();
+  loadLeaveFromSheet(getActiveDate()).then(function(){ renderSpotlight(getActiveDate()); });
 }
 
 loginForm.addEventListener('submit', function(e){
@@ -403,52 +1253,153 @@ document.getElementById('logoutBtn').addEventListener('click', function(){
 })();
 
 /* ==========================================================================
-   BIRTHDAY NOTIFICATION
+   BIRTHDAY NOTIFICATION — Drivers + Washing Team + Technicians + Supervisors
+   Loads all four rosters from STAFF_SCRIPT_URL and shows matches all day on
+   the top bar and the Depot Summary spotlight card. Re-renders when data
+   finishes loading so the UI updates even if the first paint was empty.
    ========================================================================== */
 function parseDobToMonthDay(raw){
   if(!raw) return null;
   const s = String(raw).trim();
+  // YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS…
   let m = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if(m) return { month: Number(m[2]), day: Number(m[3]) };
-  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  // DD-MM-YYYY or DD/MM/YYYY (common on washing / tech / supervisor sheets)
+  m = s.match(/^(\d{1,2})[-\/](\d{1,2})[-\/](\d{4})/);
   if(m) return { month: Number(m[2]), day: Number(m[1]) };
   return null;
 }
 
-async function checkBirthdaysToday(){
+function staffDobRaw(rec){
+  if(!rec || typeof rec !== 'object') return '';
+  return rec.dob || rec.DOB || rec['Date of Birth'] || rec['D.O.B'] || rec['Date of birth'] || '';
+}
+
+function staffPersonFromRecord(roleKey, roleLabel, rec){
+  let n;
+  if(typeof normalizeStaffRecord === 'function'){
+    n = normalizeStaffRecord(roleKey, rec);
+  } else if(roleKey === 'drivers'){
+    n = { id: rec.driver_id || '', name: rec.name || '', mobile: rec.mobile || '' };
+  } else {
+    n = {
+      id: rec['Employee Id'] || '',
+      name: rec['Staff'] || rec['NAME AS PER AADHAR CARD'] || '',
+      mobile: rec['Mobile No.'] || ''
+    };
+  }
+  return {
+    name: n.name || n.id || roleLabel,
+    id: n.id || '',
+    number: n.mobile || '',
+    dob: staffDobRaw(rec),
+    role: roleKey,
+    roleLabel: roleLabel
+  };
+}
+
+let allStaffPeople = []; // unified list for birthdays across all roles
+let allStaffLoaded = false;
+// Legacy aliases kept so older call sites still work
+let allDrivers = [];
+let driversLoaded = false;
+// Early stubs so birthday load can run before the staff KPI block initialises them
+if(typeof staffRosterCache === 'undefined'){ var staffRosterCache = {}; }
+if(typeof staffRosterLoaded === 'undefined'){ var staffRosterLoaded = {}; }
+
+// Role list used for birthdays (mirrors STAFF_ROLE_DEFS; defined here so
+// checkBirthdaysToday can run safely even if that const is declared later).
+const BIRTHDAY_ROLE_DEFS = [
+  { key:'drivers',    label:'Drivers' },
+  { key:'technician', label:'Technicians' },
+  { key:'washing',    label:'Washing Team' },
+  { key:'supervisor', label:'Supervisors' }
+];
+
+async function ensureAllStaffForBirthdays(){
+  // Wait briefly if staff helpers are not initialised yet (script still parsing).
+  let tries = 0;
+  while(typeof fetchStaffRoster !== 'function' && tries < 40){
+    await new Promise(r => setTimeout(r, 25));
+    tries++;
+  }
+  if(typeof fetchStaffRoster !== 'function') return allStaffPeople;
+
+  const missing = BIRTHDAY_ROLE_DEFS.filter(r => !staffRosterLoaded[r.key]);
+  if(missing.length){
+    await Promise.all(missing.map(r => fetchStaffRoster(r.key)));
+  }
+  const people = [];
+  BIRTHDAY_ROLE_DEFS.forEach(role=>{
+    const roster = staffRosterCache[role.key] || [];
+    roster.forEach(rec=>{
+      const person = staffPersonFromRecord(role.key, role.label, rec);
+      if(!person.name || person.name === role.label) return;
+      if(typeof hasStaffRecord === 'function' && !hasStaffRecord({ id: person.id, name: person.name })) return;
+      people.push(person);
+    });
+  });
+  allStaffPeople = people;
+  allStaffLoaded = people.length > 0;
+  allDrivers = staffRosterCache['drivers'] || [];
+  driversLoaded = !!(staffRosterLoaded['drivers']);
+  return allStaffPeople;
+}
+
+function birthdayMatchesForDate(dateKey){
+  const md = monthDayFromIso(dateKey);
+  if(!md) return [];
+  return allStaffPeople.filter(p=>{
+    const dob = parseDobToMonthDay(p.dob);
+    return dob && dob.month === md.month && dob.day === md.day;
+  });
+}
+
+function birthdayLabel(p){
+  const role = p.roleLabel ? ` (${p.roleLabel})` : '';
+  return (p.name || 'Staff') + role;
+}
+
+/** Refresh top bar + spotlight whenever staff data arrives or the date changes. */
+function refreshBirthdaysUI(){
+  const dateKey = getActiveDate();
+  renderSpotlight(dateKey);
+
   const bar = document.getElementById('birthdayBar');
   const msgEl = document.getElementById('birthdayMsg');
+  if(!bar || !msgEl) return;
 
-  const drivers = await ensureDriversLoaded();
-  // Refresh the Depot Summary spotlight card now that the driver list (and
-  // its birthdays) is available, in case it rendered before this resolved.
-  renderSpotlight(getActiveDate());
-  if(!drivers.length) return;
+  // Top banner is always calendar "today", not the selected summary date.
+  const todayIso = localDateISO();
+  const todayKey = todayIso; // stable dismiss key (YYYY-MM-DD local)
+  if(sessionStorage.getItem('chakra_bday_dismissed') === todayKey){
+    bar.style.display = 'none';
+    return;
+  }
 
-  const today = new Date();
-  const todayKey = today.getFullYear() + '-' + (today.getMonth()+1) + '-' + today.getDate();
-  if(sessionStorage.getItem('chakra_bday_dismissed') === todayKey) return;
+  const matches = birthdayMatchesForDate(todayIso);
+  if(matches.length){
+    const names = matches.map(birthdayLabel);
+    msgEl.textContent = matches.length === 1
+      ? `Today is ${names[0]}'s birthday! 🎉`
+      : `Today is the birthday of: ${names.join(', ')} 🎉`;
+    bar.style.display = 'flex';
+  } else {
+    bar.style.display = 'none';
+    msgEl.textContent = '';
+  }
+}
 
+async function checkBirthdaysToday(){
   try{
-    const matches = drivers.filter(d=>{
-      const dob = parseDobToMonthDay(d.dob);
-      return dob && dob.month === (today.getMonth()+1) && dob.day === today.getDate();
-    }).map(d=> d.name || d.employee_id || 'Driver');
-
-    if(matches.length){
-      msgEl.textContent = matches.length === 1
-        ? `Today is ${matches[0]}'s birthday! 🎉`
-        : `Today is the birthday of: ${matches.join(', ')} 🎉`;
-      bar.style.display = 'flex';
-    }
+    await ensureAllStaffForBirthdays();
+    refreshBirthdaysUI();
   }catch(err){
     // Silent — birthday check is a nice-to-have, never blocks the app.
   }
 }
 document.getElementById('birthdayDismiss').addEventListener('click', function(){
-  const today = new Date();
-  const todayKey = today.getFullYear() + '-' + (today.getMonth()+1) + '-' + today.getDate();
-  sessionStorage.setItem('chakra_bday_dismissed', todayKey);
+  sessionStorage.setItem('chakra_bday_dismissed', localDateISO());
   document.getElementById('birthdayBar').style.display = 'none';
 });
 
@@ -507,140 +1458,805 @@ function modelColorClass(model){
 /* ---------- Total Fleet: fixed value (not pulled from the sheet) ---------- */
 const FIXED_TOTAL_FLEET = 104;
 
-/* ---------- Manually-typed KPIs (Breakdown / Accident report counts) ----------
-   These aren't in the DOR sheet yet, so for now they're typed in directly on
-   the dashboard and kept per-date in this browser via localStorage. */
-function getManualKpi(key, dateKey){
-  try{
-    const raw = localStorage.getItem('chakra_kpi_' + key + '_' + dateKey);
-    return raw !== null ? raw : '';
-  }catch(e){ return ''; }
-}
-function setManualKpi(key, dateKey, value){
-  try{ localStorage.setItem('chakra_kpi_' + key + '_' + dateKey, value); }catch(e){}
-}
-
-/* ---------- Depot staff strength (manual, per-date, same pattern as above) ---------- */
-const STAFF_ROLES = [
-  { key:'drivers',     label:'Drivers' },
-  { key:'technicians', label:'Technicians' },
-  { key:'washing',     label:'Washing Team' },
-  { key:'mis',         label:'MIS' },
-  { key:'supervisors', label:'Supervisors' }
+/* ==========================================================================
+   FLEET COMPOSITION — Bus Model vs Services
+   Buses and Services are typed in by hand for each model, and saved to a
+   "FleetComposition" sheet/tab via the same Apps Script backend (SCRIPT_URL)
+   using action=getFleetComposition / action=saveFleetComposition. See the
+   note at the bottom of this file for the matching Apps Script snippet.
+   Falls back to localStorage if the sheet call fails, so the page still
+   works before the Apps Script side is wired up.
+   ========================================================================== */
+const FLEET_MODELS_DEFAULT = [
+  { key:'super_luxury',        name:'Super Luxury',          buses:40, services:80 },
+  { key:'deluxe',               name:'Deluxe',                 buses:10, services:10 },
+  { key:'express_jbs',          name:'Express JBS',            buses:14, services:28 },
+  { key:'express_gdk',          name:'Express GDK',            buses:18, services:18 },
+  { key:'express_kmr',          name:'Express KMR',            buses:6,  services:6  },
+  { key:'express_mnty',         name:'Express MNTY',           buses:4,  services:4  },
+  { key:'express_jgtl',         name:'Express JGTL',           buses:4,  services:4  },
+  { key:'express_mncl_lxpt',    name:'Express MNCL & LXPT',    buses:4,  services:4  }
 ];
 
-function renderStaffKpis(dateKey){
-  const row = document.getElementById('staffKpiRow');
-  if(!row) return;
-  row.innerHTML = STAFF_ROLES.map(role=>{
-    const val = getManualKpi('staff_' + role.key, dateKey);
-    return `<div class="kpi manual staff">
-        <input type="number" min="0" class="val-input" data-staff-role="${role.key}" value="${val}" placeholder="0">
-        <div class="lbl">${role.label} <span class="tag-manual">manual</span></div>
-      </div>`;
-  }).join('');
-  row.querySelectorAll('[data-staff-role]').forEach(inp=>{
-    inp.addEventListener('input', function(){
-      setManualKpi('staff_' + this.dataset.staffRole, dateKey, this.value);
-    });
-  });
+function fleetLocalKey(){ return 'chakra_fleet_composition'; }
+function loadFleetFromLocal(){
+  try{
+    const raw = localStorage.getItem(fleetLocalKey());
+    return raw ? JSON.parse(raw) : null;
+  }catch(e){ return null; }
+}
+function saveFleetToLocal(data){
+  try{ localStorage.setItem(fleetLocalKey(), JSON.stringify(data)); }catch(e){}
 }
 
-/* ---------- Drivers cache (used for the birthday bar AND the spotlight flip card) ---------- */
-let allDrivers = [];
-let driversLoaded = false;
-async function ensureDriversLoaded(){
-  if(driversLoaded) return allDrivers;
-  if(!DRIVERS_SCRIPT_URL || DRIVERS_SCRIPT_URL.indexOf('PASTE_') === 0) return allDrivers;
+function setFleetSyncStatus(state, text){
+  const el = document.getElementById('fleetSyncStatus');
+  if(!el) return;
+  el.textContent = text;
+  el.className = 'sync-status' + (state ? ' ' + state : '');
+}
+
+function renderFleetTable(models, spare){
+  const body = document.getElementById('fleetTableBody');
+  if(!body) return;
+  let html = '';
+  models.forEach(m=>{
+    html += `<tr data-key="${m.key}">
+        <td class="name">${m.name}</td>
+        <td><input type="number" min="0" class="cell-input small fleet-buses-input" data-key="${m.key}" value="${num(m.buses)}"></td>
+        <td><input type="number" min="0" class="cell-input small fleet-services-input" data-key="${m.key}" value="${num(m.services)}"></td>
+      </tr>`;
+  });
+  html += `<tr class="total-row">
+      <td>Total Operated Buses / Services</td>
+      <td id="fleetTotalBusesCell">0</td>
+      <td id="fleetTotalServicesCell">0</td>
+    </tr>`;
+  body.innerHTML = html;
+  document.getElementById('fleetSpareBuses').value = num(spare);
+
+  body.querySelectorAll('.fleet-buses-input, .fleet-services-input').forEach(inp=>{
+    inp.addEventListener('input', recalcFleetTotals);
+  });
+  document.getElementById('fleetSpareBuses').removeEventListener('input', recalcFleetTotals);
+  document.getElementById('fleetSpareBuses').addEventListener('input', recalcFleetTotals);
+
+  recalcFleetTotals();
+}
+
+function readFleetTableState(){
+  const rows = Array.from(document.querySelectorAll('#fleetTableBody tr[data-key]'));
+  const models = rows.map(row=>{
+    const key = row.dataset.key;
+    const busesInp = row.querySelector('.fleet-buses-input');
+    const servicesInp = row.querySelector('.fleet-services-input');
+    const known = FLEET_MODELS_DEFAULT.find(m=>m.key===key);
+    return {
+      key,
+      name: known ? known.name : key,
+      buses: num(busesInp ? busesInp.value : 0),
+      services: num(servicesInp ? servicesInp.value : 0)
+    };
+  });
+  const spare = num(document.getElementById('fleetSpareBuses').value);
+  return { models, spare };
+}
+
+function recalcFleetTotals(){
+  const { models, spare } = readFleetTableState();
+  const totalBuses = models.reduce((s,m)=> s + m.buses, 0);
+  const totalServices = models.reduce((s,m)=> s + m.services, 0);
+  const totalBusesCell = document.getElementById('fleetTotalBusesCell');
+  const totalServicesCell = document.getElementById('fleetTotalServicesCell');
+  if(totalBusesCell) totalBusesCell.textContent = totalBuses.toLocaleString();
+  if(totalServicesCell) totalServicesCell.textContent = totalServices.toLocaleString();
+  document.getElementById('fleetTotalBuses').textContent = (totalBuses + spare).toLocaleString();
+  document.getElementById('fleetOperatedBuses').textContent = totalBuses.toLocaleString();
+}
+
+async function loadFleetComposition(){
+  setFleetSyncStatus('busy', 'Loading…');
+  if(sheetConfigured()){
+    try{
+      const res = await fetch(SCRIPT_URL + '?action=getFleetComposition');
+      if(res.ok){
+        const json = await res.json();
+        if(json && json.ok && json.result && Array.isArray(json.result.models) && json.result.models.length){
+          renderFleetTable(json.result.models, json.result.spare || 0);
+          saveFleetToLocal(json.result);
+          setFleetSyncStatus('ok', 'Loaded from sheet.');
+          return;
+        }
+      }
+    }catch(e){ /* fall through to local/default below */ }
+  }
+  const local = loadFleetFromLocal();
+  if(local && Array.isArray(local.models) && local.models.length){
+    renderFleetTable(local.models, local.spare || 0);
+    setFleetSyncStatus('', 'Showing locally saved values (not yet on sheet).');
+  } else {
+    renderFleetTable(FLEET_MODELS_DEFAULT, 4);
+    setFleetSyncStatus('', 'Showing default values.');
+  }
+}
+
+async function saveFleetComposition(){
+  const state = readFleetTableState();
+  saveFleetToLocal(state);
+  if(!sheetConfigured()){
+    setFleetSyncStatus('err', 'Google Sheet not connected — saved locally only.');
+    return;
+  }
+  setFleetSyncStatus('busy', 'Saving…');
   try{
-    const res = await fetch(DRIVERS_SCRIPT_URL + '?action=list');
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // avoids CORS preflight on Apps Script
+      body: JSON.stringify({ action: 'saveFleetComposition', models: state.models, spare: state.spare })
+    });
+    const json = await res.json().catch(()=>null);
+    if(res.ok && json && json.ok){
+      setFleetSyncStatus('ok', 'Saved to sheet.');
+    } else {
+      setFleetSyncStatus('err', 'Saved locally, but the sheet save failed — check the Apps Script action=saveFleetComposition handler.');
+    }
+  }catch(e){
+    setFleetSyncStatus('err', 'Saved locally, but could not reach the sheet.');
+  }
+}
+
+document.getElementById('fleetSaveBtn').addEventListener('click', saveFleetComposition);
+document.getElementById('fleetReloadBtn').addEventListener('click', loadFleetComposition);
+
+/* ---------- Depot staff strength — LIVE, pulled from the Depot Staff Management
+   backend (Drivers / WashingTeam / TechnicianTeam / Supervisor + Attendance).
+   Shows "present / total" per role; click a card to see the id, name and
+   phone number of everyone in that team. ---------- */
+const STAFF_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyAE1POq5C-ousC5-48dsPM1alLxx_6XEeAj2e4uInz2-UDLDxypv8-Y5YevdgSknMG/exec";
+
+const STAFF_ROLE_DEFS = [
+  { key:'drivers',    label:'Drivers' },
+  { key:'technician', label:'Technicians' },
+  { key:'washing',    label:'Washing Team' },
+  { key:'supervisor', label:'Supervisors' }
+];
+
+// staffRosterCache / staffRosterLoaded are declared earlier (birthday block) so
+// checkBirthdaysToday can run during session restore before this section runs.
+async function fetchStaffRoster(category){
+  if(staffRosterLoaded[category]) return staffRosterCache[category];
+  try{
+    const res = await fetch(STAFF_SCRIPT_URL + '?type=' + category + '&action=list');
     if(res.ok){
       const data = await res.json();
-      if(Array.isArray(data)){ allDrivers = data; driversLoaded = true; }
+      if(Array.isArray(data)){
+        staffRosterCache[category] = data;
+        staffRosterLoaded[category] = true;
+        return data;
+      }
     }
-  }catch(e){ /* silent — spotlight birthdays are a nice-to-have */ }
+  }catch(e){ /* silent — a failed pull just leaves that card blank */ }
+  return staffRosterCache[category] || [];
+}
+
+let staffAttendanceCache = {}; // date -> attendance rows for that date
+async function fetchStaffAttendance(dateKey){
+  if(staffAttendanceCache[dateKey]) return staffAttendanceCache[dateKey];
+  try{
+    const res = await fetch(STAFF_SCRIPT_URL + '?type=attendance&date=' + encodeURIComponent(dateKey));
+    if(res.ok){
+      const data = await res.json();
+      if(Array.isArray(data)){ staffAttendanceCache[dateKey] = data; return data; }
+    }
+  }catch(e){ /* silent */ }
+  return [];
+}
+
+// Drivers use driver_id/name/mobile/status; WashingTeam/TechnicianTeam/Supervisor
+// share the "Employee Id"/"Staff"/"Mobile No."/"Status" column layout.
+function normalizeStaffRecord(category, rec){
+  if(category === 'drivers'){
+    return { id: rec.driver_id || '', name: rec.name || '', mobile: rec.mobile || '', status: rec.status || '' };
+  }
+  return {
+    id: rec['Employee Id'] || '',
+    name: rec['Staff'] || rec['NAME AS PER AADHAR CARD'] || '',
+    mobile: rec['Mobile No.'] || '',
+    status: rec['Status'] || ''
+  };
+}
+function hasStaffRecord(r){
+  return (r.id && String(r.id).trim()) || (r.name && String(r.name).trim());
+}
+function isPresentStatus(status){
+  return String(status||'').trim().toLowerCase().startsWith('p'); // "Present" / "P"
+}
+function attendanceCategoryMatches(roleKey, attCategory){
+  const a = String(attCategory||'').toLowerCase();
+  if(roleKey === 'drivers') return a.includes('driver');
+  if(roleKey === 'washing') return a.includes('wash');
+  if(roleKey === 'technician') return a.includes('tech');
+  if(roleKey === 'supervisor') return a.includes('super');
+  return false;
+}
+
+async function renderStaffKpis(dateKey){
+  const row = document.getElementById('staffKpiRow');
+  if(!row) return;
+
+  row.innerHTML = STAFF_ROLE_DEFS.map(role=>`
+      <div class="kpi staff-live" data-role="${role.key}">
+        <div class="val">…</div>
+        <div class="lbl">${role.label} <span class="tag-manual tag-live">live</span></div>
+      </div>`).join('');
+
+  const [rosters, attendance] = await Promise.all([
+    Promise.all(STAFF_ROLE_DEFS.map(r=> fetchStaffRoster(r.key))),
+    fetchStaffAttendance(dateKey)
+  ]);
+
+  STAFF_ROLE_DEFS.forEach((role, i)=>{
+    const roster = (rosters[i] || []).map(rec=> normalizeStaffRecord(role.key, rec));
+    const activeRoster = roster.filter(hasStaffRecord);
+    const presentAtt = attendance.filter(a=> attendanceCategoryMatches(role.key, a.category) && isPresentStatus(a.status));
+
+    const card = row.querySelector(`[data-role="${role.key}"]`);
+    if(!card) return;
+    card.querySelector('.val').textContent = `${presentAtt.length}/${activeRoster.length}`;
+    card.title = 'Tap to see the ' + role.label.toLowerCase() + ' list';
+    card.addEventListener('click', ()=> openStaffModal(role, activeRoster, presentAtt, dateKey));
+  });
+
+  // Staff rosters just finished loading — rebuild the unified birthday list and
+  // refresh the top bar + spotlight so birthdays appear as soon as data is in.
+  try{
+    const people = [];
+    STAFF_ROLE_DEFS.forEach(role=>{
+      const roster = staffRosterCache[role.key] || [];
+      roster.forEach(rec=>{
+        const person = staffPersonFromRecord(role.key, role.label, rec);
+        if(!person.name || person.name === role.label) return;
+        if(!hasStaffRecord({ id: person.id, name: person.name })) return;
+        people.push(person);
+      });
+    });
+    allStaffPeople = people;
+    allStaffLoaded = people.length > 0;
+    allDrivers = staffRosterCache['drivers'] || [];
+    driversLoaded = !!(staffRosterLoaded['drivers']);
+    refreshBirthdaysUI();
+  }catch(e){ /* birthday refresh is non-blocking */ }
+}
+
+/* ---------- Staff list modal — S.No / id / name / phone, with All / Present / Absent tabs ---------- */
+function ensureStaffModal(){
+  let modal = document.getElementById('staffModal');
+  if(modal) return modal;
+  modal = document.createElement('div');
+  modal.id = 'staffModal';
+  modal.className = 'staff-modal-overlay';
+  modal.innerHTML = `
+    <div class="staff-modal-box">
+      <div class="staff-modal-head">
+        <h4 id="staffModalTitle"></h4>
+        <button type="button" id="staffModalClose" class="staff-modal-close">✕</button>
+      </div>
+      <div class="staff-modal-sub" id="staffModalSub"></div>
+      <div class="staff-modal-tabs" id="staffModalTabs"></div>
+      <div class="staff-modal-cols">
+        <span>S.No</span><span>Name</span><span>ID</span><span>Phone</span><span>Status</span>
+      </div>
+      <ul class="staff-modal-list" id="staffModalList"></ul>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.addEventListener('click', function(e){ if(e.target === modal) closeStaffModal(); });
+  document.getElementById('staffModalClose').addEventListener('click', closeStaffModal);
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeStaffModal(); });
+  return modal;
+}
+function closeStaffModal(){
+  const modal = document.getElementById('staffModal');
+  if(modal) modal.classList.remove('open');
+}
+
+function staffModalRowsHtml(entries, presentKeys){
+  if(!entries.length) return `<li class="staff-modal-empty">Nobody in this list.</li>`;
+  return entries.map((r, i)=>{
+    const key = String(r.id || r.name || '').trim().toLowerCase();
+    const present = presentKeys.has(key);
+    return `<li class="staff-modal-row ${present ? 'present' : 'absent'}">
+        <span class="staff-modal-sno">${i + 1}</span>
+        <span class="staff-modal-name">${r.name || '—'}</span>
+        <span class="staff-modal-id">${r.id || '—'}</span>
+        <span class="staff-modal-phone">${r.mobile
+          ? `${r.mobile} <a class="staff-call-btn" href="tel:${String(r.mobile).replace(/[^0-9+]/g,'')}" title="Call ${r.name || ''}" onclick="event.stopPropagation()">📞</a>`
+          : '—'}</span>
+        <span class="staff-modal-tag">${present ? 'Present' : 'Absent'}</span>
+      </li>`;
+  }).join('');
+}
+
+function openStaffModal(role, roster, presentAtt, dateKey){
+  const modal = ensureStaffModal();
+  const presentKeys = new Set(presentAtt.map(a=> String(a.employee_id || a.name || '').trim().toLowerCase()));
+  const presentList = roster.filter(r=> presentKeys.has(String(r.id || r.name || '').trim().toLowerCase()));
+  const absentList  = roster.filter(r=> !presentKeys.has(String(r.id || r.name || '').trim().toLowerCase()));
+
+  const tabs = [
+    { key:'all',     label:'All',     entries: roster },
+    { key:'present', label:'Present', entries: presentList },
+    { key:'absent',  label:'Absent',  entries: absentList }
+  ];
+
+  document.getElementById('staffModalTitle').textContent = role.label + ' — ' + dateKey;
+  document.getElementById('staffModalSub').textContent =
+    `${presentList.length} present of ${roster.length} total`;
+
+  const tabsEl = document.getElementById('staffModalTabs');
+  const listEl = document.getElementById('staffModalList');
+
+  function selectTab(activeKey){
+    tabsEl.querySelectorAll('button').forEach(btn=>{
+      btn.classList.toggle('active', btn.dataset.tabKey === activeKey);
+    });
+    const active = tabs.find(t=> t.key === activeKey) || tabs[0];
+    listEl.innerHTML = staffModalRowsHtml(active.entries, presentKeys);
+  }
+
+  tabsEl.innerHTML = tabs.map(t=>
+    `<button type="button" class="${t.key==='all'?'active':''}" data-tab-key="${t.key}">${t.label} (${t.entries.length})</button>`
+  ).join('');
+  tabsEl.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', ()=> selectTab(btn.dataset.tabKey));
+  });
+
+  selectTab('all');
+  modal.classList.add('open');
+}
+
+/* ---------- Drivers cache helper (legacy) — birthdays use ensureAllStaffForBirthdays() ---------- */
+async function ensureDriversLoaded(){
+  await ensureAllStaffForBirthdays();
   return allDrivers;
 }
 
-/* ---------- On-leave list (manual, per-date, kept in this browser for now) ---------- */
-function getLeaveList(dateKey){
-  try{
-    const raw = localStorage.getItem('chakra_leave_' + dateKey);
-    return raw ? JSON.parse(raw) : [];
-  }catch(e){ return []; }
-}
-function setLeaveList(dateKey, arr){
-  try{ localStorage.setItem('chakra_leave_' + dateKey, JSON.stringify(arr)); }catch(e){}
-}
-function editLeaveList(dateKey){
-  const current = getLeaveList(dateKey);
-  const input = prompt('Names on leave today (comma separated):', current.join(', '));
-  if(input === null) return;
-  const arr = input.split(',').map(s=>s.trim()).filter(Boolean);
-  setLeaveList(dateKey, arr);
-  renderSpotlight(dateKey);
+/* ---------- Helper: build a display entry from a unified staff person or raw record ---------- */
+function buildDriverEntry(d){
+  // Already-normalized person from allStaffPeople
+  if(d && d.roleLabel){
+    return {
+      name: d.name || 'Staff',
+      id: d.id || '',
+      number: d.number || '',
+      roleLabel: d.roleLabel || ''
+    };
+  }
+  return {
+    name: d.name || d.employee_id || d.driver_id || d['Staff'] || d['NAME AS PER AADHAR CARD'] || 'Staff',
+    id: d.driver_id || d.employee_id || d['Employee Id'] || d.id || '',
+    number: d.mobile || d['Mobile No.'] || d.phone || d.contact || '',
+    roleLabel: d.roleLabel || ''
+  };
 }
 
-/* ---------- Spotlight flip card: flips between Birthdays and On Leave every 8s ---------- */
-let spotlightInterval = null;
+/* ---------- On-leave list — name, id, phone, short reason; per date.
+   Cached in localStorage and saved to the same Google Sheet workbook
+   (tab "LeaveRegister") via SCRIPT_URL action=getLeaveList / saveLeaveList.
+   Also hydrates from Depot Reports "Leave Report" when available, so the
+   On Leave card still shows after a hard refresh. */
+const leaveCacheByDate = {}; // dateKey -> [{name,id,number,reason}]
+const leaveLoadInFlight = {}; // dateKey -> Promise (dedupe concurrent loads)
+
+function leaveKeyFor(e){
+  return String((e.id || '') + '|' + (e.name || '')).trim().toLowerCase();
+}
+
+function getLeaveList(dateKey){
+  if(Array.isArray(leaveCacheByDate[dateKey])) return leaveCacheByDate[dateKey].slice();
+  try{
+    const raw = localStorage.getItem('chakra_leave_' + dateKey);
+    const arr = raw ? JSON.parse(raw) : [];
+    leaveCacheByDate[dateKey] = Array.isArray(arr) ? arr : [];
+    return leaveCacheByDate[dateKey].slice();
+  }catch(e){ return []; }
+}
+function setLeaveListLocal(dateKey, arr){
+  leaveCacheByDate[dateKey] = Array.isArray(arr) ? arr : [];
+  try{ localStorage.setItem('chakra_leave_' + dateKey, JSON.stringify(leaveCacheByDate[dateKey])); }catch(e){}
+}
+function normalizeLeaveEntry(item){
+  if(typeof item === 'string') return { name:item, id:'', number:'', reason:'' };
+  return {
+    name: item.name || item.driverName || item['Staff'] || '',
+    id: item.id || item.driverId || item.employee_id || '',
+    number: item.number || item.phone || item.mobile || item.driverCell || '',
+    reason: item.reason || item.leave_reason || item.leaveType || ''
+  };
+}
+
+/** Merge two leave lists by id|name; later list wins on conflict. */
+function mergeLeaveLists(base, extra){
+  const map = new Map();
+  (base || []).forEach(e => {
+    const n = normalizeLeaveEntry(e);
+    if(!n.name) return;
+    map.set(leaveKeyFor(n), n);
+  });
+  (extra || []).forEach(e => {
+    const n = normalizeLeaveEntry(e);
+    if(!n.name) return;
+    const k = leaveKeyFor(n);
+    const prev = map.get(k) || {};
+    map.set(k, {
+      name: n.name || prev.name || '',
+      id: n.id || prev.id || '',
+      number: n.number || prev.number || '',
+      reason: n.reason || prev.reason || ''
+    });
+  });
+  return Array.from(map.values());
+}
+
+/** Pull formal Leave Report rows that cover dateKey (fromDate..toDate). */
+async function fetchLeaveFromReports(dateKey){
+  if(!reportsConfigured()) return [];
+  try{
+    // Broaden window slightly so multi-day leave that started earlier still
+    // can be filtered client-side when toDate is present.
+    const url = REPORTS_SCRIPT_URL
+      + '?list=1'
+      + '&type=' + encodeURIComponent('Leave Report')
+      + '&dateTo=' + encodeURIComponent(dateKey);
+    const res = await fetch(url);
+    if(!res.ok) return [];
+    const json = await res.json();
+    const rows = (json && Array.isArray(json.results)) ? json.results : [];
+    return rows.filter(r => {
+      const from = String(r.fromDate || r.date || '').slice(0, 10);
+      const to = String(r.toDate || r.fromDate || r.date || '').slice(0, 10);
+      if(!from) return false;
+      // Active on dateKey if from <= dateKey <= to
+      return from <= dateKey && (!to || to >= dateKey);
+    }).map(r => normalizeLeaveEntry({
+      name: r.driverName || r.name || '',
+      id: r.driverId || r.id || '',
+      number: r.mobile || r.number || '',
+      reason: r.leaveType || r.reason || ''
+    })).filter(e => e.name);
+  }catch(e){
+    return [];
+  }
+}
+
+async function loadLeaveFromSheet(dateKey){
+  if(leaveLoadInFlight[dateKey]) return leaveLoadInFlight[dateKey];
+
+  leaveLoadInFlight[dateKey] = (async function(){
+    const local = getLeaveList(dateKey);
+    let sheetList = null;
+
+    if(sheetConfigured()){
+      try{
+        const res = await fetch(SCRIPT_URL + '?action=getLeaveList&date=' + encodeURIComponent(dateKey));
+        if(res.ok){
+          const json = await res.json();
+          if(json && json.ok && Array.isArray(json.result)){
+            sheetList = json.result.map(normalizeLeaveEntry).filter(e => e.name);
+          }
+        }
+      }catch(e){ /* fall through */ }
+    }
+
+    // Leave Report rows covering this date (Depot Reports backend)
+    const reportList = await fetchLeaveFromReports(dateKey);
+
+    // Prefer authoritative sheet when it returns a real list.
+    // If sheet is empty/missing but local or reports have people, keep them
+    // so a hard refresh still shows the On Leave card.
+    let merged;
+    if(sheetList && sheetList.length){
+      merged = mergeLeaveLists(sheetList, reportList);
+    } else if(local.length){
+      merged = mergeLeaveLists(local, reportList);
+    } else if(sheetList){
+      // Explicit empty from sheet + nothing local → stay empty (unless reports)
+      merged = mergeLeaveLists(sheetList, reportList);
+    } else {
+      merged = mergeLeaveLists(local, reportList);
+    }
+
+    setLeaveListLocal(dateKey, merged);
+    return merged;
+  })();
+
+  try{
+    return await leaveLoadInFlight[dateKey];
+  }finally{
+    delete leaveLoadInFlight[dateKey];
+  }
+}
+
+async function saveLeaveToSheet(dateKey, arr){
+  const normalized = (arr || []).map(normalizeLeaveEntry).filter(e => e.name);
+  setLeaveListLocal(dateKey, normalized);
+  if(!sheetConfigured()) return { ok: false, error: 'Sheet not connected' };
+  try{
+    const res = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({
+        action: 'saveLeaveList',
+        date: dateKey,
+        entries: normalized
+      })
+    });
+    const json = await res.json().catch(() => null);
+    if(res.ok && json && json.ok) return { ok: true };
+    return { ok: false, error: (json && json.error) || 'Save failed' };
+  }catch(e){
+    return { ok: false, error: String(e) };
+  }
+}
+
+/* ---------- Leave form modal — formal multi-person entry (name / id / phone / reason) ---------- */
+function ensureLeaveModal(){
+  let modal = document.getElementById('leaveModal');
+  if(modal) return modal;
+  modal = document.createElement('div');
+  modal.id = 'leaveModal';
+  modal.className = 'leave-modal-overlay';
+  modal.innerHTML = `
+    <div class="leave-modal-box" role="dialog" aria-modal="true" aria-labelledby="leaveModalTitle">
+      <div class="leave-modal-head">
+        <h4 id="leaveModalTitle">🌴 On Leave</h4>
+        <button type="button" class="staff-modal-close" id="leaveModalClose" title="Close">✕</button>
+      </div>
+      <div class="leave-modal-sub" id="leaveModalSub"></div>
+      <div class="leave-modal-body" id="leaveModalBody"></div>
+      <div class="leave-modal-foot">
+        <button type="button" class="btn btn-outline btn-sm" id="leaveAddRowBtn">＋ Add person</button>
+        <span class="leave-status" id="leaveModalStatus"></span>
+        <button type="button" class="btn btn-outline btn-sm" id="leaveModalCancel">Cancel</button>
+        <button type="button" class="btn btn-green btn-sm" id="leaveModalSave">💾 Save to Sheet</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+
+  modal.addEventListener('click', function(e){ if(e.target === modal) closeLeaveModal(); });
+  document.getElementById('leaveModalClose').addEventListener('click', closeLeaveModal);
+  document.getElementById('leaveModalCancel').addEventListener('click', closeLeaveModal);
+  document.getElementById('leaveAddRowBtn').addEventListener('click', function(){
+    appendLeaveFormRow({ name:'', id:'', number:'', reason:'' });
+  });
+  document.getElementById('leaveModalSave').addEventListener('click', submitLeaveModal);
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape' && modal.classList.contains('open')) closeLeaveModal();
+  });
+  return modal;
+}
+
+function closeLeaveModal(){
+  const modal = document.getElementById('leaveModal');
+  if(modal) modal.classList.remove('open');
+}
+
+function leaveFormRowHtml(entry, idx){
+  const e = normalizeLeaveEntry(entry || {});
+  return `
+    <div class="leave-row" data-leave-row="${idx}">
+      <div>
+        <label>Name *</label>
+        <input type="text" class="leave-inp-name" placeholder="Full name" value="${escapeAttr(e.name)}" autocomplete="name">
+      </div>
+      <div>
+        <label>ID</label>
+        <input type="text" class="leave-inp-id" placeholder="Employee / Driver ID" value="${escapeAttr(e.id)}">
+      </div>
+      <div>
+        <label>Phone</label>
+        <input type="tel" class="leave-inp-phone" placeholder="Mobile number" value="${escapeAttr(e.number)}" autocomplete="tel">
+      </div>
+      <div class="leave-field-reason">
+        <label>Short reason</label>
+        <input type="text" class="leave-inp-reason" placeholder="e.g. Casual / Medical / CL" value="${escapeAttr(e.reason)}">
+      </div>
+      <button type="button" class="leave-row-remove" title="Remove this person">✕</button>
+    </div>`;
+}
+
+function escapeAttr(s){
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function appendLeaveFormRow(entry){
+  const body = document.getElementById('leaveModalBody');
+  if(!body) return;
+  const idx = body.querySelectorAll('.leave-row').length;
+  const wrap = document.createElement('div');
+  wrap.innerHTML = leaveFormRowHtml(entry, idx);
+  const row = wrap.firstElementChild;
+  row.querySelector('.leave-row-remove').addEventListener('click', function(){
+    row.remove();
+    if(!body.querySelector('.leave-row')) appendLeaveFormRow({});
+  });
+  body.appendChild(row);
+  const nameInp = row.querySelector('.leave-inp-name');
+  if(nameInp && !entry.name) nameInp.focus();
+}
+
+function readLeaveFormRows(){
+  const body = document.getElementById('leaveModalBody');
+  if(!body) return [];
+  return Array.from(body.querySelectorAll('.leave-row')).map(row => ({
+    name: (row.querySelector('.leave-inp-name') || {}).value || '',
+    id: (row.querySelector('.leave-inp-id') || {}).value || '',
+    number: (row.querySelector('.leave-inp-phone') || {}).value || '',
+    reason: (row.querySelector('.leave-inp-reason') || {}).value || ''
+  })).map(normalizeLeaveEntry).filter(e => e.name.trim());
+}
+
+let leaveModalDateKey = '';
+
+function setLeaveModalStatus(state, text){
+  const el = document.getElementById('leaveModalStatus');
+  if(!el) return;
+  el.textContent = text || '';
+  el.className = 'leave-status' + (state ? ' ' + state : '');
+}
+
+function editLeaveList(dateKey){
+  leaveModalDateKey = dateKey || getActiveDate();
+  const modal = ensureLeaveModal();
+  const current = getLeaveList(leaveModalDateKey).map(normalizeLeaveEntry);
+
+  document.getElementById('leaveModalTitle').textContent = '🌴 On Leave';
+  document.getElementById('leaveModalSub').textContent =
+    'Date: ' + leaveModalDateKey + ' — add each person with name, ID, phone and a short leave reason. Click “Add person” for more rows.';
+
+  const body = document.getElementById('leaveModalBody');
+  body.innerHTML = '';
+  if(current.length){
+    current.forEach(e => appendLeaveFormRow(e));
+  } else {
+    appendLeaveFormRow({});
+  }
+  setLeaveModalStatus('', '');
+  modal.classList.add('open');
+}
+
+async function submitLeaveModal(){
+  const dateKey = leaveModalDateKey || getActiveDate();
+  const arr = readLeaveFormRows();
+  const saveBtn = document.getElementById('leaveModalSave');
+  if(saveBtn) saveBtn.disabled = true;
+  setLeaveModalStatus('busy', 'Saving…');
+
+  setLeaveListLocal(dateKey, arr);
+  renderSpotlight(dateKey);
+
+  const result = await saveLeaveToSheet(dateKey, arr);
+  if(saveBtn) saveBtn.disabled = false;
+
+  if(result && result.ok){
+    setLeaveModalStatus('ok', 'Saved ' + arr.length + ' entr' + (arr.length === 1 ? 'y' : 'ies') + ' to sheet.');
+    setTimeout(closeLeaveModal, 700);
+  } else {
+    setLeaveModalStatus('err',
+      'Saved on this device only. Sheet error: ' +
+      ((result && result.error) || 'check action=saveLeaveList'));
+  }
+}
+
+/* ---------- Spotlight cards: one square card for Birthdays, one for On Leave.
+   Each card cycles through its own people one at a time, flipping every 6s
+   whenever it has more than one entry. ---------- */
 function monthDayFromIso(dateKey){
   const parts = String(dateKey).split('-');
   if(parts.length !== 3) return null;
   return { month: Number(parts[1]), day: Number(parts[2]) };
 }
-function renderSpotlight(dateKey){
-  const wrap = document.getElementById('spotlightRow');
-  if(!wrap) return;
 
-  const md = monthDayFromIso(dateKey);
-  const bdayMatches = (md ? allDrivers.filter(d=>{
-    const dob = parseDobToMonthDay(d.dob);
-    return dob && dob.month === md.month && dob.day === md.day;
-  }) : []).map(d=> d.name || d.employee_id || 'Driver');
+const spotlightTimers = {}; // id -> interval handle, so re-renders don't stack timers
+function stopSpotlightTimer(id){
+  if(spotlightTimers[id]){ clearInterval(spotlightTimers[id]); delete spotlightTimers[id]; }
+}
 
-  const leaveList = getLeaveList(dateKey);
+function spotFaceHtml(entry, emptyText){
+  if(!entry){
+    return `<div class="spot-face-inner"><div class="spot-empty">${emptyText}</div></div>`;
+  }
+  return `<div class="spot-face-inner">
+      <div class="spot-emoji">${entry.emoji || '🎉'}</div>
+      <div class="spot-name">${entry.name}</div>
+      ${entry.roleLabel ? `<div class="spot-meta">${entry.roleLabel}</div>` : ''}
+      ${entry.id ? `<div class="spot-meta">ID: ${entry.id}</div>` : ''}
+      ${entry.number ? `<div class="spot-meta">📞 ${entry.number}</div>` : ''}
+      ${entry.reason ? `<div class="spot-meta">Reason: ${entry.reason}</div>` : ''}
+    </div>`;
+}
 
-  const frontList = bdayMatches.length
-    ? bdayMatches.map(n=>`<li>🎂 ${n}</li>`).join('')
-    : `<li class="flip-empty">No birthdays today.</li>`;
-  const backList = leaveList.length
-    ? leaveList.map(n=>`<li>🌴 ${n}</li>`).join('')
-    : `<li class="flip-empty">No one on leave today.</li>`;
+/* opts: { id, icon, title, colorClass, entries, emptyText, editable, dateKey } */
+function renderSpotCard(containerEl, opts){
+  if(!containerEl) return;
+  stopSpotlightTimer(opts.id);
 
-  wrap.innerHTML = `
-    <div class="flip-card" id="spotlightCard">
-      <div class="flip-card-inner">
-        <div class="flip-face flip-front">
-          <div class="flip-title"><span>🎂 Birthdays Today (${bdayMatches.length})</span></div>
-          <ul class="flip-list">${frontList}</ul>
-          <div class="flip-dots"><span></span><span></span></div>
-        </div>
-        <div class="flip-face flip-back">
-          <div class="flip-title"><span>🌴 On Leave Today (${leaveList.length})</span>
-            <button class="edit-btn" id="editLeaveBtn" type="button">Edit</button>
-          </div>
-          <ul class="flip-list">${backList}</ul>
-          <div class="flip-dots"><span></span><span></span></div>
+  const count = opts.entries.length;
+  let currentIndex = 0;
+
+  containerEl.innerHTML = `
+    <div class="spot-card ${opts.colorClass}">
+      <div class="spot-card-head">
+        <span class="spot-icon">${opts.icon}</span>
+        <span class="spot-title">${opts.title}</span>
+        <span class="spot-count">${count}</span>
+        ${opts.editable ? `<button class="spot-edit-btn" id="${opts.id}-edit" type="button">Edit</button>` : ''}
+      </div>
+      <div class="spot-flip-wrap">
+        <div class="spot-flip-inner" id="${opts.id}-inner">
+          <div class="spot-face spot-face-a" id="${opts.id}-faceA">${spotFaceHtml(count ? opts.entries[0] : null, opts.emptyText)}</div>
+          <div class="spot-face spot-face-b" id="${opts.id}-faceB">${spotFaceHtml(null, opts.emptyText)}</div>
         </div>
       </div>
+      ${count > 1 ? `<div class="spot-dots" id="${opts.id}-dots">${opts.entries.map((_,i)=>`<span class="${i===0?'on':''}"></span>`).join('')}</div>` : ''}
     </div>
   `;
 
-  const editBtn = document.getElementById('editLeaveBtn');
-  if(editBtn) editBtn.addEventListener('click', function(e){ e.stopPropagation(); editLeaveList(dateKey); });
+  if(opts.editable){
+    const editBtn = document.getElementById(opts.id + '-edit');
+    if(editBtn) editBtn.addEventListener('click', function(e){ e.stopPropagation(); editLeaveList(opts.dateKey); });
+  }
 
-  if(spotlightInterval) clearInterval(spotlightInterval);
-  const card = document.getElementById('spotlightCard');
-  spotlightInterval = setInterval(function(){
-    if(card) card.classList.toggle('is-flipped');
-  }, 8000);
+  if(count > 1){
+    spotlightTimers[opts.id] = setInterval(function(){
+      const nextIndex = (currentIndex + 1) % count;
+      const inner = document.getElementById(opts.id + '-inner');
+      if(!inner) return;
+      const showingA = !inner.classList.contains('flipped');
+      const hiddenFace = document.getElementById(opts.id + (showingA ? '-faceB' : '-faceA'));
+      if(hiddenFace) hiddenFace.innerHTML = spotFaceHtml(opts.entries[nextIndex], opts.emptyText);
+      inner.classList.toggle('flipped');
+      currentIndex = nextIndex;
+      const dots = document.getElementById(opts.id + '-dots');
+      if(dots) Array.from(dots.children).forEach((d,i)=> d.classList.toggle('on', i === currentIndex));
+    }, 6000);
+  }
+}
+
+function renderSpotlight(dateKey){
+  // Use unified all-staff list (Drivers + Washing + Technicians + Supervisors).
+  // Falls back to empty until ensureAllStaffForBirthdays / renderStaffKpis fills it.
+  const bdayEntries = birthdayMatchesForDate(dateKey).map(p => Object.assign(buildDriverEntry(p), { emoji:'🎉' }));
+
+  const leaveEntries = getLeaveList(dateKey).map(normalizeLeaveEntry).map(e=> Object.assign(e, { emoji:'🌴' }));
+
+  renderSpotCard(document.getElementById('birthdaySpot'), {
+    id:'bdaySpot', icon:'🎂', title:'Birthdays Today', colorClass:'spot-birthday',
+    entries: bdayEntries, emptyText: allStaffLoaded ? 'No birthdays today.' : 'Loading staff…', editable:false
+  });
+
+  renderSpotCard(document.getElementById('leaveSpot'), {
+    id:'leaveSpot', icon:'🌴', title:'On Leave Today', colorClass:'spot-leave',
+    entries: leaveEntries, emptyText:'No one on leave today.', editable:true, dateKey:dateKey
+  });
 }
 
 /* ---------- shared "which date are we looking at" state ---------- */
+/** Local calendar date as YYYY-MM-DD (avoids UTC shift near midnight in IST). */
+function localDateISO(d){
+  const dt = d instanceof Date ? d : new Date();
+  const y = dt.getFullYear();
+  const m = String(dt.getMonth() + 1).padStart(2, '0');
+  const day = String(dt.getDate()).padStart(2, '0');
+  return y + '-' + m + '-' + day;
+}
 function getActiveDate(){
   const routesDate = document.getElementById('routesDate');
   const summaryDate = document.getElementById('summaryDate');
-  return (routesDate && routesDate.value) || (summaryDate && summaryDate.value) || new Date().toISOString().slice(0,10);
+  return (routesDate && routesDate.value) || (summaryDate && summaryDate.value) || localDateISO();
 }
 function syncDateInputs(value){
   const routesDate = document.getElementById('routesDate');
@@ -652,6 +2268,8 @@ function applyDateFilter(){
   const dateKey = getActiveDate();
   todaysRows = dorRows.filter(r => dmyToIso(r['Date (dd-mm-yyyy)']) === dateKey);
   renderRoutes(); renderDepot();
+  // Pull leave list for the selected date from the sheet (falls back to local cache).
+  loadLeaveFromSheet(dateKey).then(() => renderSpotlight(dateKey));
 }
 document.getElementById('routesDate').addEventListener('change', function(){
   syncDateInputs(this.value); applyDateFilter();
@@ -670,8 +2288,11 @@ function renderRoutes(){
   area.innerHTML = '';
 
   if(!todaysRows.length){
-    area.innerHTML = `<div class="card"><div class="card-body" style="color:var(--muted);">
-      No DOR entries found for this date yet. Submit entries on the DOR form, or click <b>Sync from DOR Sheet</b> to refresh.
+    area.innerHTML = `<div class="card"><div class="card-body" style="color:var(--muted); line-height:1.6;">
+      No DOR entries found for this date yet.<br><br>
+      <b>1.</b> Confirm the Apps Script implements <code>action=getSheetData</code> and is redeployed.<br>
+      <b>2.</b> Submit entries on the DOR form.<br>
+      <b>3.</b> Click <b>Sync from DOR Sheet</b> to refresh.
     </div></div>`;
     return;
   }
@@ -814,8 +2435,6 @@ function renderDepot(){
   document.getElementById('depotTable').innerHTML = rows.length ? html : '';
 
   const dateKey = getActiveDate();
-  const breakdownVal = getManualKpi('breakdown', dateKey);
-  const accidentVal = getManualKpi('accident', dateKey);
   const odoDiffColor = totalOdoDiff > 0 ? '#c0392b' : '#177a45';
 
   document.getElementById('kpiRow').innerHTML = `
@@ -829,23 +2448,12 @@ function renderDepot(){
     <div class="kpi"><div class="val" style="color:${totalLoss>0?'#c0392b':'#177a45'}">${totalLoss.toLocaleString()}</div><div class="lbl">Loss KMs</div></div>
     <div class="kpi"><div class="val">${totalOdoKm.toLocaleString()}</div><div class="lbl">Odo KMs</div></div>
     <div class="kpi"><div class="val" style="color:${odoDiffColor}">${totalOdoDiff.toLocaleString()}</div><div class="lbl">Actual vs Odo Diff.</div></div>
-    <div class="kpi manual">
-      <input type="number" min="0" class="val-input" id="kpiBreakdown" value="${breakdownVal}" placeholder="0">
-      <div class="lbl">Breakdown Reports <span class="tag-manual">manual</span></div>
-    </div>
-    <div class="kpi manual">
-      <input type="number" min="0" class="val-input" id="kpiAccident" value="${accidentVal}" placeholder="0">
-      <div class="lbl">Accident Reports <span class="tag-manual">manual</span></div>
-    </div>
   `;
-
-  const breakdownInput = document.getElementById('kpiBreakdown');
-  const accidentInput = document.getElementById('kpiAccident');
-  if(breakdownInput) breakdownInput.addEventListener('input', function(){ setManualKpi('breakdown', dateKey, this.value); });
-  if(accidentInput) accidentInput.addEventListener('input', function(){ setManualKpi('accident', dateKey, this.value); });
 
   renderStaffKpis(dateKey);
   renderSpotlight(dateKey);
+  // Refresh leave from sheet when depot summary re-renders (non-blocking).
+  loadLeaveFromSheet(dateKey).then(function(){ renderSpotlight(dateKey); });
 }
 
 /* ==========================================================================
@@ -859,7 +2467,7 @@ function renderDepot(){
 function setSyncStatus(state, text){
   const el = document.getElementById('syncStatus');
   if(!el) return;
-  el.textContent = text;
+  el.textContent = text || '';
   el.className = 'sync-status' + (state ? ' ' + state : '');
 }
 
@@ -877,7 +2485,23 @@ async function syncLogIntoRoutes(silent){
     const res = await fetch(SCRIPT_URL + '?action=getSheetData');
     if(!res.ok) throw new Error('HTTP ' + res.status);
     const json = await res.json();
-    if(!json.ok) throw new Error(json.error || 'Unexpected response');
+
+    // Clearer message when the Apps Script is missing the action
+    if(!json.ok){
+      const msg = json.error || 'Unexpected response';
+      if(String(msg).toLowerCase().includes('unknown action')){
+        throw new Error(
+          'Backend does not support action=getSheetData. ' +
+          'Add getDORSheetData_ to the Apps Script (see comment at top of SCRIPT_URL section) and redeploy.'
+        );
+      }
+      throw new Error(msg);
+    }
+
+    if(!json.result || !Array.isArray(json.result.headers) || !Array.isArray(json.result.rows)){
+      throw new Error('Invalid payload: expected result.headers and result.rows arrays');
+    }
+
     const { headers, rows } = json.result;
 
     dorRows = rows.map(rowArr=>{
@@ -896,7 +2520,7 @@ async function syncLogIntoRoutes(silent){
     }
   }catch(err){
     console.error(err);
-    setSyncStatus('err', 'Could not pull the DOR sheet — check the Web App URL / that "action=getSheetData" is supported.');
+    setSyncStatus('err', 'Could not pull the DOR sheet — ' + (err.message || String(err)));
     renderRoutes(); renderDepot();
   }finally{
     syncInFlight = false;
@@ -906,15 +2530,19 @@ document.getElementById('syncLogBtn').addEventListener('click', function(){ sync
 
 /* ---------- boot ---------- */
 todaysRows = [];
-const todayStr = new Date().toISOString().slice(0,10);
+const todayStr = localDateISO();
 document.getElementById('summaryDate').value = todayStr;
 document.getElementById('routesDate').value = todayStr;
 renderRoutes();
 renderDepot();
+renderFleetTable(FLEET_MODELS_DEFAULT, 4); // placeholder until loadFleetComposition() resolves
 // If already signed in (session restored above via checkSession), showApp()
 // already triggered a sync — but this covers the render-before-session-check
 // timing so the first paint isn't empty while that fetch is in flight.
-if(sessionStorage.getItem('chakra_session')) syncLogIntoRoutes(true);
+if(sessionStorage.getItem('chakra_session')){
+  syncLogIntoRoutes(true);
+  loadFleetComposition();
+}
 </script>
 </body>
 </html>
