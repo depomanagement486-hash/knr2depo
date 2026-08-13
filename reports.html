@@ -25,6 +25,33 @@
     color:var(--ink);
     font-family:'Inter',sans-serif;
     padding:24px 12px 60px;
+    position:relative;
+    min-height:100vh;
+  }
+
+  /* ===== BACKGROUND IMAGE WITH 70% BLUR ===== */
+  body::before{
+    content:"";
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    background-image:url("background.jpeg");
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+    filter:blur(14px);          /* strong blur ≈ 70% visual softness */
+    transform:scale(1.08);      /* prevents white edges after blur */
+    z-index:-2;
+  }
+  /* subtle dark overlay so white forms stay readable */
+  body::after{
+    content:"";
+    position:fixed;
+    top:0;left:0;right:0;bottom:0;
+    background:rgba(0,0,0,0.28);
+    z-index:-1;
   }
 
   /* ===================== TOOLBAR ===================== */
@@ -307,6 +334,7 @@
   @page{size:A4;margin:12mm 14mm;}
   @media print{
     body{background:#fff;padding:0;}
+    body::before,body::after{display:none !important;}
     .no-print,.toolbar,.config-note,.entry-section{display:none !important;}
     .preview-empty{display:none !important;}
     .sheet-wrap{max-width:100%;}
