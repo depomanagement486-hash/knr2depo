@@ -74,6 +74,7 @@
   .btn-danger{background:#fff;color:var(--red);border:1px solid #f1c9c3;}
   .btn-danger:hover{background:#fdecea;}
   .btn-sm{padding:6px 12px;font-size:12.5px;}
+  .btn:disabled{opacity:.6;cursor:not-allowed;}
 
   .card{background:var(--card);border-radius:12px;box-shadow:var(--shadow);border:1px solid var(--line);}
 
@@ -306,7 +307,7 @@
       <button class="btn btn-danger" onclick="markAllAbsent()">&#10005; Mark All Absent</button>
       <button class="btn btn-outline" onclick="clearAllAttendance()">&#8635; Clear All</button>
       <button class="btn btn-outline" onclick="genericSyncFromSheet('attendance',false); loadAttendanceForDate();">&#8635; Refresh</button>
-      <button class="btn btn-primary" onclick="saveAttendanceToSheet()">&#128190; Save to Google Sheet</button>
+      <button class="btn btn-primary" id="saveAttendanceBtn" onclick="saveAttendanceToSheet()">&#128190; Save to Google Sheet</button>
     </div>
     <div class="card">
       <table>
@@ -1398,6 +1399,7 @@ function saveSupervisor(){
 ===================================================================== */
 let attendanceData = {}; // uid -> 'Present' | 'Absent'
 let currentAttendanceCategory = 'all'; // 'all' | 'Driver' | 'Washing' | 'Technician' | 'Supervisor'
+let attendanceSaving = false; // guards against double-submit while a save is in flight
 
 function getAllPeople(){
   const people = [];
@@ -1567,6 +1569,7 @@ async function loadAttendanceForDate(){
 }
 
 async function saveAttendanceToSheet(){
+  if(attendanceSaving) return; // a save is already in flight — ignore extra clicks/taps
   if(!sheetConfigured('attendance')){
     alert('The Attendance sheet isn\'t connected yet. Paste its Apps Script Web App URL into SHEET_URLS.attendance near the top of the script, then reload.');
     return;
@@ -1584,19 +1587,27 @@ async function saveAttendanceToSheet(){
   }));
   if(!rows.length){ alert('Mark at least one person as Present or Absent before saving.'); return; }
 
+  const btn = document.getElementById('saveAttendanceBtn');
+  attendanceSaving = true;
+  if(btn){ btn.disabled = true; btn.textContent = 'Saving…'; }
   setSyncStatus('busy', 'Saving attendance for ' + date + '…');
   try{
-    await fetch(SHEET_URLS.attendance, {
+    const res = await fetch(SHEET_URLS.attendance, {
       method: 'POST',
       headers: {'Content-Type': 'text/plain;charset=utf-8'},
       body: JSON.stringify({ type: 'attendance', action: 'save_batch', date: date, rows: rows })
     });
+    const result = await res.json().catch(() => null);
+    if(!res.ok || (result && result.error)) throw new Error((result && result.error) || ('HTTP ' + res.status));
     setSyncStatus('ok', 'Attendance saved for ' + date + ' • ' + new Date().toLocaleTimeString());
     alert('Saved attendance for ' + rows.length + ' record(s) on ' + date + '.');
   }catch(err){
     console.error(err);
     setSyncStatus('err', 'Could not save attendance to the sheet');
     alert('Could not save attendance to the Google Sheet. Check the Web App URL and deployment access.');
+  }finally{
+    attendanceSaving = false;
+    if(btn){ btn.disabled = false; btn.innerHTML = '&#128190; Save to Google Sheet'; }
   }
 }
 
